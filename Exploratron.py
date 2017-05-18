@@ -1,5 +1,5 @@
 #
-# This contains the game currently known as "Exploratron".
+# This contains the game currently known as "Exploratron". 
 #
 
 import pygame
