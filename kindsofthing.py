@@ -1,6 +1,14 @@
 
 world = None
 
+class Location:
+    """This is a way to specify a particular place."""
+    def __init__(self, roomNumber, coordinates):
+        self.roomNumber = roomNumber
+        self.coordinates = coordinates
+
+
+
 class Thing:
     """Represents any kind of thing in the world."""
     def __init__(self, tileId):
