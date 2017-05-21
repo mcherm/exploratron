@@ -16,3 +16,7 @@ class StairsDown(Thing):
 class Chest(Thing):
     def __init__(self):
         Thing.__init__(self, 6)
+
+class WoodenDoor(Door):
+    def __init__(self, destination):
+        Door.__init__(self, 8, destination)
