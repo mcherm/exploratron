@@ -20,7 +20,6 @@ room1Layout = [
 
 def makeRoom(layout):
     grid = Grid(len(layout[0]), len(layout))
-    print(f"Grid size: {grid.__dict__}") # FIXME: Remove
     for y, row in enumerate(layout):
         for x, cellContents in enumerate(row):
             for thing in cellContents:
