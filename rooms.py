@@ -4,7 +4,7 @@ from gamecomponents import *
 
 room0Layout = [
     [ [BrickWall()], [BrickWall()], [WoodenDoor(Location(1, (2,3)))], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()] ], 
-    [ [BrickWall()], [Dirt(), Chest()], [Dirt()], [Dirt()], [Dirt()], [Dirt(), Mobile(12)], [BrickWall()], ],
+    [ [BrickWall()], [Dirt(), Chest()], [Dirt()], [Dirt()], [Dirt()], [Dirt()], [BrickWall()], ],
     [ [BrickWall()], [Dirt()], [Dirt()], [StairsDown()], [Dirt()], [Dirt()], [BrickWall()], ],
     [ [BrickWall()], [Dirt()], [Dirt()], [Dirt()], [Dirt()], [Dirt(), Chest()], [BrickWall()], ],
     [ [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], ],

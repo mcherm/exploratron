@@ -18,6 +18,13 @@ class World:
     def __init__(self):
         self.gameOver = False
         self.rooms = rooms.rooms
+        # Set up mobile
+        mobile0 = Mobile(12)
+        mobileRoom = self.rooms[0]
+        mobile0.setLocation( mobileRoom, (5,1) )
+        mobileRoom.cellAt(5, 1).addThing(mobile0)
+        self.mobiles = [mobile0]
+        # set up player
         self.player = Player(11)
         playerRoom = self.rooms[-1]
         self.player.setLocation( playerRoom, (2,1) )
@@ -91,6 +98,14 @@ class PygameInput:
 
 # ========= Start Functions for Game =========
 
+
+def moveMobiles(world):
+    """This function will cause all of the mobiles to move one step,
+    updating the world accordingly."""
+    for mobile in world.mobiles:
+        mobile.takeOneStep()
+    
+
 def getPlayerInputs(pygameInput):
     events = pygameInput.getEvents()
     return PlayerInputs(events)
@@ -112,6 +127,7 @@ def updateWorld(world, playerInputs):
                 world.player.moveWest()
         if event.type == pygame.QUIT:
             world.gameOver = True
+    moveMobiles(world)
             
     
 

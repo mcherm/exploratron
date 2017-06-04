@@ -1,5 +1,9 @@
 
+import random
+
+
 world = None
+
 
 
 
@@ -54,6 +58,9 @@ class Mobile(Thing):
         oldX, oldY = self.position
         newX = oldX
         newY = oldY + 1
+        # -- check if it is on the map --
+        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+            return
         # -- check if we can enter --
         oldCell = self.grid.cellAt(oldX, oldY)
         newCell = self.grid.cellAt(newX, newY)
@@ -68,6 +75,9 @@ class Mobile(Thing):
         oldX, oldY = self.position
         newX = oldX + 1
         newY = oldY 
+        # -- check if it is on the map --
+        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+            return
         # -- check if we can enter --
         oldCell = self.grid.cellAt(oldX, oldY)
         newCell = self.grid.cellAt(newX, newY)
@@ -82,6 +92,9 @@ class Mobile(Thing):
         oldX, oldY = self.position
         newX = oldX - 1
         newY = oldY 
+        # -- check if it is on the map --
+        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+            return
         # -- check if we can enter --
         oldCell = self.grid.cellAt(oldX, oldY)
         newCell = self.grid.cellAt(newX, newY)
@@ -96,6 +109,9 @@ class Mobile(Thing):
         oldX, oldY = self.position
         newX = oldX
         newY = oldY - 1
+        # -- check if it is on the map --
+        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+            return
         # -- check if we can enter --
         oldCell = self.grid.cellAt(oldX, oldY)
         newCell = self.grid.cellAt(newX, newY)
@@ -115,6 +131,16 @@ class Mobile(Thing):
         self.position = location.coordinates
         newCell = self.grid.cellAt(location.coordinates[0], location.coordinates[1])
         newCell.addThing(self)
+    def takeOneStep(self):
+        randomNumber = random.randrange(4)
+        if randomNumber == 0:
+            self.moveNorth()
+        elif randomNumber == 1:
+            self.moveSouth()
+        elif randomNumber == 2:
+            self.moveEast()
+        else:
+            self.moveWest()
 
             
 class Player(Mobile):
