@@ -21,7 +21,7 @@ class World:
         self.mobiles = []
         # set up player
         self.player = Player(11)
-        playerRoom = self.rooms[-1]
+        playerRoom = self.rooms[1]
         self.player.setLocation( playerRoom, (2,1) )
         playerRoom.cellAt(2,1).addThing(self.player)
     def addMobiles(self, newMobiles):

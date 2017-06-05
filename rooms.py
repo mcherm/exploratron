@@ -5,7 +5,9 @@ from gamecomponents import *
 
 drt = Dirt()
 bkw = BrickWall()
-std = StairsDown()
+idr = InnerDoor()
+st1 = StairsDown(Location(2, (2,3)))
+st2 = StairsDown(Location(0, (3,2)))
 dr1 = WoodenDoor(Location(1, (2,3)))
 dr2 = WoodenDoor(Location(0, (2,0)))
 
@@ -14,7 +16,7 @@ room0 = Room(
     [
         [bkw, bkw, dr1, bkw, bkw, bkw, bkw],
         [bkw, drt, drt, drt, drt, drt, bkw],
-        [bkw, drt, drt, std, drt, drt, bkw],
+        [bkw, drt, drt, st1, drt, drt, bkw],
         [bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
     ],
@@ -23,7 +25,7 @@ room0 = Room(
         (5,3): Chest(),
     },
     {
-        (5,1): Mobile(12)
+        (5,1): Mobile(12),
     }
 )
 
@@ -39,4 +41,26 @@ room1 = Room(
 )
 
 
-rooms = [room0, room1]
+room2 = Room(
+    [
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, st2, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, idr, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
+    {
+        (9,3): Chest(),
+    },
+    {
+        (8,8): Mobile(12),
+    }
+)
+
+
+rooms = [room0, room1, room2]

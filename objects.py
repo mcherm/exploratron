@@ -9,9 +9,9 @@ class Dirt(Thing):
     def __init__(self):
         Thing.__init__(self, 0)
 
-class StairsDown(Thing):
-    def __init__(self):
-        Thing.__init__(self, 5)
+class StairsDown(Door):
+    def __init__(self, destination):
+        Door.__init__(self, 5, destination)
 
 class Chest(Thing):
     def __init__(self):
@@ -20,3 +20,8 @@ class Chest(Thing):
 class WoodenDoor(Door):
     def __init__(self, destination):
         Door.__init__(self, 8, destination)
+
+class InnerDoor(Thing):
+    def __init__(self):
+        Thing.__init__(self, 8)
+
