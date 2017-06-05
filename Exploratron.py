@@ -18,17 +18,17 @@ class World:
     def __init__(self):
         self.gameOver = False
         self.rooms = rooms.rooms
-        # Set up mobile
-        mobile0 = Mobile(12)
-        mobileRoom = self.rooms[0]
-        mobile0.setLocation( mobileRoom, (5,1) )
-        mobileRoom.cellAt(5, 1).addThing(mobile0)
-        self.mobiles = [mobile0]
+        self.mobiles = []
         # set up player
         self.player = Player(11)
         playerRoom = self.rooms[-1]
         self.player.setLocation( playerRoom, (2,1) )
         playerRoom.cellAt(2,1).addThing(self.player)
+    def addMobiles(self, newMobiles):
+        """Call this to add some new mobiles to the list of active
+        mobiles."""
+        print(f"Adding mobiles!") # FIXME: Remove
+        self.mobiles.extend(newMobiles)
 
         
 class PlayerInputs:
@@ -73,11 +73,11 @@ class ImageLibrary:
 class PygameGridDisplay:
     def __init__(self):
         self.screen = pygame.display.set_mode( (1024,768) )
-    def show(self, grid, imageLibrary):
+    def show(self, room, imageLibrary):
         self.screen.fill( (0,0,0) )
-        for y in range(grid.height):
-            for x in range(grid.width):
-                cell = grid.cellAt(x,y)
+        for y in range(room.height):
+            for x in range(room.width):
+                cell = room.cellAt(x,y)
                 for thing in cell.things:
                     image = imageLibrary.lookup( thing.tileId )
                     self.screen.blit( image, (TILE_SIZE*x, TILE_SIZE*y) )
@@ -133,7 +133,7 @@ def updateWorld(world, playerInputs):
 
 
 def renderWorld(player, display, imageLibrary):
-    display.show(player.grid, imageLibrary)
+    display.show(player.room, imageLibrary)
 
 
 

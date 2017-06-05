@@ -49,9 +49,9 @@ Kinds of things:
 """
 
 class Mobile(Thing):
-    def setLocation(self, grid, position):
+    def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
-        self.grid = grid
+        self.room = room
         self.position = position
     def moveSouth(self):
         # -- find the new location --
@@ -59,11 +59,11 @@ class Mobile(Thing):
         newX = oldX
         newY = oldY + 1
         # -- check if it is on the map --
-        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+        if newX < 0 or newY < 0 or newX >= self.room.width or newY >= self.room.height:
             return
         # -- check if we can enter --
-        oldCell = self.grid.cellAt(oldX, oldY)
-        newCell = self.grid.cellAt(newX, newY)
+        oldCell = self.room.cellAt(oldX, oldY)
+        newCell = self.room.cellAt(newX, newY)
         if newCell.canEnter(self):
             # -- update my position and the cell --
             self.position = (newX, newY)
@@ -76,11 +76,11 @@ class Mobile(Thing):
         newX = oldX + 1
         newY = oldY 
         # -- check if it is on the map --
-        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+        if newX < 0 or newY < 0 or newX >= self.room.width or newY >= self.room.height:
             return
         # -- check if we can enter --
-        oldCell = self.grid.cellAt(oldX, oldY)
-        newCell = self.grid.cellAt(newX, newY)
+        oldCell = self.room.cellAt(oldX, oldY)
+        newCell = self.room.cellAt(newX, newY)
         if newCell.canEnter(self):
             # -- update my position and the cell --
             self.position = (newX, newY)
@@ -93,11 +93,11 @@ class Mobile(Thing):
         newX = oldX - 1
         newY = oldY 
         # -- check if it is on the map --
-        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+        if newX < 0 or newY < 0 or newX >= self.room.width or newY >= self.room.height:
             return
         # -- check if we can enter --
-        oldCell = self.grid.cellAt(oldX, oldY)
-        newCell = self.grid.cellAt(newX, newY)
+        oldCell = self.room.cellAt(oldX, oldY)
+        newCell = self.room.cellAt(newX, newY)
         if newCell.canEnter(self):
             # -- update my position and the cell --
             self.position = (newX, newY)
@@ -110,11 +110,11 @@ class Mobile(Thing):
         newX = oldX
         newY = oldY - 1
         # -- check if it is on the map --
-        if newX < 0 or newY < 0 or newX >= self.grid.width or newY >= self.grid.height:
+        if newX < 0 or newY < 0 or newX >= self.room.width or newY >= self.room.height:
             return
         # -- check if we can enter --
-        oldCell = self.grid.cellAt(oldX, oldY)
-        newCell = self.grid.cellAt(newX, newY)
+        oldCell = self.room.cellAt(oldX, oldY)
+        newCell = self.room.cellAt(newX, newY)
         if newCell.canEnter(self):
             # -- update my position and the cell --
             self.position = (newX, newY)
@@ -125,11 +125,11 @@ class Mobile(Thing):
     def goToLocation(self, location):
         """Calling this makes the player move from it's current location to
         the new location specified."""
-        oldCell = self.grid.cellAt(self.position[0], self.position[1])
+        oldCell = self.room.cellAt(self.position[0], self.position[1])
         oldCell.removeThing(self)
-        self.grid = world.rooms[ location.roomNumber ]
+        self.room = world.rooms[ location.roomNumber ]
         self.position = location.coordinates
-        newCell = self.grid.cellAt(location.coordinates[0], location.coordinates[1])
+        newCell = self.room.cellAt(location.coordinates[0], location.coordinates[1])
         newCell.addThing(self)
     def takeOneStep(self):
         randomNumber = random.randrange(4)
@@ -144,5 +144,11 @@ class Mobile(Thing):
 
             
 class Player(Mobile):
-    pass
+    def goToLocation(self, location):
+        oldRoom = self.room
+        super().goToLocation(location)
+        if self.room != oldRoom:
+            newMobiles = self.room.playerEntersRoom()
+            if newMobiles:
+                world.addMobiles(newMobiles)
 

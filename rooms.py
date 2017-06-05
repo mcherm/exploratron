@@ -2,30 +2,41 @@ from objects import *
 from gamecomponents import *
 
 
-room0Layout = [
-    [ [BrickWall()], [BrickWall()], [WoodenDoor(Location(1, (2,3)))], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()] ], 
-    [ [BrickWall()], [Dirt(), Chest()], [Dirt()], [Dirt()], [Dirt()], [Dirt()], [BrickWall()], ],
-    [ [BrickWall()], [Dirt()], [Dirt()], [StairsDown()], [Dirt()], [Dirt()], [BrickWall()], ],
-    [ [BrickWall()], [Dirt()], [Dirt()], [Dirt()], [Dirt()], [Dirt(), Chest()], [BrickWall()], ],
-    [ [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], [BrickWall()], ],
-]
 
-room1Layout = [
-    [ [BrickWall()], [BrickWall()], [BrickWall()],                    [BrickWall()], [BrickWall()] ],
-    [ [BrickWall()], [Dirt()],      [Dirt()],                         [Dirt()],      [BrickWall()] ],
-    [ [BrickWall()], [Dirt()],      [Dirt()],                         [Dirt()],      [BrickWall()] ],
-    [ [BrickWall()], [BrickWall()], [WoodenDoor(Location(0, (2,0)))], [BrickWall()], [BrickWall()] ],
-]
+drt = Dirt()
+bkw = BrickWall()
+std = StairsDown()
+dr1 = WoodenDoor(Location(1, (2,3)))
+dr2 = WoodenDoor(Location(0, (2,0)))
 
 
-def makeRoom(layout):
-    grid = Grid(len(layout[0]), len(layout))
-    for y, row in enumerate(layout):
-        for x, cellContents in enumerate(row):
-            for thing in cellContents:
-                grid.cellAt(x,y).addThing(thing)
-    return grid
+room0 = Room(
+    [
+        [bkw, bkw, dr1, bkw, bkw, bkw, bkw],
+        [bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, std, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
+    {
+        (1,1): Chest(),
+        (5,3): Chest(),
+    },
+    {
+        (5,1): Mobile(12)
+    }
+)
 
 
-rooms = [ makeRoom(room) for room in [room0Layout, room1Layout]]
 
+room1 = Room(
+    [
+        [bkw, bkw, bkw, bkw, bkw],
+        [bkw, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, bkw],
+        [bkw, bkw, dr2, bkw, bkw],
+    ]
+)
+
+
+rooms = [room0, room1]

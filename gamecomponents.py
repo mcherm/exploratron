@@ -42,3 +42,54 @@ class Grid:
     def cellAt(self, x, y):
         return self.cells[y][x]
 
+
+class Room:
+    """A room is a location that mobiles can move through."""
+    def __init__(self, background, items=None, mobilesAtEntry=None):
+        """The background should be a 2-D list of Things which lays out
+        the stuff in the background in the room. This is used to determine
+        the width and height of the room. items can be None (for
+        no items in the room) or a map where the keys are a location
+        (an (x,y) tuple) and the values are either a Thing or a list
+        of things to be placed in that location. Finally, mobiles is None
+        or a map where keys are a location and values are a mobile who
+        should be added to the room atthat spot the first time the room
+        is entered."""
+        self.width = len(background[0])
+        self.height = len(background)
+        self.hasBeenEntered = False
+        self.mobilesAtEntry = mobilesAtEntry
+        self.grid = Grid(self.width, self.height)
+        for y, row in enumerate(background):
+            assert len(row) == self.width
+            for x, thing in enumerate(row):
+                self.cellAt(x,y).addThing(thing)
+        if items:
+            for location, thingOrThings in items.items():
+                x,y = location
+                if isinstance(thingOrThings, Thing):
+                    self.cellAt(x,y).addThing(thingOrThings)
+                else:
+                    for thing in thingOrThings:
+                        self.cellAt(x,y).addThing(thing)
+    def cellAt(self, x, y):
+        return self.grid.cellAt(x,y)
+    def playerEntersRoom(self):
+        """The Game will call this when a player enters the room. The first
+        time it is entered, this will add the mobiles; all other times it
+        will do nothing. It returns a list of the newly added mobiles."""
+        if self.hasBeenEntered:
+            return []
+        else:
+            self.hasBeenEntered = True
+            result = []
+            print(f"Adding new mobiles!!!") # FIXME: Remove
+            if self.mobilesAtEntry:
+                for location, mobile in self.mobilesAtEntry.items():
+                    x,y = location
+                    assert isinstance(mobile, Mobile)
+                    mobile.setLocation(self, location)
+                    self.cellAt(x,y).addThing(mobile)
+                    result.append(mobile)
+            return result
+    
