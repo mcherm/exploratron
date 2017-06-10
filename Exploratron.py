@@ -46,7 +46,7 @@ TILE_SIZE = 64
 
 class ImageLibrary:
     def __init__(self):
-        rootDir = '/Users/rdg959/Documents/personal/Exploratron/img'
+        rootDir = './img'
         names = [
             'drawntiles64/dirt-1',
             'drawntiles64/dirt-1',
