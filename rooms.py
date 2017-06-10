@@ -10,6 +10,8 @@ st1 = StairsDown(Location(2, (2,3)))
 st2 = StairsDown(Location(0, (3,2)))
 dr1 = WoodenDoor(Location(1, (2,3)))
 dr2 = WoodenDoor(Location(0, (2,0)))
+dr3 = WoodenDoor(Location(3, (0,1)))
+dr4 = WoodenDoor(Location(2, (11,1)))
 
 
 room0 = Room(
@@ -44,7 +46,7 @@ room1 = Room(
 room2 = Room(
     [
         [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
-        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, dr3],
         [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, drt, st2, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
@@ -62,5 +64,22 @@ room2 = Room(
     }
 )
 
+room3 = Room(
+    [
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [dr4, drt, drt, drt, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, drt, bkw, drt, bkw],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
 
-rooms = [room0, room1, room2]
+        
+)
+
+
+
+rooms = [room0, room1, room2, room3]
