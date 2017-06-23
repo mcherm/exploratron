@@ -49,6 +49,9 @@ Kinds of things:
 """
 
 class Mobile(Thing):
+    def __init__(self, tileId):
+        super().__init__(tileId)
+        self.whenItCanAct = 0
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
@@ -131,7 +134,7 @@ class Mobile(Thing):
         self.position = location.coordinates
         newCell = self.room.cellAt(location.coordinates[0], location.coordinates[1])
         newCell.addThing(self)
-    def takeOneStep(self):
+    def takeOneStep(self, currentTime):
         randomNumber = random.randrange(4)
         if randomNumber == 0:
             self.moveNorth()
@@ -141,6 +144,7 @@ class Mobile(Thing):
             self.moveEast()
         else:
             self.moveWest()
+        self.whenItCanAct = currentTime + 500
 
             
 class Player(Mobile):
