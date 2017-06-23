@@ -9,6 +9,7 @@ from objects import *
 import rooms
 import time
 
+
 # ========= Start Classes for Game =========
 
     
@@ -28,7 +29,6 @@ class World:
     def addMobiles(self, newMobiles):
         """Call this to add some new mobiles to the list of active
         mobiles."""
-        print(f"Adding mobiles!") # FIXME: Remove
         self.mobiles.extend(newMobiles)
 
         
@@ -113,23 +113,60 @@ def getPlayerInputs(pygameInput):
     return PlayerInputs(events)
 
 
+def isNonActionEvent(event):
+    """Retrns True if this is an event that can be processed when the
+    player does not have an action, and False otherwise."""
+    return event.type == pygame.QUIT
+    
+def isActionEvent(event):
+    """Returns true if this is an event that can only be processed when
+    the player has an action, and False otherwise."""
+    return (event.type == pygame.KEYDOWN and
+        event.key in (pygame.K_s, pygame.K_w, pygame.K_d, pygame.K_a))
+
+
 def updateWorld(world, playerInputs):
     currentTime = int(time.perf_counter()*1000)
     events = playerInputs.events
     if events:
-        print(events)
-    for event in events:
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s:
-                world.player.moveSouth()
-            if event.key == pygame.K_w:
-                world.player.moveNorth()
-            if event.key == pygame.K_d:
-                world.player.moveEast()
-            if event.key == pygame.K_a:
-                world.player.moveWest()
-        if event.type == pygame.QUIT:
-            world.gameOver = True
+        # Non-Action Events
+        for event in filter(isNonActionEvent, events):
+            if event.type == pygame.QUIT:
+                world.gameOver = True
+    # Action Events
+    if currentTime < world.player.whenItCanAct:
+        # Player cannot act yet
+        if (world.player.queuedEvent is None) and events:
+            # Player does not have an event queued
+            for event in filter(isActionEvent, events):
+                world.player.queuedEvent = event
+                break
+    else:
+        # Player can act now
+        eventToActOn = world.player.queuedEvent
+        # We used the value, so clear it
+        world.player.queuedEvent = None
+        if eventToActOn is None:
+            # Set eventToActOn to the FIRST action event
+            for event in filter(isActionEvent, events):
+                eventToActOn = event
+                break
+        # Now we have set eventToActOn
+        if eventToActOn is not None:
+            if eventToActOn.type == pygame.KEYDOWN:
+                if eventToActOn.key == pygame.K_s:
+                    world.player.moveSouth()
+                    world.player.whenItCanAct = currentTime + 500
+                if eventToActOn.key == pygame.K_w:
+                    world.player.moveNorth()
+                    world.player.whenItCanAct = currentTime + 500
+                if eventToActOn.key == pygame.K_d:
+                    world.player.moveEast()
+                    world.player.whenItCanAct = currentTime + 500
+                if eventToActOn.key == pygame.K_a:
+                    world.player.moveWest()
+                    world.player.whenItCanAct = currentTime + 500
+    # Move Mobiles
     moveMobiles(world, currentTime)
             
     
