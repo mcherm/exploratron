@@ -7,6 +7,7 @@ import kindsofthing
 from kindsofthing import *
 from objects import *
 import rooms
+import time
 
 # ========= Start Classes for Game =========
 
@@ -99,11 +100,12 @@ class PygameInput:
 # ========= Start Functions for Game =========
 
 
-def moveMobiles(world):
+def moveMobiles(world, currentTime):
     """This function will cause all of the mobiles to move one step,
     updating the world accordingly."""
     for mobile in world.mobiles:
-        mobile.takeOneStep()
+        if currentTime >= mobile.whenItCanAct:
+            mobile.takeOneStep(currentTime)
     
 
 def getPlayerInputs(pygameInput):
@@ -112,6 +114,7 @@ def getPlayerInputs(pygameInput):
 
 
 def updateWorld(world, playerInputs):
+    currentTime = int(time.perf_counter()*1000)
     events = playerInputs.events
     if events:
         print(events)
@@ -127,7 +130,7 @@ def updateWorld(world, playerInputs):
                 world.player.moveWest()
         if event.type == pygame.QUIT:
             world.gameOver = True
-    moveMobiles(world)
+    moveMobiles(world, currentTime)
             
     
 
