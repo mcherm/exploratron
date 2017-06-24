@@ -63,6 +63,7 @@ class ImageLibrary:
             'drawntiles64/adventurer-1-boy',
             'drawntiles64/angry-bee',
             'drawntiles64/mouseman',
+            'drawntiles64/green-snake',
           ]
         self.imageById = {}
         for imgnum, name in enumerate(names):
@@ -169,8 +170,22 @@ def updateWorld(world, playerInputs):
                     world.player.whenItCanAct = currentTime + 500
     # Move Mobiles
     moveMobiles(world, currentTime)
+    # Check for Death
+    handleDeath(world)
             
-    
+
+def handleDeath(world):
+    for mobile in world.mobiles:
+        if mobile.isDead:
+            x, y = mobile.position
+            cell = mobile.room.cellAt(x, y)
+            cell.removeThing(mobile)
+            world.mobiles.remove(mobile)
+    if world.player.isDead:
+        x, y = world.player.position
+        cell = world.player.room.cellAt(x, y)
+        cell.removeThing(world.player)
+        world.gameOver = True
 
 
 def renderWorld(player, display, imageLibrary):
