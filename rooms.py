@@ -12,6 +12,7 @@ dr1 = WoodenDoor(Location(1, (2,3)))
 dr2 = WoodenDoor(Location(0, (2,0)))
 dr3 = WoodenDoor(Location(3, (0,1)))
 dr4 = WoodenDoor(Location(2, (11,1)))
+sdr = InnerSecretDoor()
 
 
 room0 = Room(
@@ -69,7 +70,7 @@ room3 = Room(
     [
         [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
         [dr4, drt, drt, drt, drt, bkw, drt, bkw],
-        [bkw, drt, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, drt, sdr, drt, bkw],
         [bkw, drt, drt, drt, drt, bkw, drt, bkw],
         [bkw, drt, drt, drt, drt, bkw, drt, bkw],
         [bkw, drt, drt, drt, drt, bkw, drt, bkw],
