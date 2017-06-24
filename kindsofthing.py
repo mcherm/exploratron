@@ -49,9 +49,10 @@ Kinds of things:
 """
 
 class Mobile(Thing):
-    def __init__(self, tileId):
+    def __init__(self, tileId, hitPoints):
         super().__init__(tileId)
         self.whenItCanAct = 0
+        self.hitPoints=hitPoints
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
@@ -148,8 +149,8 @@ class Mobile(Thing):
 
             
 class Player(Mobile):
-    def __init__(self, tileId):
-        super().__init__(tileId)
+    def __init__(self, tileId, hitPoints):
+        super().__init__(tileId, hitPoints)
         self.queuedEvent = None
     def goToLocation(self, location):
         oldRoom = self.room
