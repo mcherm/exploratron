@@ -22,7 +22,7 @@ class World:
         self.rooms = rooms.rooms
         self.mobiles = []
         # set up player
-        self.player = Player(11)
+        self.player = Player(11,9)
         playerRoom = self.rooms[1]
         self.player.setLocation( playerRoom, (2,1) )
         playerRoom.cellAt(2,1).addThing(self.player)
