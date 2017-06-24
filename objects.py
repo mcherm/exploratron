@@ -25,3 +25,10 @@ class InnerDoor(Thing):
     def __init__(self):
         Thing.__init__(self, 8)
 
+class GiantBee(Mobile):
+    def __init__(self):
+        super().__init__(12)
+        
+class MouseMan(Mobile):
+    def __init__(self):
+        super().__init__(13)

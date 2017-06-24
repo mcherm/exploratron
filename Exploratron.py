@@ -55,13 +55,14 @@ class ImageLibrary:
             'drawntiles64/dirt-1',
             'drawntiles64/dirt-1',
             'drawntiles64/stairs-down',
-            'drawntiles64/chest',
+            'drawntiles64/chest2',
             'drawntiles64/wall-1',
             'drawntiles64/doorway-1',
-            'drawntiles64/chest',
-            'drawntiles64/chest',
+            'drawntiles64/chest2',
+            'drawntiles64/chest2',
             'drawntiles64/adventurer-1-boy',
-            'foundassets/crawl-tiles Oct-5-2010/player/transform/dragon_form',            
+            'drawntiles64/angry-bee',
+            'drawntiles64/mouseman',
           ]
         self.imageById = {}
         for imgnum, name in enumerate(names):
