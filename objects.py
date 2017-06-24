@@ -5,6 +5,10 @@ class BrickWall(Wall):
     def __init__(self):
         Wall.__init__(self, 7)
 
+class InnerSecretDoor(Thing):
+    def __init__(self):
+        Thing.__init__(self, 7)
+
 class Dirt(Thing):
     def __init__(self):
         Thing.__init__(self, 0)
