@@ -83,7 +83,6 @@ class Room:
         else:
             self.hasBeenEntered = True
             result = []
-            print(f"Adding new mobiles!!!") # FIXME: Remove
             if self.mobilesAtEntry:
                 for location, mobile in self.mobilesAtEntry.items():
                     x,y = location

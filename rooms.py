@@ -27,7 +27,7 @@ room0 = Room(
         (5,3): Chest(),
     },
     {
-        (5,1): Mobile(12),
+        (5,1): GiantBee(),
     }
 )
 
@@ -60,7 +60,7 @@ room2 = Room(
         (9,3): Chest(),
     },
     {
-        (8,8): Mobile(12),
+        (8,8): MouseMan(),
     }
 )
 
