@@ -35,6 +35,12 @@ class Door(Thing):
     def doEnter(self, mobile):
         mobile.goToLocation(self.destination)
 
+class Trap(Thing):
+    """a thing that maks you take damage"""
+    def doEnter(self, mobile):
+        mobile.takeDamage(1)
+        
+
 
 """
 Kinds of things:
@@ -53,6 +59,7 @@ class Mobile(Thing):
         super().__init__(tileId)
         self.whenItCanAct = 0
         self.hitPoints=hitPoints
+        self.isDead=False
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
@@ -146,8 +153,15 @@ class Mobile(Thing):
         else:
             self.moveWest()
         self.whenItCanAct = currentTime + 500
-
+    def takeDamage (self,amount):
+        self.hitPoints=self.hitPoints-amount
+        print(self.hitPoints)
+        if self.hitPoints < 1:
+            self.isDead = True
+            print (self.isDead) 
             
+    
+        
 class Player(Mobile):
     def __init__(self, tileId, hitPoints):
         super().__init__(tileId, hitPoints)

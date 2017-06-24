@@ -27,8 +27,8 @@ class InnerDoor(Thing):
 
 class GiantBee(Mobile):
     def __init__(self):
-        super().__init__(12,11)
+        super().__init__(12, 11)
         
 class MouseMan(Mobile):
     def __init__(self):
-        super().__init__(13,12)
+        super().__init__(13, 3)
