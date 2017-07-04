@@ -20,7 +20,8 @@ def messageClient():
         raise Exception("Message too long for our UDP buffers.")
     clientSocket.sendto(byteStr, serverAddr)
 
-    while True:
+    shouldExit = False
+    while not shouldExit:
         readyToReadSockets, (), () = select.select([clientSocket], [], [], 0)
         if readyToReadSockets:
             byteStr, address = readyToReadSockets[0].recvfrom(UDP_MAX_SIZE)
@@ -29,6 +30,9 @@ def messageClient():
                 print(f"Server sent WelcomeClientMessage: {message}.")
             elif isinstance(message, NewRoomMessage):
                 print(f"Server sent NewRoomMessage: {message}.")
+            elif isinstance(message, ClientShouldExitMessage):
+                print(f"Server sent ClientShouldExitMessage: {message}.")
+                shouldExit = True
             else:
                 raise Exception(f"Message type {message} not supported.")
         if random.randrange(600000) < 1:
