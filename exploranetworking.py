@@ -31,16 +31,19 @@ class WelcomeClientMessage(Message):
 
 class NewRoomMessage(Message):
     """A message sent when a server wants a client to display a new room."""
-    def __init__(self, width, height, imageIds):
+    def __init__(self, width, height, grid):
+        """Constructor. grid should be a 2-D array (list of lists) of 'cells', where
+        a cell is EITHER a number (representing the single tileId in that location)
+        OR a list of numbers (representing the stack of tiles in that location)."""
         super().__init__("NewRoom")
         self.width = width
         self.height = height
-        self.imageIds = imageIds
+        self.grid = grid
     def dataJSON(self):
         return {
             "width": self.width,
             "height": self.height,
-            "imageIds": self.imageIds
+            "grid": self.grid
         }
 
 
@@ -77,7 +80,7 @@ def bytesToMessage(byteString):
 
 ##sampleBytes = b'{"message":"NewRoom","data":{"width":4,"height":3,"imageIds":[[2,2,2,2],[2,3,3,2],[2,3,24,2],[2,2,5,2]]}}'
 ##
-##msg1 = NewRoomMessage( 4, 3, [[2,2,2,2],[2,3,3,2],[2,3,24,2],[2,2,5,2]] )
+##msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
 ##msg2 = KeyPressedMessage( keyCode=115 )
 ##print(sampleBytes)
 ##print(msg1.toBytes())
