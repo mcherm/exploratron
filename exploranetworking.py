@@ -17,22 +17,17 @@ class Message:
         return str(self.toJSON())
     def toBytes(self):
         return json.dumps(self.toJSON(), separators=(',',':')).encode('utf-8')
+
         
 class JoinServerMessage(Message):
     """A message sent when a client wants to sign on to a server."""
     def __init__(self):
         super().__init__("JoinServer")
 
-def _makeJoinServerMessage(jsonData):
-    return JoinServerMessage()
-
 class WelcomeClientMessage(Message):
     """A message the servers sends to a client immediately after they join."""
     def __init__(self):
         super().__init__("WelcomeClient")
-
-def _makeWelcomeClientMessage(jsonData):
-    return WelcomeClientMessage()
 
 class NewRoomMessage(Message):
     """A message sent when a server wants a client to display a new room."""
@@ -48,8 +43,6 @@ class NewRoomMessage(Message):
             "imageIds": self.imageIds
         }
 
-def _makeNewRoomMessage(jsonData):
-    return NewRoomMessage(width=jsonData['width'], height=jsonData['height'], imageIds=jsonData['imageIds'])
 
 class KeyPressedMessage(Message):
     """A message sent when a client wants a server to know a key has been pressed."""
@@ -61,20 +54,24 @@ class KeyPressedMessage(Message):
             "keyCode": self.keyCode
         }
 
-def _makeKeyPressedMessage(jsonData):
-    return KeyPressedMessage(keyCode=jsonData["keyCode"])
-    
-_messageBuilder = {
-    "JoinServer": _makeJoinServerMessage,
-    "WelcomeClient": _makeWelcomeClientMessage,
-    "NewRoom": _makeNewRoomMessage,
-    "KeyPressed": _makeKeyPressedMessage,
+class ClientShouldExitMessage(Message):
+    """A message sent when the server is telling the client to quit playing."""
+    def __init__(self):
+        super().__init__("ClientShouldExit")
+
+
+_messageClass = {
+    "JoinServer": JoinServerMessage,
+    "WelcomeClient": WelcomeClientMessage,
+    "NewRoom": NewRoomMessage,
+    "KeyPressed": KeyPressedMessage,
+    "ClientShouldExit": ClientShouldExitMessage,
 }
 
 def bytesToMessage(byteString):
     jsonMessage = json.loads(byteString.decode('utf-8'))
     messageType = jsonMessage["message"]
-    return _messageBuilder[messageType](jsonMessage["data"])
+    return _messageClass[messageType](**jsonMessage["data"])
 
 
 
