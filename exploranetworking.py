@@ -62,7 +62,7 @@ class KeyPressedMessage(Message):
         }
 
 def _makeKeyPressedMessage(jsonData):
-    return KeyPressedMessage(key=jsonData["keyCode"])
+    return KeyPressedMessage(keyCode=jsonData["keyCode"])
     
 _messageBuilder = {
     "JoinServer": _makeJoinServerMessage,
