@@ -51,7 +51,9 @@ def messageServer():
                 raise Exception(f"Message type {message} not supported.")
         if random.randrange(100000) < 1:
             print("New Display Change")
-            msg = NewRoomMessage( 4, 3, [[2,2,2,2],[2,3,3,2],[2,3,24,2],[2,2,5,2]] )
+            msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
+            msg2 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,[0,12],0,7],[7,0,0,7],[7,7,8,7]] )
+            msg = random.choice([msg1, msg2])
             byteStr = msg.toBytes()
             if len(byteStr) > UDP_MAX_SIZE:
                 raise Exception("Message too long for our UDP buffers.")
