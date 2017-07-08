@@ -1,16 +1,20 @@
 
 import json
+import copy
 
 # Max number of bytes WE choose to allow in a UDP packet.
 UDP_MAX_SIZE = 4096
 
 class Message:
-    def __init__(self, messageName):
-        self.messageName = messageName
+    @classmethod
+    def messageName(cls):
+        className = cls.__name__
+        assert className.endswith("Message")
+        return className[:-7]
     def dataJSON(self):
-        return {}
+        return copy.copy(self.__dict__)
     def toJSON(self):
-        return {"message": self.messageName, "data": self.dataJSON()}
+        return {"message": self.messageName(), "data": self.dataJSON()}
     def __repr__(self):
         return f"Message<{str(self)}>"
     def __str__(self):
@@ -21,13 +25,17 @@ class Message:
         
 class JoinServerMessage(Message):
     """A message sent when a client wants to sign on to a server."""
-    def __init__(self):
-        super().__init__("JoinServer")
 
 class WelcomeClientMessage(Message):
-    """A message the servers sends to a client immediately after they join."""
-    def __init__(self):
-        super().__init__("WelcomeClient")
+    """A message the servers sends to a client immediately after they join. It
+    includes everything needed for a NewRoomMessage."""
+    def __init__(self, width, height, grid):
+        """Constructor. grid should be a 2-D array (list of lists) of 'cells', where
+        a cell is EITHER a number (representing the single tileId in that location)
+        OR a list of numbers (representing the stack of tiles in that location)."""
+        self.width = width
+        self.height = height
+        self.grid = grid    
 
 class NewRoomMessage(Message):
     """A message sent when a server wants a client to display a new room."""
@@ -35,41 +43,33 @@ class NewRoomMessage(Message):
         """Constructor. grid should be a 2-D array (list of lists) of 'cells', where
         a cell is EITHER a number (representing the single tileId in that location)
         OR a list of numbers (representing the stack of tiles in that location)."""
-        super().__init__("NewRoom")
         self.width = width
         self.height = height
         self.grid = grid
-    def dataJSON(self):
-        return {
-            "width": self.width,
-            "height": self.height,
-            "grid": self.grid
-        }
 
+class RefreshRoomMessage(Message):
+    """A message sent when a server wants to refresh all the tiles in the
+    current room."""
+    def __init__(self, grid):
+        """Constructor. grid should be a 2-D array (list of lists) of 'cells', where
+        a cell is EITHER a number (representing the single tileId in that location)
+        OR a list of numbers (representing the stack of tiles in that location)."""
+        self.grid = grid
 
 class KeyPressedMessage(Message):
     """A message sent when a client wants a server to know a key has been pressed."""
     def __init__(self, keyCode):
-        super().__init__("KeyPressed")
         self.keyCode = keyCode
-    def dataJSON(self):
-        return {
-            "keyCode": self.keyCode
-        }
 
 class ClientShouldExitMessage(Message):
     """A message sent when the server is telling the client to quit playing."""
-    def __init__(self):
-        super().__init__("ClientShouldExit")
 
 
-_messageClass = {
-    "JoinServer": JoinServerMessage,
-    "WelcomeClient": WelcomeClientMessage,
-    "NewRoom": NewRoomMessage,
-    "KeyPressed": KeyPressedMessage,
-    "ClientShouldExit": ClientShouldExitMessage,
-}
+messages = [JoinServerMessage, WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
+            KeyPressedMessage, ClientShouldExitMessage]
+
+_messageClass = {msg.messageName(): msg for msg in messages}
+
 
 def bytesToMessage(byteString):
     jsonMessage = json.loads(byteString.decode('utf-8'))

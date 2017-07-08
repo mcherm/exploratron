@@ -25,6 +25,12 @@ class ClientConnection:
         
 
 
+def makeRandomGrid():
+    grid1 = [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]]
+    grid2 = [[7,7,7,7],[7,0,0,7],[7,[0,12],0,7],[7,0,0,7],[7,7,8,7]]
+    return random.choice([grid1, grid2])
+    
+
 
 def messageServer():
     print(f'Test Server')
@@ -43,22 +49,30 @@ def messageServer():
                 print(f"Client sent JoinServerMessage: {message}.")
                 clientConnection = ClientConnection(serverSocket, address, message)
                 clientConnections[address] = clientConnection
-                clientConnection.send(WelcomeClientMessage())
+                clientConnection.send(WelcomeClientMessage( 4, 5, makeRandomGrid() ))
             elif isinstance(message, KeyPressedMessage):
                 clientConnection = clientConnections.get(address)
                 print(f"Client {clientConnection} sent key press {message.keyCode}.")
             else:
                 raise Exception(f"Message type {message} not supported.")
-        if random.randrange(100000) < 1:
-            print("New Display Change")
-            msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
-            msg2 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,[0,12],0,7],[7,0,0,7],[7,7,8,7]] )
-            msg = random.choice([msg1, msg2])
+        if random.randrange(1000000) < 1:
+            print("New Room")
+            msg = NewRoomMessage( 4, 5, makeRandomGrid() )
             byteStr = msg.toBytes()
             if len(byteStr) > UDP_MAX_SIZE:
                 raise Exception("Message too long for our UDP buffers.")
             for clientConnection in clientConnections.values():
                 clientConnection.sendRaw(byteStr)
+        if random.randrange(100000) < 1:
+            print("Refresh Room")
+            msg = RefreshRoomMessage( makeRandomGrid() )
+            byteStr = msg.toBytes()
+            if len(byteStr) > UDP_MAX_SIZE:
+                raise Exception("Message too long for our UDP buffers.")
+            for clientConnection in clientConnections.values():
+                clientConnection.sendRaw(byteStr)
+            
+            
         
 
 

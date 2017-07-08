@@ -26,11 +26,14 @@ class MockCell:
             raise Exception("tileData must be an int or a list of ints.")
 
 class MockRoom:
-    def __init__(self, newRoomMessage):
-        assert isinstance(newRoomMessage, NewRoomMessage)
-        self.width = newRoomMessage.width
-        self.height = newRoomMessage.height
-        self.grid = [ [MockCell(tileData) for tileData in row] for row in newRoomMessage.grid]
+    def __init__(self, message):
+        assert isinstance(message, (WelcomeClientMessage, NewRoomMessage))
+        self.width = message.width
+        self.height = message.height
+        self.grid = [ [MockCell(tileData) for tileData in row] for row in message.grid]
+    def refreshRoom(self, message):
+        assert isinstance(message, RefreshRoomMessage)
+        self.grid =  [ [MockCell(tileData) for tileData in row] for row in message.grid]
     def cellAt(self, x, y):
         return self.grid[y][x]
 
@@ -71,9 +74,13 @@ class ViewerClient():
                 message = bytesToMessage(byteStr)
                 if isinstance(message, WelcomeClientMessage):
                     print(f"Server sent WelcomeClientMessage: {message}.")
+                    currentRoom = MockRoom(message)
                 elif isinstance(message, NewRoomMessage):
                     print(f"Server sent NewRoomMessage: {message}.")
                     currentRoom = MockRoom(message)
+                elif isinstance(message, RefreshRoomMessage):
+                    print(f"Server sent RefreshRoomMessage: {message}.")
+                    currentRoom.refreshRoom(message)
                 elif isinstance(message, ClientShouldExitMessage):
                     print(f"Server sent ClientShouldExitMessage: {message}.")
                     shouldExit = True
