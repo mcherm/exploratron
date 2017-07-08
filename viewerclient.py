@@ -55,10 +55,7 @@ class ViewerClient():
         self.clientSocket.settimeout(1)
         serverAddr = ("127.0.0.1", 12000)
 
-        byteStr = JoinServerMessage().toBytes()
-        if len(byteStr) > UDP_MAX_SIZE:
-            raise Exception("Message too long for our UDP buffers.")
-        self.clientSocket.sendto(byteStr, serverAddr)
+        self.clientSocket.sendto(JoinServerMessage().toBytes(), serverAddr)
     def mainLoop(self):
         currentRoom = None
         display = None
