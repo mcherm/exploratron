@@ -14,10 +14,7 @@ class ClientConnection:
     def send(self, message):
         assert isinstance(message, Message)
         print(f"sending to {self.address}: {message}")
-        byteStr = message.toBytes()
-        if len(byteStr) > UDP_MAX_SIZE:
-            raise Exception("Message too long for our UDP buffers.")
-        self.sendRaw(byteStr)
+        self.sendRaw(message.toBytes())
     def sendRaw(self, byteStr):
         """Like send(), but the caller converts to bytes and checks the length."""
         self.serverSocket.sendto(byteStr, self.address)
@@ -58,19 +55,13 @@ def messageServer():
         if random.randrange(1000000) < 1:
             print("New Room")
             msg = NewRoomMessage( 4, 5, makeRandomGrid() )
-            byteStr = msg.toBytes()
-            if len(byteStr) > UDP_MAX_SIZE:
-                raise Exception("Message too long for our UDP buffers.")
             for clientConnection in clientConnections.values():
-                clientConnection.sendRaw(byteStr)
+                clientConnection.sendRaw(msg.toBytes())
         if random.randrange(100000) < 1:
             print("Refresh Room")
             msg = RefreshRoomMessage( makeRandomGrid() )
-            byteStr = msg.toBytes()
-            if len(byteStr) > UDP_MAX_SIZE:
-                raise Exception("Message too long for our UDP buffers.")
             for clientConnection in clientConnections.values():
-                clientConnection.sendRaw(byteStr)
+                clientConnection.sendRaw(msg.toBytes())
             
             
         

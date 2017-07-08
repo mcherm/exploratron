@@ -20,7 +20,10 @@ class Message:
     def __str__(self):
         return str(self.toJSON())
     def toBytes(self):
-        return json.dumps(self.toJSON(), separators=(',',':')).encode('utf-8')
+        byteStr = json.dumps(self.toJSON(), separators=(',',':')).encode('utf-8')
+        if len(byteStr) > UDP_MAX_SIZE:
+            raise Exception("Message too long for our UDP buffers.")
+        return byteStr
 
         
 class JoinServerMessage(Message):
