@@ -59,6 +59,16 @@ class RefreshRoomMessage(Message):
         OR a list of numbers (representing the stack of tiles in that location)."""
         self.grid = grid
 
+class UpdateRoomMessage(Message):
+    """A message sent when a server wants to refresh just certain cells of the
+    current room."""
+    def __init__(self, cells):
+        """Constructor. cells is a list of three-element lists [x,y,cell] where
+        each 'cell' is either a number (representing the single tineId in that
+        location) or a list of numbers (represent the stack of tiles in that location).
+        Each cell provided fully replaces whatever was there before."""
+        self.cells = cells
+
 class KeyPressedMessage(Message):
     """A message sent when a client wants a server to know a key has been pressed."""
     def __init__(self, keyCode):
@@ -67,11 +77,16 @@ class KeyPressedMessage(Message):
 class ClientShouldExitMessage(Message):
     """A message sent when the server is telling the client to quit playing."""
 
+class ClientDisconnectingMessage(Message):
+    """A message the client sends to the server when it is going to disconnect and
+    no longer needs to receive updates."""
 
-messages = [JoinServerMessage, WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
-            KeyPressedMessage, ClientShouldExitMessage]
 
-_messageClass = {msg.messageName(): msg for msg in messages}
+clientToServerMessages = [JoinServerMessage, KeyPressedMessage, ClientDisconnectingMessage]
+serverToClientMessages = [WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
+                          UpdateRoomMessage, ClientShouldExitMessage]
+
+_messageClass = {msg.messageName(): msg for msg in clientToServerMessages + serverToClientMessages}
 
 
 def bytesToMessage(byteString):
