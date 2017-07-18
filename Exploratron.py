@@ -8,6 +8,7 @@ from kindsofthing import *
 from objects import *
 from images import ImageLibrary, TILE_SIZE, PygameGridDisplay
 from events import *
+from exploranetworking import *
 import rooms
 import time
 
@@ -123,26 +124,35 @@ def handleDeath(world):
         cell.removeThing(world.player)
         world.gameOver = True
 
-# FIXME: Add this soon
-##def processClientMessages(clients):
-##    """This function gets any messages waiting on the queue from clients
-##    and returns XXXXXXXXX"""
-##    for message, replyFunc in clients.receiveMessages():
-##        if isinstance(message, JoinServerMessage):
-##            print(f"Got JoinServerMessage to join client {message.playerId}.")
-##            print(f"WelcomeClientMessage to just 1 client")
-##            replyFunc( WelcomeClientMessage( 4, 5, makeRandomGrid() ) )
-##        elif isinstance(message, KeyPressedMessage):
-##            pass
-##        elif isinstance(message, ClientDisconnectingMessage):
-##            pass
-##        else:
-##            raise Exception(f"Message type not supported for message {message}.")
+def processClientMessages(world, clients, eventList):
+    """This function gets any messages waiting on the queue from clients.
+    If this results in new events, they will be written to the eventList."""
+    for message, replyFunc in clients.receiveMessages():
+        if isinstance(message, JoinServerMessage):
+            print(f"Got JoinServerMessage to join client {message.playerId}.")
+            playersWithId = [x for x in world.players if x.playerId == message.playerId]
+            # FIXME: Better error handling than assert!
+            assert len(playersWithId) == 1
+            room = playersWithId[0].room
+            print(f"WelcomeClientMessage to just 1 client")
+            message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+            replyFunc(message)
+        elif isinstance(message, KeyPressedMessage):
+            pass # FIXME: Need this to handle key presses in client (later)
+        elif isinstance(message, ClientDisconnectingMessage):
+            pass # FIXME: Don't I need to do something here?
+        else:
+            raise Exception(f"Message type not supported for message {message}.")
     
 
 
-def renderWorld(player, display, imageLibrary):
+def renderWorld(player, display, imageLibrary, clients):
     display.show(player.room, imageLibrary)
+    # FIXME: Sending the room refresh to each client each tick is NOT a good plan!
+    #        I am trying it ONLY to demonstrate that the communication works both ways.
+    room = player.room
+    message = NewRoomMessage(room.width, room.height, room.gridInMessageFormat())
+    clients.sendMessageToAll(message)
 
 
 
@@ -150,15 +160,13 @@ def mainLoop(world):
     eventList = EventList()
     display = PygameGridDisplay()
     imageLibrary = ImageLibrary()
-# FIXME: Add this soon
-#    clients = ServersideClientConnections()
+    clients = ServersideClientConnections()
     player = world.player
     while not world.gameOver:
-        renderWorld(player, display, imageLibrary)
+        renderWorld(player, display, imageLibrary, clients)
         eventList.clear()
         eventList.addPygameEvents(display.getEvents(), world.player.playerId)
-        # FIXME: Add this soon
-        #clientInputs = processClientMessages(clients)
+        processClientMessages(world, clients, eventList)
         updateWorld(world, eventList)
     display.quit()
 
