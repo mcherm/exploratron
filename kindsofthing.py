@@ -163,9 +163,10 @@ class Mobile(Thing):
     
         
 class Player(Mobile):
-    def __init__(self, tileId, hitPoints):
+    def __init__(self, tileId, hitPoints, playerId):
         super().__init__(tileId, hitPoints)
         self.queuedEvent = None
+        self.playerId = playerId
     def goToLocation(self, location):
         oldRoom = self.room
         super().goToLocation(location)

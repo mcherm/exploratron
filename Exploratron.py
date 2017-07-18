@@ -7,6 +7,7 @@ import kindsofthing
 from kindsofthing import *
 from objects import *
 from images import ImageLibrary, TILE_SIZE, PygameGridDisplay
+from events import *
 import rooms
 import time
 
@@ -22,8 +23,10 @@ class World:
         self.gameOver = False
         self.rooms = rooms.rooms
         self.mobiles = []
+        self.players = []
         # set up player
-        self.player = Player(11,9)
+        self.player = Player(tileId=11, hitPoints=9, playerId="0")
+        self.players.append(self.player)
         playerRoom = self.rooms[1]
         self.player.setLocation( playerRoom, (2,1) )
         playerRoom.cellAt(2,1).addThing(self.player)
@@ -33,22 +36,19 @@ class World:
         self.mobiles.extend(newMobiles)
 
         
-class PlayerInputs:
-    def __init__(self, events):
-        self.events = events
+##class PlayerInputs:
+##    """Maintains a list of events. The events are designed to be EITHER
+##    created by PyGame (for local events) OR created ourselves (for
+##    remote connections). The object will be assumed to have a "type"
+##    property which will be a PyGame event type or else something we
+##    define (our types will be numbers above 1000)."""
+##    def __init__(self, events):
+##        self.events = events
 
         
 # ========= End Classes for Game =========
 
 
-# ========= Start Drawing Stuff =========
-
-
-
-
-
-
-# ========= End Drawing Stuff ==========
 
 # ========= Start Functions for Game =========
 
@@ -62,59 +62,48 @@ def moveMobiles(world, currentTime):
     
 
 
-def isNonActionEvent(event):
-    """Retrns True if this is an event that can be processed when the
-    player does not have an action, and False otherwise."""
-    return event.type == pygame.QUIT
-    
-def isActionEvent(event):
-    """Returns true if this is an event that can only be processed when
-    the player has an action, and False otherwise."""
-    return (event.type == pygame.KEYDOWN and
-        event.key in (pygame.K_s, pygame.K_w, pygame.K_d, pygame.K_a))
 
 
-def updateWorld(world, playerInputs):
+def updateWorld(world, eventList):
     currentTime = int(time.perf_counter()*1000)
-    events = playerInputs.events
-    if events:
-        # Non-Action Events
-        for event in filter(isNonActionEvent, events):
-            if event.type == pygame.QUIT:
-                world.gameOver = True
+    # Non-Action Events
+    for event in eventList.nonActionEvents:
+        if isinstance(event, QuitGameEvent):
+            world.gameOver = True
     # Action Events
-    if currentTime < world.player.whenItCanAct:
-        # Player cannot act yet
-        if (world.player.queuedEvent is None) and events:
-            # Player does not have an event queued
-            for event in filter(isActionEvent, events):
-                world.player.queuedEvent = event
-                break
-    else:
-        # Player can act now
-        eventToActOn = world.player.queuedEvent
-        # We used the value, so clear it
-        world.player.queuedEvent = None
-        if eventToActOn is None:
-            # Set eventToActOn to the FIRST action event
-            for event in filter(isActionEvent, events):
-                eventToActOn = event
-                break
-        # Now we have set eventToActOn
-        if eventToActOn is not None:
-            if eventToActOn.type == pygame.KEYDOWN:
-                if eventToActOn.key == pygame.K_s:
-                    world.player.moveSouth()
-                    world.player.whenItCanAct = currentTime + 500
-                if eventToActOn.key == pygame.K_w:
-                    world.player.moveNorth()
-                    world.player.whenItCanAct = currentTime + 500
-                if eventToActOn.key == pygame.K_d:
-                    world.player.moveEast()
-                    world.player.whenItCanAct = currentTime + 500
-                if eventToActOn.key == pygame.K_a:
-                    world.player.moveWest()
-                    world.player.whenItCanAct = currentTime + 500
+    for player in world.players:
+        if currentTime < player.whenItCanAct:
+            # Player cannot act yet
+            if player.queuedEvent is None:
+                # Player does not have an event queued
+                for event in eventList.actionEvents:
+                    player.queuedEvent = event
+                    break
+        else:
+            # Player can act now
+            eventToActOn = player.queuedEvent
+            # We used the value, so clear it
+            player.queuedEvent = None
+            if eventToActOn is None:
+                # Set eventToActOn to the FIRST action event
+                for event in eventList.actionEvents:
+                    eventToActOn = event
+                    break
+            # Now we have set eventToActOn
+            if eventToActOn is not None:
+                if isinstance(eventToActOn, KeyPressedEvent):
+                    if eventToActOn.keyCode == pygame.K_s:
+                        player.moveSouth()
+                        player.whenItCanAct = currentTime + 500
+                    if eventToActOn.keyCode == pygame.K_w:
+                        player.moveNorth()
+                        player.whenItCanAct = currentTime + 500
+                    if eventToActOn.keyCode == pygame.K_d:
+                        player.moveEast()
+                        player.whenItCanAct = currentTime + 500
+                    if eventToActOn.keyCode == pygame.K_a:
+                        player.moveWest()
+                        player.whenItCanAct = currentTime + 500
     # Move Mobiles
     moveMobiles(world, currentTime)
     # Check for Death
@@ -134,6 +123,23 @@ def handleDeath(world):
         cell.removeThing(world.player)
         world.gameOver = True
 
+# FIXME: Add this soon
+##def processClientMessages(clients):
+##    """This function gets any messages waiting on the queue from clients
+##    and returns XXXXXXXXX"""
+##    for message, replyFunc in clients.receiveMessages():
+##        if isinstance(message, JoinServerMessage):
+##            print(f"Got JoinServerMessage to join client {message.playerId}.")
+##            print(f"WelcomeClientMessage to just 1 client")
+##            replyFunc( WelcomeClientMessage( 4, 5, makeRandomGrid() ) )
+##        elif isinstance(message, KeyPressedMessage):
+##            pass
+##        elif isinstance(message, ClientDisconnectingMessage):
+##            pass
+##        else:
+##            raise Exception(f"Message type not supported for message {message}.")
+    
+
 
 def renderWorld(player, display, imageLibrary):
     display.show(player.room, imageLibrary)
@@ -141,13 +147,19 @@ def renderWorld(player, display, imageLibrary):
 
 
 def mainLoop(world):
+    eventList = EventList()
     display = PygameGridDisplay()
     imageLibrary = ImageLibrary()
+# FIXME: Add this soon
+#    clients = ServersideClientConnections()
     player = world.player
     while not world.gameOver:
         renderWorld(player, display, imageLibrary)
-        playerInputs = PlayerInputs(display.getEvents())
-        updateWorld(world, playerInputs)
+        eventList.clear()
+        eventList.addPygameEvents(display.getEvents(), world.player.playerId)
+        # FIXME: Add this soon
+        #clientInputs = processClientMessages(clients)
+        updateWorld(world, eventList)
     display.quit()
 
 
