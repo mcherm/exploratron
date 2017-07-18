@@ -1,6 +1,10 @@
 
 import json
 import copy
+import select
+from socket import *
+from collections import defaultdict
+
 
 # Max number of bytes WE choose to allow in a UDP packet.
 UDP_MAX_SIZE = 4096
@@ -28,6 +32,8 @@ class Message:
         
 class JoinServerMessage(Message):
     """A message sent when a client wants to sign on to a server."""
+    def __init__(self, playerId):
+        self.playerId = playerId
 
 class WelcomeClientMessage(Message):
     """A message the servers sends to a client immediately after they join. It
@@ -95,6 +101,78 @@ def bytesToMessage(byteString):
     return _messageClass[messageType](**jsonMessage["data"])
 
 
+class ServersideClientConnection:
+    """The server keeps instances of this class, each of which has information about
+    a particular active client."""
+    def __init__(self, serverSocket, address, joinServerMessage):
+        assert isinstance(joinServerMessage, JoinServerMessage)
+        self.serverSocket = serverSocket
+        self.address = address
+        self.playerId = joinServerMessage.playerId
+    def send(self, message):
+        assert isinstance(message, Message)
+        print(f"sending to {self.address}: {message}")
+        self.sendRaw(message.toBytes())
+    def sendRaw(self, byteStr):
+        """Like send(), but the caller converts to bytes and checks the length."""
+        self.serverSocket.sendto(byteStr, self.address)
+        
+
+
+class ServersideClientConnections:
+    """The server maintains an instance of this class, which keeps track of the clients
+    that are currently connected."""
+    def __init__(self):
+        self.connectionsByAddr = {} # a map of address -> ServersideClientConnection
+        self.connectionsByPlayer = defaultdict(list) # a map of "playerId" -> [ServersideClientConnections]
+        self.serverSocket = socket(AF_INET, SOCK_DGRAM)
+        self.serverSocket.bind(('', 12000))
+    def numConnections(self):
+        return len(self.connectionsByAddr)
+    def receiveMessages(self):
+        """This should be called once per event loop. It will check to see if there are
+        messages ready to read. The method will return a list of (Message, replyFunc)
+        pairs (0 pairs if no messages that the server needs to respond to were received).
+        The Message can be any clientToServerMessage and the replyFunc is a function
+        taking a serverToClientMessage which will send it to the appropriate client."""
+        result = []
+        readyToReadSockets, (), () = select.select([self.serverSocket], [], [], 0)
+        for socket in readyToReadSockets:
+            # Read ONE message from the socket (FIXME: Should it read more if they are ready?)
+            byteStr, address = socket.recvfrom(UDP_MAX_SIZE)
+            message = bytesToMessage(byteStr)
+            if isinstance(message, JoinServerMessage):
+                clientConnection = ServersideClientConnection(self.serverSocket, address, message)
+                self.connectionsByAddr[clientConnection.address] = clientConnection
+                self.connectionsByPlayer[clientConnection.playerId].append(clientConnection)
+                result.append( (message, clientConnection.send) )
+            elif isinstance(message, ClientDisconnectingMessage):
+                try:
+                    clientConnection = self.connectionsByAddr.pop(address)
+                    self.connectionsByPlayer.get(clientConnection.playerId).remove(clientConnection)
+                except KeyError:
+                    # Strangely, some client we don't know tried to disconnect. SHOULD WARN
+                    pass
+                result.append( (message, lambda x: None) )
+            else:
+                clientConnection = self.connectionsByAddr.get(address)
+                print(f"Client {clientConnection} sent message {message}.")
+                result.append( (message, clientConnection.send) )
+        return result
+    def sendMessageToAll(self, message):
+        for clientConnection in self.connectionsByAddr.values():
+            clientConnection.sendRaw(message.toBytes())
+    def sendMessageToPlayer(self, playerId, message):
+        """Sends a message to all connections for a given playerId."""
+        for clientConnection in self.connectionsByPlayer.get(playerId):
+            clientConnection.sendRaw(message.toBytes())
+    def numClients(self, playerId):
+        """Given a playerId, returns the number of currently connected clients
+        following that player."""
+        return len(self.connectionsByPlayer.get(playerId))
+        
+        
+    
 
 ##sampleBytes = b'{"message":"NewRoom","data":{"width":4,"height":3,"imageIds":[[2,2,2,2],[2,3,3,2],[2,3,24,2],[2,2,5,2]]}}'
 ##
