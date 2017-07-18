@@ -1,23 +1,21 @@
 
 import random
-from socket import *
-import select
 from exploranetworking import *
 
 
-
-class ClientConnection:
-    def __init__(self, serverSocket, address, joinServerMessage):
-        assert isinstance(joinServerMessage, JoinServerMessage)
-        self.serverSocket = serverSocket
-        self.address = address
-    def send(self, message):
-        assert isinstance(message, Message)
-        print(f"sending to {self.address}: {message}")
-        self.sendRaw(message.toBytes())
-    def sendRaw(self, byteStr):
-        """Like send(), but the caller converts to bytes and checks the length."""
-        self.serverSocket.sendto(byteStr, self.address)
+# FIXME: Remove this
+##class ClientConnection:
+##    def __init__(self, serverSocket, address, joinServerMessage):
+##        assert isinstance(joinServerMessage, JoinServerMessage)
+##        self.serverSocket = serverSocket
+##        self.address = address
+##    def send(self, message):
+##        assert isinstance(message, Message)
+##        print(f"sending to {self.address}: {message}")
+##        self.sendRaw(message.toBytes())
+##    def sendRaw(self, byteStr):
+##        """Like send(), but the caller converts to bytes and checks the length."""
+##        self.serverSocket.sendto(byteStr, self.address)
         
         
 
@@ -45,50 +43,37 @@ def makeRandomUpdate():
 def messageServer():
     print(f'Test Server')
     global lastLocation
-    serverSocket = socket(AF_INET, SOCK_DGRAM)
-    serverSocket.bind(('', 12000))
 
-    # map of address -> ClientConnection
-    clientConnections = {}
+    clients = ServersideClientConnections()
 
     while True:
-        readyToReadSockets, (), () = select.select([serverSocket], [], [], 0)
-        if readyToReadSockets:
-            byteStr, address = readyToReadSockets[0].recvfrom(UDP_MAX_SIZE)
-            message = bytesToMessage(byteStr)
+        for message, replyFunc in clients.receiveMessages():
             if isinstance(message, JoinServerMessage):
-                print(f"Client sent JoinServerMessage: {message}.")
-                clientConnection = ClientConnection(serverSocket, address, message)
-                clientConnections[address] = clientConnection
+                print(f"Got JoinServerMessage to join client {message.playerId}.")
                 print(f"WelcomeClientMessage to just 1 client")
-                clientConnection.send(WelcomeClientMessage( 4, 5, makeRandomGrid() ))
+                replyFunc( WelcomeClientMessage( 4, 5, makeRandomGrid() ) )
             elif isinstance(message, KeyPressedMessage):
-                clientConnection = clientConnections.get(address)
-                print(f"Client {clientConnection} sent key press {message.keyCode}.")
+                pass
             elif isinstance(message, ClientDisconnectingMessage):
-                clientConnections.pop(address) # Remove this client from the list we send to
+                pass
             else:
                 raise Exception(f"Message type not supported for message {message}.")
+            
         if random.randrange(2000000) < 1:
-            print(f"New Room to {len(clientConnections)} clients")
+            print(f"New Room to {clients.numConnections()} clients")
             lastLocation = (2,2)
             msg = NewRoomMessage( 4, 5, makeRandomGrid() )
-            for clientConnection in clientConnections.values():
-                clientConnection.sendRaw(msg.toBytes())
+            clients.sendMessageToAll(msg)
         if random.randrange(1000000) < 1:
-            print(f"Refresh Room to {len(clientConnections)} clients")
+            print(f"Refresh Room to {clients.numConnections()} clients")
             lastLocation = (2,2)
             msg = RefreshRoomMessage( makeRandomGrid() )
-            for clientConnection in clientConnections.values():
-                clientConnection.sendRaw(msg.toBytes())
+            clients.sendMessageToAll(msg)
         if random.randrange(100000) < 1:
-            print(f"Update Room to {len(clientConnections)} clients")
+            print(f"Update Room to {clients.numConnections()} clients")
             msg = UpdateRoomMessage( makeRandomUpdate() )
-            for clientConnection in clientConnections.values():
-                clientConnection.sendRaw(msg.toBytes())
+            clients.sendMessageToAll(msg)
             
-            
-        
 
 
 messageServer()

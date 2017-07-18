@@ -52,6 +52,7 @@ def test():
 #-----------------------
     
 SERVER_ADDRESS = ("127.0.0.1", 12000)
+PLAYER_ID = "0"
 
 class ViewerClient():
     def __init__(self):
@@ -59,7 +60,7 @@ class ViewerClient():
         self.clientSocket = socket(AF_INET, SOCK_DGRAM)
         self.clientSocket.settimeout(1)
 
-        self.clientSocket.sendto(JoinServerMessage().toBytes(), SERVER_ADDRESS)
+        self.clientSocket.sendto(JoinServerMessage(PLAYER_ID).toBytes(), SERVER_ADDRESS)
     def mainLoop(self):
         currentRoom = None
         display = None
