@@ -1,13 +1,15 @@
 
 import random
-
+from images import Region
 
 
 
 class Thing:
     """Represents any kind of thing in the world."""
-    def __init__(self, tileId):
-        self.tileId = tileId
+    def __init__(self, region, tileName):
+        assert isinstance(region, Region)
+        assert isinstance(tileName, str)
+        self.tileId = region.imageLibrary.idByName(tileName)
     def canEnter(self, mobile):
         """Tests whether the mobile can enter a space containing
         this thing. Returns True if it can and False if not."""
@@ -26,8 +28,8 @@ class Wall(Thing):
 
 class Door(Thing):
     """A thing that teleports you to a new location when you enter."""
-    def __init__(self, tileId, destination):
-        super().__init__(tileId)
+    def __init__(self, region, tileName, destination):
+        super().__init__(region, tileName)
         self.destination = destination
     def doEnter(self, mobile, world, screenChanges):
         mobile.goToLocation(self.destination, world, screenChanges)
@@ -52,8 +54,8 @@ Kinds of things:
 """
 
 class Mobile(Thing):
-    def __init__(self, tileId, hitPoints):
-        super().__init__(tileId)
+    def __init__(self, region, tileName, hitPoints):
+        super().__init__(region, tileName)
         self.whenItCanAct = 0
         self.hitPoints=hitPoints
         self.isDead=False
@@ -166,8 +168,8 @@ class Mobile(Thing):
     
         
 class Player(Mobile):
-    def __init__(self, tileId, hitPoints, playerId):
-        super().__init__(tileId, hitPoints)
+    def __init__(self, region, tileName, hitPoints, playerId):
+        super().__init__(region, tileName, hitPoints)
         self.queuedEvent = None
         self.playerId = playerId
         self.numClients = 0

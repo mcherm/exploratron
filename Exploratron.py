@@ -5,7 +5,7 @@
 import kindsofthing
 from kindsofthing import *
 from objects import *
-from images import ImageLibrary, TILE_SIZE, PygameGridDisplay
+from images import Region, TILE_SIZE, PygameGridDisplay
 from events import *
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
@@ -26,7 +26,7 @@ class World:
         self.mobiles = []
         self.players = []
         # set up player
-        self.player = Player(tileId=11, hitPoints=9, playerId="0")
+        self.player = Player(region=defaultRegion, tileName='drawntiles64/adventurer-1-boy', hitPoints=9, playerId="0")
         self.players.append(self.player)
         playerRoom = self.rooms[1]
         self.player.setLocation( playerRoom, (2,1) )
@@ -140,9 +140,9 @@ def processClientMessages(world, clients, eventList):
     
 
 
-def renderWorld(world, display, imageLibrary, screenChanges, clients):
+def renderWorld(world, display, region, screenChanges, clients):
     # -- Local screen --
-    display.show(world.player.room, imageLibrary)
+    display.show(world.player.room, region.imageLibrary)
 
     # -- Remote clients --
     for player in world.players:
@@ -170,7 +170,7 @@ def mainLoop(world):
     screenChanges = ScreenChanges()
     eventList = EventList()
     display = PygameGridDisplay()
-    imageLibrary = ImageLibrary()
+    region = Region()
     clients = ServersideClientConnections()
     player = world.player
     while not world.gameOver:
@@ -179,7 +179,7 @@ def mainLoop(world):
         eventList.addPygameEvents(display.getEvents(), world.player.playerId)
         processClientMessages(world, clients, eventList)
         updateWorld(world, eventList, screenChanges)
-        renderWorld(world, display, imageLibrary, screenChanges, clients)
+        renderWorld(world, display, region, screenChanges, clients)
     display.quit()
     clients.sendMessageToAll(ClientShouldExitMessage())
     

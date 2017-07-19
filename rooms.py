@@ -59,7 +59,7 @@ room2 = Room(
     ],
     {
         (9,3): Chest(),
-        (7,4): Trap(14),
+        (7,4): SnakeTrap(),
     },
     {
         (8,8): MouseMan(),
