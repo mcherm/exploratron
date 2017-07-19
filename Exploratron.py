@@ -37,15 +37,6 @@ class World:
         self.mobiles.extend(newMobiles)
 
         
-##class PlayerInputs:
-##    """Maintains a list of events. The events are designed to be EITHER
-##    created by PyGame (for local events) OR created ourselves (for
-##    remote connections). The object will be assumed to have a "type"
-##    property which will be a PyGame event type or else something we
-##    define (our types will be numbers above 1000)."""
-##    def __init__(self, events):
-##        self.events = events
-
         
 # ========= End Classes for Game =========
 
