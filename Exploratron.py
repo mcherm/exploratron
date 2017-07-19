@@ -2,13 +2,13 @@
 # This contains the game currently known as "Exploratron". 
 #
 
-import pygame
 import kindsofthing
 from kindsofthing import *
 from objects import *
 from images import ImageLibrary, TILE_SIZE, PygameGridDisplay
 from events import *
 from exploranetworking import *
+from screenchanges import ScreenChanges, SetOfEverything
 import rooms
 import time
 
@@ -54,18 +54,18 @@ class World:
 # ========= Start Functions for Game =========
 
 
-def moveMobiles(world, currentTime):
+def moveMobiles(world, currentTime, screenChanges):
     """This function will cause all of the mobiles to move one step,
     updating the world accordingly."""
     for mobile in world.mobiles:
         if currentTime >= mobile.whenItCanAct:
-            mobile.takeOneStep(currentTime)
+            mobile.takeOneStep(currentTime, screenChanges)
     
 
 
 
 
-def updateWorld(world, eventList):
+def updateWorld(world, eventList, screenChanges):
     currentTime = int(time.perf_counter()*1000)
     # Non-Action Events
     for event in eventList.nonActionEvents:
@@ -93,20 +93,20 @@ def updateWorld(world, eventList):
             # Now we have set eventToActOn
             if eventToActOn is not None:
                 if isinstance(eventToActOn, KeyPressedEvent):
-                    if eventToActOn.keyCode == pygame.K_s:
-                        player.moveSouth()
+                    if eventToActOn.keyCode == KeyCode.GO_DOWN:
+                        player.moveSouth(screenChanges)
                         player.whenItCanAct = currentTime + 500
-                    if eventToActOn.keyCode == pygame.K_w:
-                        player.moveNorth()
+                    if eventToActOn.keyCode == KeyCode.GO_UP:
+                        player.moveNorth(screenChanges)
                         player.whenItCanAct = currentTime + 500
-                    if eventToActOn.keyCode == pygame.K_d:
-                        player.moveEast()
+                    if eventToActOn.keyCode == KeyCode.GO_RIGHT:
+                        player.moveEast(screenChanges)
                         player.whenItCanAct = currentTime + 500
-                    if eventToActOn.keyCode == pygame.K_a:
-                        player.moveWest()
+                    if eventToActOn.keyCode == KeyCode.GO_LEFT:
+                        player.moveWest(screenChanges)
                         player.whenItCanAct = currentTime + 500
     # Move Mobiles
-    moveMobiles(world, currentTime)
+    moveMobiles(world, currentTime, screenChanges)
     # Check for Death
     handleDeath(world)
             
@@ -133,43 +133,65 @@ def processClientMessages(world, clients, eventList):
             playersWithId = [x for x in world.players if x.playerId == message.playerId]
             # FIXME: Better error handling than assert!
             assert len(playersWithId) == 1
-            room = playersWithId[0].room
+            player = playersWithId[0]
+            player.addClient()
+            room = player.room
             print(f"WelcomeClientMessage to just 1 client")
             message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
             replyFunc(message)
         elif isinstance(message, KeyPressedMessage):
             pass # FIXME: Need this to handle key presses in client (later)
         elif isinstance(message, ClientDisconnectingMessage):
-            pass # FIXME: Don't I need to do something here?
+            # FIXME: I **SHOULD** call player.removeClient(), but I don't know which player.
+            pass
         else:
             raise Exception(f"Message type not supported for message {message}.")
     
 
 
-def renderWorld(player, display, imageLibrary, clients):
-    display.show(player.room, imageLibrary)
-    # FIXME: Sending the room refresh to each client each tick is NOT a good plan!
-    #        I am trying it ONLY to demonstrate that the communication works both ways.
-    room = player.room
-    message = NewRoomMessage(room.width, room.height, room.gridInMessageFormat())
-    clients.sendMessageToAll(message)
+def renderWorld(world, display, imageLibrary, screenChanges, clients):
+    # -- Local screen --
+    display.show(world.player.room, imageLibrary)
+
+    # -- Remote clients --
+    for player in world.players:
+        if player.numClients > 0:
+            roomSwitch = screenChanges.getRoomSwitches(player)
+            if roomSwitch is not None:
+                oldRoom, newRoom = roomSwitch
+                message = NewRoomMessage(newRoom.width, newRoom.height, newRoom.gridInMessageFormat())
+            else:
+                room = player.room
+                roomChangeSet = screenChanges.getRoomChangeSet(room)
+                if isinstance(roomChangeSet, SetOfEverything):
+                    message = RefreshRoomMessage(room.gridInMessageFormat())
+                elif len(roomChangeSet) > 0:
+                    updates = [(x,y,room.cellAt(x,y).toMessageFormat()) for (x,y) in roomChangeSet]
+                    message = UpdateRoomMessage(updates)
+                else:
+                    message = None
+            if message is not None:
+                clients.sendMessageToPlayer(player.playerId, message)
 
 
 
 def mainLoop(world):
+    screenChanges = ScreenChanges()
     eventList = EventList()
     display = PygameGridDisplay()
     imageLibrary = ImageLibrary()
     clients = ServersideClientConnections()
     player = world.player
     while not world.gameOver:
-        renderWorld(player, display, imageLibrary, clients)
         eventList.clear()
+        screenChanges.clear()
         eventList.addPygameEvents(display.getEvents(), world.player.playerId)
         processClientMessages(world, clients, eventList)
-        updateWorld(world, eventList)
+        updateWorld(world, eventList, screenChanges)
+        renderWorld(world, display, imageLibrary, screenChanges, clients)
     display.quit()
-
+    clients.sendMessageToAll(ClientShouldExitMessage())
+    
 
 
 # ========= End Functions for Game =========

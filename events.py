@@ -1,6 +1,20 @@
 import pygame
+import enum
 
-    
+
+class KeyCode(enum.Enum):
+    GO_UP = enum.auto()
+    GO_DOWN = enum.auto()
+    GO_LEFT = enum.auto()
+    GO_RIGHT = enum.auto()
+
+_pygameKeyToKeyCode = {
+    pygame.K_w: KeyCode.GO_UP,
+    pygame.K_s: KeyCode.GO_DOWN,
+    pygame.K_a: KeyCode.GO_LEFT,
+    pygame.K_d: KeyCode.GO_RIGHT,
+}
+
 
 class Event:
     """Parent class for all events."""
@@ -58,7 +72,9 @@ class EventList:
             if pygameEvent.type == pygame.QUIT:
                 self.addEvent(QuitGameEvent())
             elif pygameEvent.type == pygame.KEYDOWN:
-                self.addEvent(KeyPressedEvent(playerId, pygameEvent.key))
+                keyCode = _pygameKeyToKeyCode.get(pygameEvent.key)
+                if keyCode is not None:
+                    self.addEvent(KeyPressedEvent(playerId, keyCode))
             else:
                 raise Exception(f"pygame event type {pygameEvent.type} not supported")
 
