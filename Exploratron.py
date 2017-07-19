@@ -59,7 +59,7 @@ def moveMobiles(world, currentTime, screenChanges):
     updating the world accordingly."""
     for mobile in world.mobiles:
         if currentTime >= mobile.whenItCanAct:
-            mobile.takeOneStep(currentTime, screenChanges)
+            mobile.takeOneStep(currentTime, world, screenChanges)
     
 
 
@@ -94,16 +94,16 @@ def updateWorld(world, eventList, screenChanges):
             if eventToActOn is not None:
                 if isinstance(eventToActOn, KeyPressedEvent):
                     if eventToActOn.keyCode == KeyCode.GO_DOWN:
-                        player.moveSouth(screenChanges)
+                        player.moveSouth(world, screenChanges)
                         player.whenItCanAct = currentTime + 500
                     if eventToActOn.keyCode == KeyCode.GO_UP:
-                        player.moveNorth(screenChanges)
+                        player.moveNorth(world, screenChanges)
                         player.whenItCanAct = currentTime + 500
                     if eventToActOn.keyCode == KeyCode.GO_RIGHT:
-                        player.moveEast(screenChanges)
+                        player.moveEast(world, screenChanges)
                         player.whenItCanAct = currentTime + 500
                     if eventToActOn.keyCode == KeyCode.GO_LEFT:
-                        player.moveWest(screenChanges)
+                        player.moveWest(world, screenChanges)
                         player.whenItCanAct = currentTime + 500
     # Move Mobiles
     moveMobiles(world, currentTime, screenChanges)
@@ -196,5 +196,4 @@ def mainLoop(world):
 
 # ========= End Functions for Game =========
 
-kindsofthing.world = World()
-mainLoop(kindsofthing.world)
+mainLoop(World())

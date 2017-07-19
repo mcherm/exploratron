@@ -25,12 +25,12 @@ class Cell:
             if not thing.canEnter(mobile):
                 return False
         return True
-    def doEnter(self, mobile, screenChanges):
+    def doEnter(self, mobile, world, screenChanges):
         """This gets called when a mobile enters into this cell. It should
         make sure that all the things in the cell that do anything when you
         enter do whatever they are supposed to."""
         for thing in self.things:
-            thing.doEnter(mobile, screenChanges)
+            thing.doEnter(mobile, world, screenChanges)
     def toMessageFormat(self):
         """Returns a number (representing the single tileId in this cell)
         OR a list of numbers (representing the stack of tiles in this cell)."""
