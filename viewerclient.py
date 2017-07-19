@@ -95,7 +95,7 @@ class ViewerClient():
             if currentRoom is not None:
                 if display is None:
                     display = images.PygameGridDisplay()
-                    imageLibrary = images.ImageLibrary()
+                    imageLibrary = images.ImageLibrary('drawntiles64')
                 display.show(currentRoom, imageLibrary)
             if display is not None:
                 events = display.getEvents()
