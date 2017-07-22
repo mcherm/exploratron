@@ -2,13 +2,15 @@ import pygame
 import enum
 
 
-class KeyCode(enum.Enum):
-    GO_UP = enum.auto()
-    GO_DOWN = enum.auto()
-    GO_LEFT = enum.auto()
-    GO_RIGHT = enum.auto()
+class KeyCode:
+    GO_UP = 1
+    GO_DOWN = 2
+    GO_LEFT = 3
+    GO_RIGHT = 4
 
-_pygameKeyToKeyCode = {
+    
+
+pygameKeyToKeyCode = {
     pygame.K_w: KeyCode.GO_UP,
     pygame.K_s: KeyCode.GO_DOWN,
     pygame.K_a: KeyCode.GO_LEFT,
@@ -30,9 +32,9 @@ class QuitGameEvent(Event):
 class NewPlayerAddedEvent(Event):
     """An event for when it is discovered that a new player needs to be
     added at the next update stage."""
-    def __init__(self, playerCatalogEntry, replyFunc):
+    def __init__(self, playerCatalogEntry, clientConnection):
         self.playerCatalogEntry = playerCatalogEntry
-        self.replyFunc = replyFunc
+        self.clientConnection = clientConnection
 
 class PlayerEvent(Event):
     """Any event that affects a specific player."""
@@ -93,7 +95,7 @@ class EventList:
             if pygameEvent.type == pygame.QUIT:
                 self.addEvent(QuitGameEvent())
             elif pygameEvent.type == pygame.KEYDOWN:
-                keyCode = _pygameKeyToKeyCode.get(pygameEvent.key)
+                keyCode = pygameKeyToKeyCode.get(pygameEvent.key)
                 if keyCode is not None:
                     self.addEvent(KeyPressedEvent(playerId, keyCode))
             else:

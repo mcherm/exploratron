@@ -91,7 +91,7 @@ def updateWorld(world, region, eventList, screenChanges):
             room = newPlayer.room
             print(f"WelcomeClientMessage to just 1 client")
             message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
-            event.replyFunc(message)
+            event.clientConnection.send(message)
         else:
             raise Exception(f'Unexpected event: {event}')
     # Action Events
@@ -158,7 +158,7 @@ def handleGameOver(world):
 def processClientMessages(world, clients, eventList):
     """This function gets any messages waiting on the queue from clients.
     If this results in new events, they will be written to the eventList."""
-    for message, replyFunc in clients.receiveMessages():
+    for message, clientConnection in clients.receiveMessages():
         if isinstance(message, JoinServerMessage):
             print(f"Got JoinServerMessage to join client {message.playerId}.")
             playersWithId = [x for x in world.players if x.playerId == message.playerId]
@@ -171,16 +171,16 @@ def processClientMessages(world, clients, eventList):
                 room = player.room
                 print(f"WelcomeClientMessage to just 1 client")
                 message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
-                replyFunc(message)
+                clientConnection.send(message)
             elif playerCatalogEntry is not None:
                 # No such player now, but we could add one
-                eventList.addEvent(NewPlayerAddedEvent(playerCatalogEntry, replyFunc))
+                eventList.addEvent(NewPlayerAddedEvent(playerCatalogEntry, clientConnection))
             else:
                 # No such ID. We cannot welcome this client.
                 # FIXME: Should return an error message to the client!
                 pass
         elif isinstance(message, KeyPressedMessage):
-            pass # FIXME: Need this to handle key presses in client (later)
+            eventList.addEvent(KeyPressedEvent(clientConnection.playerId, message.keyCode))
         elif isinstance(message, ClientDisconnectingMessage):
             # FIXME: I **SHOULD** call player.removeClient(), but I don't know which player.
             pass
