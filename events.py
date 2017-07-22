@@ -27,6 +27,13 @@ class QuitGameEvent(Event):
     """An event for when the game is going to exit (on the server)."""
     pass
 
+class NewPlayerAddedEvent(Event):
+    """An event for when it is discovered that a new player needs to be
+    added at the next update stage."""
+    def __init__(self, playerCatalogEntry, replyFunc):
+        self.playerCatalogEntry = playerCatalogEntry
+        self.replyFunc = replyFunc
+
 class PlayerEvent(Event):
     """Any event that affects a specific player."""
     def __init__(self, playerId):
@@ -50,18 +57,32 @@ class ClientDisconnectEvent(PlayerEvent):
     def __init__(self, playerId):
         super().__init__(playerId)
 
+
 class EventList:
     """This class maintains a list of events."""
     def __init__(self):
-        self.actionEvents = []
-        self.nonActionEvents = []
+        self.actionEvents = {} # map playerId to just ONE event (the first one we got)
+        self.nonActionEvents = [] # List of all non-action events
+    def __str__(self):
+        return f'<EventList with {len(self.actionEvents)+len(self.nonActionEvents)} events>'
     def clear(self):
         """Remove all events."""
         self.actionEvents.clear()
         self.nonActionEvents.clear()
+    def getNonActionEvents(self):
+        """Returns a list of all the events that do not need to wait until
+        some player has a free action before they are processed."""
+        return self.nonActionEvents
+    def getFirstActionEvent(self, playerId):
+        """Returns the first actionEvent (event which requires a player to
+        have a free action) if there is one, or an empty list if there aren't
+        any."""
+        return self.actionEvents.get(playerId)
     def addEvent(self, event):
         if event.isActionEvent():
-            self.actionEvents.append(event)
+            assert isinstance(event, PlayerEvent)
+            if event.playerId not in self.actionEvents:
+                self.actionEvents[event.playerId] = event
         else:
             self.nonActionEvents.append(event)
     def addPygameEvents(self, pygameEvents, playerId):
