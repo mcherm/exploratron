@@ -27,6 +27,7 @@ class World:
         self.rooms = rooms.rooms
         self.mobiles = [] # contains all active mobiles EXCEPT those of type Player
         self.players = []
+        self.playerByPlayerId = {} # FIXME: Don't need map AND ALSO the list
         self.displayedPlayer = None
         self.playerCatalog = thePlayerCatalog
     def addMobiles(self, newMobiles):
@@ -41,22 +42,25 @@ class World:
         newPlayer = playerCatalogEntry.getPlayer(region)
         assert newPlayer.playerId not in [p.playerId for p in self.players]
         self.players.append(newPlayer)
+        self.playerByPlayerId[newPlayer.playerId] = newPlayer
         location = playerCatalogEntry.getLocation()
         startingRoom = self.rooms[location.roomNumber]
         newPlayer.setLocation(startingRoom, location.coordinates)
         startingRoom.cellAt(*location.coordinates).addThing(newPlayer)
         return newPlayer
+    def removePlayer(self, player):
+        """Passed a player, removes it."""
+        self.players.remove(player)
+        del self.playersByPlayerId[player.playerId]
+    def getPlayer(self, playerId):
+        """Passed a playerId, this returns the given player, or raises an exception if it isn't
+        in the list of players."""
+        return self.playerByPlayerId[playerId]
     def setDisplayedPlayer(self, playerId):
         if self.displayedPlayer is not None:
             self.displayedPlayer.displayed = False
-        foundThePlayer = False
-        for player in self.players:
-            if player.playerId == playerId:
-                assert not foundThePlayer # should only find it once
-                player.displayed = True
-                self.displayedPlayer = player
-                foundThePlayer = True
-        assert foundThePlayer # should find it at least once
+        self.displayedPlayer = self.getPlayer(playerId)
+        self.displayedPlayer.displayed = True
 
         
         
@@ -87,7 +91,7 @@ def updateWorld(world, region, eventList, screenChanges):
             world.gameOver = True
         elif isinstance(event, NewPlayerAddedEvent):
             newPlayer = world.addPlayer(region, event.playerCatalogEntry)
-            newPlayer.addClient()
+            newPlayer.addClient(event.clientConnection)
             room = newPlayer.room
             print(f"WelcomeClientMessage to just 1 client")
             message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
@@ -145,12 +149,12 @@ def handleDeath(world):
             x, y = player.position
             cell = player.room.cellAt(x, y)
             cell.removeThing(player)
-            world.players.remove(player)
+            world.removePlayer(player)
 
 def handleGameOver(world):
     reasonToKeepPlaying = False
     for player in world.players:
-        if player.numClients > 0 or player.displayed:
+        if len(player.clientConnections) > 0 or player.displayed:
             reasonToKeepPlaying = True
     if not reasonToKeepPlaying:
         world.gameOver = True
@@ -161,13 +165,14 @@ def processClientMessages(world, clients, eventList):
     for message, clientConnection in clients.receiveMessages():
         if isinstance(message, JoinServerMessage):
             print(f"Got JoinServerMessage to join client {message.playerId}.")
+            # FIXME: Can be made cleaner now that there is getPlayer()
             playersWithId = [x for x in world.players if x.playerId == message.playerId]
             assert len(playersWithId) <= 1
             playerCatalogEntry = world.playerCatalog.getEntryById(message.playerId)
             if playersWithId:
                 # Such a player exists; we just add a viewer
                 player = playersWithId[0]
-                player.addClient()
+                player.addClient(clientConnection)
                 room = player.room
                 print(f"WelcomeClientMessage to just 1 client")
                 message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
@@ -182,8 +187,8 @@ def processClientMessages(world, clients, eventList):
         elif isinstance(message, KeyPressedMessage):
             eventList.addEvent(KeyPressedEvent(clientConnection.playerId, message.keyCode))
         elif isinstance(message, ClientDisconnectingMessage):
-            # FIXME: I **SHOULD** call player.removeClient(), but I don't know which player.
-            pass
+            player = world.getPlayer(clientConnection.playerId)
+            player.removeClient(clientConnection)
         else:
             raise Exception(f"Message type not supported for message {message}.")
     
@@ -195,7 +200,7 @@ def renderWorld(world, display, region, screenChanges, clients):
 
     # -- Remote clients --
     for player in world.players:
-        if player.numClients > 0:
+        if len(player.clientConnections) > 0:
             roomSwitch = screenChanges.getRoomSwitches(player)
             if roomSwitch is not None:
                 oldRoom, newRoom = roomSwitch

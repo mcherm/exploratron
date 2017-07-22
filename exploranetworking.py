@@ -134,8 +134,7 @@ class ServersideClientConnections:
         messages ready to read. The method will return a list of (Message, clientConnection)
         pairs (0 pairs if no messages that the server needs to respond to were received).
         The Message can be any clientToServerMessage and the clientConnection is the
-        connection to that client except with a ClientDisconnectingMessage in which case
-        it is None."""
+        connection to that client."""
         result = []
         readyToReadSockets, (), () = select.select([self.serverSocket], [], [], 0)
         for socket in readyToReadSockets:
@@ -151,10 +150,11 @@ class ServersideClientConnections:
                 try:
                     clientConnection = self.connectionsByAddr.pop(address)
                     self.connectionsByPlayer.get(clientConnection.playerId).remove(clientConnection)
+                    result.append( (message, clientConnection) )
                 except KeyError:
-                    # Strangely, some client we don't know tried to disconnect. SHOULD WARN
+                    # Strangely, some client we don't know tried to disconnect.
+                    # FIXME: Should probably log this or something.
                     pass
-                result.append( (message, None) )
             else:
                 clientConnection = self.connectionsByAddr.get(address)
                 print(f"Client {clientConnection} sent message {message}.")

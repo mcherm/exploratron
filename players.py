@@ -13,7 +13,7 @@ class Player(Mobile):
         super().__init__(region, tileName, hitPoints)
         self.queuedEvent = None
         self.playerId = playerId
-        self.numClients = 0
+        self.clientConnections = []
         self.displayed = False
     def goToLocation(self, location, world, screenChanges):
         oldRoom = self.room
@@ -23,11 +23,11 @@ class Player(Mobile):
             newMobiles = self.room.playerEntersRoom()
             if newMobiles:
                 world.addMobiles(newMobiles)
-    def addClient(self):
-        self.numClients += 1
-    def removeClient(self):
-        assert self.numClients > 0
-        self.numClients -= 1
+    def addClient(self, clientConnection):
+        self.clientConnections.append(clientConnection)
+    def removeClient(self, clientConnection):
+        assert clientConnection in self.clientConnections
+        self.clientConnections.remove(clientConnection)
 
 
 class PlayerCatalogEntry:
