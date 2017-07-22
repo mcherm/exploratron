@@ -51,7 +51,7 @@ class World:
     def removePlayer(self, player):
         """Passed a player, removes it."""
         self.players.remove(player)
-        del self.playersByPlayerId[player.playerId]
+        del self.playerByPlayerId[player.playerId]
     def getPlayer(self, playerId):
         """Passed a playerId, this returns the given player, or raises an exception if it isn't
         in the list of players."""
