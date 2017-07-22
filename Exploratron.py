@@ -5,7 +5,7 @@
 import kindsofthing
 from gamecomponents import Location
 import objects
-from objects import Player
+from players import Player
 from images import Region, TILE_SIZE, PygameGridDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent
 from exploranetworking import *
@@ -133,6 +133,7 @@ def handleDeath(world):
             x, y = player.position
             cell = player.room.cellAt(x, y)
             cell.removeThing(player)
+            world.players.remove(player)
 
 def handleGameOver(world):
     reasonToKeepPlaying = False
