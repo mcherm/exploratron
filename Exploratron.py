@@ -96,6 +96,7 @@ def updateWorld(world, region, eventList, screenChanges):
             print(f"WelcomeClientMessage to just 1 client")
             message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
             event.clientConnection.send(message)
+            # FIXME: Should probably update screenChanges
         else:
             raise Exception(f'Unexpected event: {event}')
     # Action Events

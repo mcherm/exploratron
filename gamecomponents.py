@@ -31,6 +31,12 @@ class Cell:
         enter do whatever they are supposed to."""
         for thing in self.things:
             thing.doEnter(mobile, world, screenChanges)
+    def doBump(self, mobile, world, screenChanges):
+        """This gets called when a mobile trys to enters the cell and falils. It should
+        make sure that all the things in the cell that do anything when you
+        enter do whatever they are supposed to."""
+        for thing in self.things:
+            thing.doBump(mobile, world, screenChanges)
     def toMessageFormat(self):
         """Returns a number (representing the single tileId in this cell)
         OR a list of numbers (representing the stack of tiles in this cell)."""

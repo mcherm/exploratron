@@ -18,6 +18,9 @@ class Thing:
         """This gets called when a mobile enters the same cell as
         this thing."""
         pass
+    def doBump(self, mobile, world, screenChanges):
+        """This gets called when a mobile bumps the cell with this thing."""
+        pass
 
 
 class Wall(Thing):
@@ -59,6 +62,11 @@ class Mobile(Thing):
         self.whenItCanAct = 0
         self.hitPoints=hitPoints
         self.isDead=False
+    def canEnter(self, mobile):
+        return False
+    def doBump(self, mobile, world, screenChanges):
+        """This gets called when a mobile bumps the cell with this thing."""
+        self.takeDamage(1)
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
@@ -82,6 +90,9 @@ class Mobile(Thing):
             screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
             newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
     def moveEast(self, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX + 1
@@ -100,6 +111,9 @@ class Mobile(Thing):
             screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
             newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
     def moveWest(self, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX - 1
@@ -118,6 +132,9 @@ class Mobile(Thing):
             screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
             newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
     def moveNorth(self, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX
@@ -136,6 +153,9 @@ class Mobile(Thing):
             screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
             newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
     def goToLocation(self, location, world, screenChanges):
         """Calling this makes the player move from it's current location to
         the new location specified."""
