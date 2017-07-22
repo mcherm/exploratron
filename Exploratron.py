@@ -3,10 +3,11 @@
 #
 
 import kindsofthing
-from kindsofthing import *
-from objects import *
+from gamecomponents import Location
+import objects
+from objects import Player
 from images import Region, TILE_SIZE, PygameGridDisplay
-from events import *
+from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
 import rooms
@@ -23,22 +24,37 @@ class World:
     def __init__(self):
         self.gameOver = False
         self.rooms = rooms.rooms
-        self.mobiles = []
+        self.mobiles = [] # contains all active mobiles EXCEPT those of type Player
         self.players = []
-        # set up player
-        self.player = Player(region=defaultRegion, tileName='drawntiles64/adventurer-1-boy', hitPoints=9, playerId="0")
-        self.players.append(self.player)
-        playerRoom = self.rooms[1]
-        self.player.setLocation( playerRoom, (2,1) )
-        playerRoom.cellAt(2,1).addThing(self.player)
+        self.displayedPlayer = None
     def addMobiles(self, newMobiles):
         """Call this to add some new mobiles to the list of active
         mobiles."""
         self.mobiles.extend(newMobiles)
+    def addPlayer(self, newPlayer, location):
+        """Call this to add a new Player to the game at the specified location. The
+        playerId of this new player must be unique."""
+        assert newPlayer.playerId not in [p.playerId for p in self.players]
+        self.players.append(newPlayer)
+        startingRoom = self.rooms[location.roomNumber]
+        newPlayer.setLocation(startingRoom, location.coordinates)
+        startingRoom.cellAt(*location.coordinates).addThing(newPlayer)
+    def setDisplayedPlayer(self, playerId):
+        if self.displayedPlayer is not None:
+            self.displayedPlayer.displayed = False
+        foundThePlayer = False
+        for player in self.players:
+            if player.playerId == playerId:
+                assert not foundThePlayer # should only find it once
+                player.displayed = True
+                self.displayedPlayer = player
+                foundThePlayer = True
+        assert foundThePlayer # should find it at least once
 
         
         
 # ========= End Classes for Game =========
+
 
 
 
@@ -64,42 +80,45 @@ def updateWorld(world, eventList, screenChanges):
             world.gameOver = True
     # Action Events
     for player in world.players:
-        if currentTime < player.whenItCanAct:
-            # Player cannot act yet
-            if player.queuedEvent is None:
-                # Player does not have an event queued
-                for event in eventList.actionEvents:
-                    player.queuedEvent = event
-                    break
-        else:
-            # Player can act now
-            eventToActOn = player.queuedEvent
-            # We used the value, so clear it
-            player.queuedEvent = None
-            if eventToActOn is None:
-                # Set eventToActOn to the FIRST action event
-                for event in eventList.actionEvents:
-                    eventToActOn = event
-                    break
-            # Now we have set eventToActOn
-            if eventToActOn is not None:
-                if isinstance(eventToActOn, KeyPressedEvent):
-                    if eventToActOn.keyCode == KeyCode.GO_DOWN:
-                        player.moveSouth(world, screenChanges)
-                        player.whenItCanAct = currentTime + 500
-                    if eventToActOn.keyCode == KeyCode.GO_UP:
-                        player.moveNorth(world, screenChanges)
-                        player.whenItCanAct = currentTime + 500
-                    if eventToActOn.keyCode == KeyCode.GO_RIGHT:
-                        player.moveEast(world, screenChanges)
-                        player.whenItCanAct = currentTime + 500
-                    if eventToActOn.keyCode == KeyCode.GO_LEFT:
-                        player.moveWest(world, screenChanges)
-                        player.whenItCanAct = currentTime + 500
+        if not player.isDead:
+            if currentTime < player.whenItCanAct:
+                # Player cannot act yet
+                if player.queuedEvent is None:
+                    # Player does not have an event queued
+                    for event in eventList.actionEvents:
+                        player.queuedEvent = event
+                        break
+            else:
+                # Player can act now
+                eventToActOn = player.queuedEvent
+                # We used the value, so clear it
+                player.queuedEvent = None
+                if eventToActOn is None:
+                    # Set eventToActOn to the FIRST action event
+                    for event in eventList.actionEvents:
+                        eventToActOn = event
+                        break
+                # Now we have set eventToActOn
+                if eventToActOn is not None:
+                    if isinstance(eventToActOn, KeyPressedEvent):
+                        if eventToActOn.keyCode == KeyCode.GO_DOWN:
+                            player.moveSouth(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
+                        if eventToActOn.keyCode == KeyCode.GO_UP:
+                            player.moveNorth(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
+                        if eventToActOn.keyCode == KeyCode.GO_RIGHT:
+                            player.moveEast(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
+                        if eventToActOn.keyCode == KeyCode.GO_LEFT:
+                            player.moveWest(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
     # Move Mobiles
     moveMobiles(world, currentTime, screenChanges)
     # Check for Death
     handleDeath(world)
+    # Check for GameOver
+    handleGameOver(world)
             
 
 def handleDeath(world):
@@ -109,10 +128,19 @@ def handleDeath(world):
             cell = mobile.room.cellAt(x, y)
             cell.removeThing(mobile)
             world.mobiles.remove(mobile)
-    if world.player.isDead:
-        x, y = world.player.position
-        cell = world.player.room.cellAt(x, y)
-        cell.removeThing(world.player)
+    for player in world.players:
+        if player.isDead:
+            x, y = player.position
+            cell = player.room.cellAt(x, y)
+            cell.removeThing(player)
+
+def handleGameOver(world):
+    reasonToKeepPlaying = False
+    for player in world.players:
+        print(f'Player {player.playerId} has {player.numClients} clients and displayed is {player.displayed}')
+        if player.numClients > 0 or player.displayed:
+            reasonToKeepPlaying = True
+    if not reasonToKeepPlaying:
         world.gameOver = True
 
 def processClientMessages(world, clients, eventList):
@@ -142,7 +170,7 @@ def processClientMessages(world, clients, eventList):
 
 def renderWorld(world, display, region, screenChanges, clients):
     # -- Local screen --
-    display.show(world.player.room, region.imageLibrary)
+    display.show(world.displayedPlayer.room, region.imageLibrary)
 
     # -- Remote clients --
     for player in world.players:
@@ -170,13 +198,15 @@ def mainLoop(world):
     screenChanges = ScreenChanges()
     eventList = EventList()
     display = PygameGridDisplay()
-    region = Region()
+    region = objects.defaultRegion
     clients = ServersideClientConnections()
-    player = world.player
+
+    world.setDisplayedPlayer(world.players[0].playerId)
+    
     while not world.gameOver:
         eventList.clear()
         screenChanges.clear()
-        eventList.addPygameEvents(display.getEvents(), world.player.playerId)
+        eventList.addPygameEvents(display.getEvents(), world.displayedPlayer.playerId)
         processClientMessages(world, clients, eventList)
         updateWorld(world, eventList, screenChanges)
         renderWorld(world, display, region, screenChanges, clients)
@@ -187,4 +217,12 @@ def mainLoop(world):
 
 # ========= End Functions for Game =========
 
-mainLoop(World())
+world = World()
+localPlayer = Player(
+    region=objects.defaultRegion,
+    tileName='drawntiles64/adventurer-1-boy',
+    hitPoints=9,
+    playerId="0")
+startLocation = Location( 1, (2,1) )
+world.addPlayer(localPlayer, startLocation)
+mainLoop(world)

@@ -4,7 +4,6 @@ import os
 
 TILE_SIZE = 64
 
-
 class ImageLibrary:
     def __init__(self, subdir):
         rootDir = './img'
@@ -17,7 +16,6 @@ class ImageLibrary:
                 if file.endswith('.png'):
                     name = f'{subdir}/{file[:-4]}'
                     tileId = counter
-                    print(f'Going to map {name} to {tileId}.') # FIXME: Remove
                     self._idByName[name] = tileId
                     self.imageById[tileId] = pygame.image.load(f'{rootDir}/{name}.png')
                     counter += 1
