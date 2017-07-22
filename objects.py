@@ -1,4 +1,4 @@
-from kindsofthing import *
+from kindsofthing import Region, Thing, Wall, Door, Trap, Mobile
 
 defaultRegion = Region()
 
