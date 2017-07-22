@@ -7,7 +7,7 @@ from gamecomponents import Location
 import objects
 from players import Player, thePlayerCatalog, PlayerCatalogEntry
 from images import Region, TILE_SIZE, PygameGridDisplay
-from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent
+from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
 import rooms
@@ -28,13 +28,14 @@ class World:
         self.mobiles = [] # contains all active mobiles EXCEPT those of type Player
         self.players = []
         self.displayedPlayer = None
+        self.playerCatalog = thePlayerCatalog
     def addMobiles(self, newMobiles):
         """Call this to add some new mobiles to the list of active
         mobiles."""
         self.mobiles.extend(newMobiles)
     def addPlayer(self, region, playerCatalogEntry):
         """Call this to add a new Player to the game at the specified location. The
-        playerId of this new player must be unique."""
+        playerId of this new player must be unique. It returns the newly created Player."""
         assert isinstance(region, Region)
         assert isinstance(playerCatalogEntry, PlayerCatalogEntry)
         newPlayer = playerCatalogEntry.getPlayer(region)
@@ -44,6 +45,7 @@ class World:
         startingRoom = self.rooms[location.roomNumber]
         newPlayer.setLocation(startingRoom, location.coordinates)
         startingRoom.cellAt(*location.coordinates).addThing(newPlayer)
+        return newPlayer
     def setDisplayedPlayer(self, playerId):
         if self.displayedPlayer is not None:
             self.displayedPlayer.displayed = False
@@ -77,12 +79,21 @@ def moveMobiles(world, currentTime, screenChanges):
 
 
 
-def updateWorld(world, eventList, screenChanges):
+def updateWorld(world, region, eventList, screenChanges):
     currentTime = int(time.perf_counter()*1000)
     # Non-Action Events
-    for event in eventList.nonActionEvents:
+    for event in eventList.getNonActionEvents():
         if isinstance(event, QuitGameEvent):
             world.gameOver = True
+        elif isinstance(event, NewPlayerAddedEvent):
+            newPlayer = world.addPlayer(region, event.playerCatalogEntry)
+            newPlayer.addClient()
+            room = newPlayer.room
+            print(f"WelcomeClientMessage to just 1 client")
+            message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+            event.replyFunc(message)
+        else:
+            raise Exception(f'Unexpected event: {event}')
     # Action Events
     for player in world.players:
         if not player.isDead:
@@ -90,9 +101,7 @@ def updateWorld(world, eventList, screenChanges):
                 # Player cannot act yet
                 if player.queuedEvent is None:
                     # Player does not have an event queued
-                    for event in eventList.actionEvents:
-                        player.queuedEvent = event
-                        break
+                    player.queuedEvent = eventList.getFirstActionEvent(player.playerId)
             else:
                 # Player can act now
                 eventToActOn = player.queuedEvent
@@ -100,9 +109,7 @@ def updateWorld(world, eventList, screenChanges):
                 player.queuedEvent = None
                 if eventToActOn is None:
                     # Set eventToActOn to the FIRST action event
-                    for event in eventList.actionEvents:
-                        eventToActOn = event
-                        break
+                    eventToActOn = eventList.getFirstActionEvent(player.playerId)
                 # Now we have set eventToActOn
                 if eventToActOn is not None:
                     if isinstance(eventToActOn, KeyPressedEvent):
@@ -155,14 +162,23 @@ def processClientMessages(world, clients, eventList):
         if isinstance(message, JoinServerMessage):
             print(f"Got JoinServerMessage to join client {message.playerId}.")
             playersWithId = [x for x in world.players if x.playerId == message.playerId]
-            # FIXME: Better error handling than assert!
-            assert len(playersWithId) == 1
-            player = playersWithId[0]
-            player.addClient()
-            room = player.room
-            print(f"WelcomeClientMessage to just 1 client")
-            message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
-            replyFunc(message)
+            assert len(playersWithId) <= 1
+            playerCatalogEntry = world.playerCatalog.getEntryById(message.playerId)
+            if playersWithId:
+                # Such a player exists; we just add a viewer
+                player = playersWithId[0]
+                player.addClient()
+                room = player.room
+                print(f"WelcomeClientMessage to just 1 client")
+                message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+                replyFunc(message)
+            elif playerCatalogEntry is not None:
+                # No such player now, but we could add one
+                eventList.addEvent(NewPlayerAddedEvent(playerCatalogEntry, replyFunc))
+            else:
+                # No such ID. We cannot welcome this client.
+                # FIXME: Should return an error message to the client!
+                pass
         elif isinstance(message, KeyPressedMessage):
             pass # FIXME: Need this to handle key presses in client (later)
         elif isinstance(message, ClientDisconnectingMessage):
@@ -213,7 +229,7 @@ def mainLoop(world):
         screenChanges.clear()
         eventList.addPygameEvents(display.getEvents(), world.displayedPlayer.playerId)
         processClientMessages(world, clients, eventList)
-        updateWorld(world, eventList, screenChanges)
+        updateWorld(world, region, eventList, screenChanges)
         renderWorld(world, display, region, screenChanges, clients)
     display.quit()
     clients.sendMessageToAll(ClientShouldExitMessage())
@@ -223,6 +239,6 @@ def mainLoop(world):
 # ========= End Functions for Game =========
 
 world = World()
-playerCatalogEntry = random.choice(thePlayerCatalog.entries)
+playerCatalogEntry = random.choice(world.playerCatalog.entries)
 world.addPlayer(objects.defaultRegion, playerCatalogEntry)
 mainLoop(world)

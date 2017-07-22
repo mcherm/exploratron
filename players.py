@@ -58,6 +58,13 @@ class PlayerCatalog:
     def addEntry(self, playerCatalogEntry):
         assert isinstance(playerCatalogEntry, PlayerCatalogEntry)
         self.entries.append(playerCatalogEntry)
+    def getEntryById(self, playerId):
+        """Returns a PlayerCatalogEntry for a player with that ID, or None if there is no
+        catalog entry with that ID."""
+        for entry in self.entries:
+            if entry.playerId == playerId:
+                return entry
+        return None
 
 
 thePlayerCatalog = PlayerCatalog()
