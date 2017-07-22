@@ -5,13 +5,14 @@
 import kindsofthing
 from gamecomponents import Location
 import objects
-from players import Player
+from players import Player, thePlayerCatalog, PlayerCatalogEntry
 from images import Region, TILE_SIZE, PygameGridDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
 import rooms
 import time
+import random
 
 
 # ========= Start Classes for Game =========
@@ -31,11 +32,15 @@ class World:
         """Call this to add some new mobiles to the list of active
         mobiles."""
         self.mobiles.extend(newMobiles)
-    def addPlayer(self, newPlayer, location):
+    def addPlayer(self, region, playerCatalogEntry):
         """Call this to add a new Player to the game at the specified location. The
         playerId of this new player must be unique."""
+        assert isinstance(region, Region)
+        assert isinstance(playerCatalogEntry, PlayerCatalogEntry)
+        newPlayer = playerCatalogEntry.getPlayer(region)
         assert newPlayer.playerId not in [p.playerId for p in self.players]
         self.players.append(newPlayer)
+        location = playerCatalogEntry.getLocation()
         startingRoom = self.rooms[location.roomNumber]
         newPlayer.setLocation(startingRoom, location.coordinates)
         startingRoom.cellAt(*location.coordinates).addThing(newPlayer)
@@ -138,7 +143,6 @@ def handleDeath(world):
 def handleGameOver(world):
     reasonToKeepPlaying = False
     for player in world.players:
-        print(f'Player {player.playerId} has {player.numClients} clients and displayed is {player.displayed}')
         if player.numClients > 0 or player.displayed:
             reasonToKeepPlaying = True
     if not reasonToKeepPlaying:
@@ -219,11 +223,6 @@ def mainLoop(world):
 # ========= End Functions for Game =========
 
 world = World()
-localPlayer = Player(
-    region=objects.defaultRegion,
-    tileName='drawntiles64/adventurer-1-boy',
-    hitPoints=9,
-    playerId="0")
-startLocation = Location( 1, (2,1) )
-world.addPlayer(localPlayer, startLocation)
+playerCatalogEntry = random.choice(thePlayerCatalog.entries)
+world.addPlayer(objects.defaultRegion, playerCatalogEntry)
 mainLoop(world)
