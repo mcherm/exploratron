@@ -131,10 +131,11 @@ class ServersideClientConnections:
         return len(self.connectionsByAddr)
     def receiveMessages(self):
         """This should be called once per event loop. It will check to see if there are
-        messages ready to read. The method will return a list of (Message, replyFunc)
+        messages ready to read. The method will return a list of (Message, clientConnection)
         pairs (0 pairs if no messages that the server needs to respond to were received).
-        The Message can be any clientToServerMessage and the replyFunc is a function
-        taking a serverToClientMessage which will send it to the appropriate client."""
+        The Message can be any clientToServerMessage and the clientConnection is the
+        connection to that client except with a ClientDisconnectingMessage in which case
+        it is None."""
         result = []
         readyToReadSockets, (), () = select.select([self.serverSocket], [], [], 0)
         for socket in readyToReadSockets:
@@ -145,7 +146,7 @@ class ServersideClientConnections:
                 clientConnection = ServersideClientConnection(self.serverSocket, address, message)
                 self.connectionsByAddr[clientConnection.address] = clientConnection
                 self.connectionsByPlayer[clientConnection.playerId].append(clientConnection)
-                result.append( (message, clientConnection.send) )
+                result.append( (message, clientConnection) )
             elif isinstance(message, ClientDisconnectingMessage):
                 try:
                     clientConnection = self.connectionsByAddr.pop(address)
@@ -153,11 +154,11 @@ class ServersideClientConnections:
                 except KeyError:
                     # Strangely, some client we don't know tried to disconnect. SHOULD WARN
                     pass
-                result.append( (message, lambda x: None) )
+                result.append( (message, None) )
             else:
                 clientConnection = self.connectionsByAddr.get(address)
                 print(f"Client {clientConnection} sent message {message}.")
-                result.append( (message, clientConnection.send) )
+                result.append( (message, clientConnection) )
         return result
     def sendMessageToAll(self, message):
         for clientConnection in self.connectionsByAddr.values():
