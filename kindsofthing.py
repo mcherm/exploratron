@@ -173,6 +173,7 @@ class Player(Mobile):
         self.queuedEvent = None
         self.playerId = playerId
         self.numClients = 0
+        self.displayed = False
     def goToLocation(self, location, world, screenChanges):
         oldRoom = self.room
         super().goToLocation(location, world, screenChanges)

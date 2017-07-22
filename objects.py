@@ -1,6 +1,5 @@
 from kindsofthing import *
 
-# FIXME: Probably NOT what I want to do with the defaultRegion:
 defaultRegion = Region()
 
 class BrickWall(Wall):
