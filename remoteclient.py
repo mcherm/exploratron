@@ -1,12 +1,12 @@
 #
-# This is a client that simply views what is happening to the main
-# character and never sends any input.
+# This is a client that connects to a certain character.
 #
 
 import pygame
 import time
 from socket import socket, AF_INET, SOCK_DGRAM
 from exploranetworking import *
+from events import pygameKeyToKeyCode
 import select
 import random
 import images
@@ -54,13 +54,13 @@ def test():
 SERVER_ADDRESS = ("127.0.0.1", 12000)
 PLAYER_ID = "0"
 
-class ViewerClient():
-    def __init__(self):
+class RemoteClient():
+    def __init__(self, playerId):
         print(f'Test Client')
         self.clientSocket = socket(AF_INET, SOCK_DGRAM)
         self.clientSocket.settimeout(1)
 
-        self.clientSocket.sendto(JoinServerMessage(PLAYER_ID).toBytes(), SERVER_ADDRESS)
+        self.clientSocket.sendto(JoinServerMessage(playerId).toBytes(), SERVER_ADDRESS)
     def mainLoop(self):
         currentRoom = None
         display = None
@@ -68,6 +68,17 @@ class ViewerClient():
         shouldExit = False
         while not shouldExit:
             # --- Look for local events ---
+            if display is not None:
+                for pygameEvent in display.getEvents():
+                    if pygameEvent.type == pygame.QUIT:
+                        shouldExit = True
+                    elif pygameEvent.type == pygame.KEYDOWN:
+                        keyCode = pygameKeyToKeyCode.get(pygameEvent.key)
+                        if keyCode is not None:
+                            message = KeyPressedMessage(keyCode)
+                            self.clientSocket.sendto(message.toBytes(), SERVER_ADDRESS)
+                    else:
+                        raise Exception(f"pygame event type {pygameEvent.type} not supported")
 
             # --- Read from socket ---
             readyToReadSockets, (), () = select.select([self.clientSocket], [], [], 0)
@@ -91,17 +102,14 @@ class ViewerClient():
                     shouldExit = True
                 else:
                     raise Exception(f"Message type {message} not supported.")
+                
             # --- Display ---
             if currentRoom is not None:
                 if display is None:
                     display = images.PygameGridDisplay()
                     imageLibrary = images.ImageLibrary('drawntiles64')
                 display.show(currentRoom, imageLibrary)
-            if display is not None:
-                events = display.getEvents()
-                for event in events:
-                    if event.type == pygame.QUIT:
-                        shouldExit = True
+
     def exit(self):
         """This should be called after the main loop exits. It will inform the server
         that we are exiting. Use a try-finally to try very hard to make sure it is
@@ -126,11 +134,9 @@ def testDisplay():
     
 
 if __name__ == '__main__':
-    viewerClient = ViewerClient()
+    remoteClient = RemoteClient(PLAYER_ID)
     try:
-        viewerClient.mainLoop()
+        remoteClient.mainLoop()
     finally:
-        viewerClient.exit()
-
-
+        remoteClient.exit()
 

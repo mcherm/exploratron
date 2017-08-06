@@ -1,4 +1,4 @@
-from kindsofthing import *
+from kindsofthing import Thing, Mobile
 
 
 class Location:
@@ -25,12 +25,25 @@ class Cell:
             if not thing.canEnter(mobile):
                 return False
         return True
-    def doEnter(self, mobile):
+    def doEnter(self, mobile, world, screenChanges):
         """This gets called when a mobile enters into this cell. It should
         make sure that all the things in the cell that do anything when you
         enter do whatever they are supposed to."""
         for thing in self.things:
-            thing.doEnter(mobile)
+            thing.doEnter(mobile, world, screenChanges)
+    def doBump(self, mobile, world, screenChanges):
+        """This gets called when a mobile trys to enters the cell and falils. It should
+        make sure that all the things in the cell that do anything when you
+        enter do whatever they are supposed to."""
+        for thing in self.things:
+            thing.doBump(mobile, world, screenChanges)
+    def toMessageFormat(self):
+        """Returns a number (representing the single tileId in this cell)
+        OR a list of numbers (representing the stack of tiles in this cell)."""
+        if len(self.things) == 1:
+            return self.things[0].tileId
+        else:
+            return [x.tileId for x in self.things]
 
 
 class Grid:
@@ -41,6 +54,12 @@ class Grid:
         self.height = height
     def cellAt(self, x, y):
         return self.cells[y][x]
+    def toMessageFormat(self):
+        """This returns the information of what is in the grid in the form
+        of a 2-D array (list of lists) of 'cells' where a cell is EITHER
+        a number (representing the single tileId in that location) OR a
+        list of numbers (representing the stack of tiles in that location)."""
+        return [[cell.toMessageFormat() for cell in row] for row in self.cells]
 
 
 class Room:
@@ -91,4 +110,10 @@ class Room:
                     self.cellAt(x,y).addThing(mobile)
                     result.append(mobile)
             return result
+    def gridInMessageFormat(self):
+        """This returns the information of what is in the room in the form
+        of a 2-D array (list of lists) of 'cells' where a cell is EITHER
+        a number (representing the single tileId in that location) OR a
+        list of numbers (representing the stack of tiles in that location)."""
+        return self.grid.toMessageFormat()
     

@@ -1,23 +1,25 @@
 
 import random
-
-
-world = None
-
+from images import Region
 
 
 
 class Thing:
     """Represents any kind of thing in the world."""
-    def __init__(self, tileId):
-        self.tileId = tileId
+    def __init__(self, region, tileName):
+        assert isinstance(region, Region)
+        assert isinstance(tileName, str)
+        self.tileId = region.imageLibrary.idByName(tileName)
     def canEnter(self, mobile):
         """Tests whether the mobile can enter a space containing
         this thing. Returns True if it can and False if not."""
         return True
-    def doEnter(self, mobile):
+    def doEnter(self, mobile, world, screenChanges):
         """This gets called when a mobile enters the same cell as
         this thing."""
+        pass
+    def doBump(self, mobile, world, screenChanges):
+        """This gets called when a mobile bumps the cell with this thing."""
         pass
 
 
@@ -29,15 +31,15 @@ class Wall(Thing):
 
 class Door(Thing):
     """A thing that teleports you to a new location when you enter."""
-    def __init__(self, tileId, destination):
-        super().__init__(tileId)
+    def __init__(self, region, tileName, destination):
+        super().__init__(region, tileName)
         self.destination = destination
-    def doEnter(self, mobile):
-        mobile.goToLocation(self.destination)
+    def doEnter(self, mobile, world, screenChanges):
+        mobile.goToLocation(self.destination, world, screenChanges)
 
 class Trap(Thing):
     """a thing that maks you take damage"""
-    def doEnter(self, mobile):
+    def doEnter(self, mobile, world, screenChanges):
         mobile.takeDamage(1)
         
 
@@ -55,16 +57,21 @@ Kinds of things:
 """
 
 class Mobile(Thing):
-    def __init__(self, tileId, hitPoints):
-        super().__init__(tileId)
+    def __init__(self, region, tileName, hitPoints):
+        super().__init__(region, tileName)
         self.whenItCanAct = 0
         self.hitPoints=hitPoints
         self.isDead=False
+    def canEnter(self, mobile):
+        return False
+    def doBump(self, mobile, world, screenChanges):
+        """This gets called when a mobile bumps the cell with this thing."""
+        self.takeDamage(1)
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
         self.position = position
-    def moveSouth(self):
+    def moveSouth(self, world, screenChanges):
         # -- find the new location --
         oldX, oldY = self.position
         newX = oldX
@@ -80,9 +87,13 @@ class Mobile(Thing):
             self.position = (newX, newY)
             oldCell.removeThing(self)
             newCell.addThing(self)
+            screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
-            newCell.doEnter(self)
-    def moveEast(self):
+            newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
+    def moveEast(self, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX + 1
         newY = oldY 
@@ -97,9 +108,13 @@ class Mobile(Thing):
             self.position = (newX, newY)
             oldCell.removeThing(self)
             newCell.addThing(self)
+            screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
-            newCell.doEnter(self)
-    def moveWest(self):
+            newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
+    def moveWest(self, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX - 1
         newY = oldY 
@@ -114,9 +129,13 @@ class Mobile(Thing):
             self.position = (newX, newY)
             oldCell.removeThing(self)
             newCell.addThing(self)
+            screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
-            newCell.doEnter(self)
-    def moveNorth(self):
+            newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
+    def moveNorth(self, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX
         newY = oldY - 1
@@ -131,29 +150,35 @@ class Mobile(Thing):
             self.position = (newX, newY)
             oldCell.removeThing(self)
             newCell.addThing(self)
+            screenChanges.changeTwoCells(self.room, oldX, oldY, newX, newY)
             # -- let things happen --
-            newCell.doEnter(self)
-    def goToLocation(self, location):
+            newCell.doEnter(self, world, screenChanges)
+        else:
+            # -- let things happen --
+            newCell.doBump(self, world, screenChanges)
+    def goToLocation(self, location, world, screenChanges):
         """Calling this makes the player move from it's current location to
         the new location specified."""
         oldCell = self.room.cellAt(self.position[0], self.position[1])
         oldCell.removeThing(self)
         self.room = world.rooms[ location.roomNumber ]
         self.position = location.coordinates
-        newCell = self.room.cellAt(location.coordinates[0], location.coordinates[1])
+        x,y = location.coordinates
+        newCell = self.room.cellAt(x, y)
         newCell.addThing(self)
-    def takeOneStep(self, currentTime):
+        screenChanges.changeCell(self.room, x, y)
+    def takeOneStep(self, currentTime, world, screenChanges):
         randomNumber = random.randrange(4)
         if randomNumber == 0:
-            self.moveNorth()
+            self.moveNorth(world, screenChanges)
         elif randomNumber == 1:
-            self.moveSouth()
+            self.moveSouth(world, screenChanges)
         elif randomNumber == 2:
-            self.moveEast()
+            self.moveEast(world, screenChanges)
         else:
-            self.moveWest()
+            self.moveWest(world, screenChanges)
         self.whenItCanAct = currentTime + 500
-    def takeDamage (self,amount):
+    def takeDamage(self, amount):
         self.hitPoints=self.hitPoints-amount
         print(self.hitPoints)
         if self.hitPoints < 1:
@@ -161,16 +186,4 @@ class Mobile(Thing):
             print (self.isDead) 
             
     
-        
-class Player(Mobile):
-    def __init__(self, tileId, hitPoints):
-        super().__init__(tileId, hitPoints)
-        self.queuedEvent = None
-    def goToLocation(self, location):
-        oldRoom = self.room
-        super().goToLocation(location)
-        if self.room != oldRoom:
-            newMobiles = self.room.playerEntersRoom()
-            if newMobiles:
-                world.addMobiles(newMobiles)
 

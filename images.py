@@ -1,35 +1,31 @@
 
 import pygame
+import os
 
 TILE_SIZE = 64
 
-
 class ImageLibrary:
-    def __init__(self):
+    def __init__(self, subdir):
         rootDir = './img'
-        names = [
-            'drawntiles64/dirt-1',
-            'drawntiles64/dirt-1',
-            'drawntiles64/dirt-1',
-            'drawntiles64/dirt-1',
-            'drawntiles64/dirt-1',
-            'drawntiles64/stairs-down',
-            'drawntiles64/chest2',
-            'drawntiles64/wall-1',
-            'drawntiles64/doorway-1',
-            'drawntiles64/chest2',
-            'drawntiles64/chest2',
-            'drawntiles64/adventurer-1-boy',
-            'drawntiles64/angry-bee',
-            'drawntiles64/mouseman',
-            'drawntiles64/green-snake',
-          ]
         self.imageById = {}
-        for imgnum, name in enumerate(names):
-            self.imageById[imgnum] = pygame.image.load(
-                f'{rootDir}/{name}.png')
-    def lookup(self, imgnum):
+        self._idByName = {}
+        for root, dirs, files in os.walk(f'{rootDir}/{subdir}'):
+            files.sort() # important to sort them so the order is consistent
+            counter = 0
+            for file in files:
+                if file.endswith('.png'):
+                    name = f'{subdir}/{file[:-4]}'
+                    tileId = counter
+                    self._idByName[name] = tileId
+                    self.imageById[tileId] = pygame.image.load(f'{rootDir}/{name}.png')
+                    counter += 1
+    def lookupById(self, imgnum):
         return self.imageById[imgnum]
+    def idByName(self, imageName):
+        """Pass in an imageName, this returns the tileId for it, or
+        raises an exception if that imageName is not known to this
+        imageLibrary."""
+        return self._idByName[imageName]
 
     
 class PygameGridDisplay:
@@ -43,7 +39,7 @@ class PygameGridDisplay:
             for x in range(room.width):
                 cell = room.cellAt(x,y)
                 for thing in cell.things:
-                    image = imageLibrary.lookup( thing.tileId )
+                    image = imageLibrary.lookupById( thing.tileId )
                     self.screen.blit( image, (TILE_SIZE*x, TILE_SIZE*y) )
         pygame.display.flip()
     def getEvents(self):
@@ -51,3 +47,9 @@ class PygameGridDisplay:
     def quit(self):
         pygame.quit()
 
+
+class Region:
+    """Someday, this might grow into the ability to have different
+    regions with their own sets of rooms and their own image libraries."""
+    def __init__(self):
+        self.imageLibrary = ImageLibrary('drawntiles64')
