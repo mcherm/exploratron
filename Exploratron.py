@@ -2,13 +2,17 @@
 # This contains the game currently known as "Exploratron". 
 #
 
-import pygame
 import kindsofthing
-from kindsofthing import *
-from objects import *
-from images import ImageLibrary, TILE_SIZE, PygameGridDisplay
+from gamecomponents import Location
+import objects
+from players import Player, thePlayerCatalog, PlayerCatalogEntry
+from images import Region, TILE_SIZE, PygameGridDisplay
+from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
+from exploranetworking import *
+from screenchanges import ScreenChanges, SetOfEverything
 import rooms
 import time
+import random
 
 
 # ========= Start Classes for Game =========
@@ -21,104 +25,117 @@ class World:
     def __init__(self):
         self.gameOver = False
         self.rooms = rooms.rooms
-        self.mobiles = []
-        # set up player
-        self.player = Player(11,9)
-        playerRoom = self.rooms[1]
-        self.player.setLocation( playerRoom, (2,1) )
-        playerRoom.cellAt(2,1).addThing(self.player)
+        self.mobiles = [] # contains all active mobiles EXCEPT those of type Player
+        self.players = []
+        self.playerByPlayerId = {} # FIXME: Don't need map AND ALSO the list
+        self.displayedPlayer = None
+        self.playerCatalog = thePlayerCatalog
     def addMobiles(self, newMobiles):
         """Call this to add some new mobiles to the list of active
         mobiles."""
         self.mobiles.extend(newMobiles)
+    def addPlayer(self, region, playerCatalogEntry):
+        """Call this to add a new Player to the game at the specified location. The
+        playerId of this new player must be unique. It returns the newly created Player."""
+        assert isinstance(region, Region)
+        assert isinstance(playerCatalogEntry, PlayerCatalogEntry)
+        newPlayer = playerCatalogEntry.getPlayer(region)
+        assert newPlayer.playerId not in [p.playerId for p in self.players]
+        self.players.append(newPlayer)
+        self.playerByPlayerId[newPlayer.playerId] = newPlayer
+        location = playerCatalogEntry.getLocation()
+        startingRoom = self.rooms[location.roomNumber]
+        newPlayer.setLocation(startingRoom, location.coordinates)
+        startingRoom.cellAt(*location.coordinates).addThing(newPlayer)
+        return newPlayer
+    def removePlayer(self, player):
+        """Passed a player, removes it."""
+        self.players.remove(player)
+        del self.playerByPlayerId[player.playerId]
+    def getPlayer(self, playerId):
+        """Passed a playerId, this returns the given player, or raises an exception if it isn't
+        in the list of players."""
+        return self.playerByPlayerId[playerId]
+    def setDisplayedPlayer(self, playerId):
+        if self.displayedPlayer is not None:
+            self.displayedPlayer.displayed = False
+        self.displayedPlayer = self.getPlayer(playerId)
+        self.displayedPlayer.displayed = True
 
         
-class PlayerInputs:
-    def __init__(self, events):
-        self.events = events
-
         
 # ========= End Classes for Game =========
 
 
-# ========= Start Drawing Stuff =========
 
-
-
-
-
-
-# ========= End Drawing Stuff ==========
 
 # ========= Start Functions for Game =========
 
 
-def moveMobiles(world, currentTime):
+def moveMobiles(world, currentTime, screenChanges):
     """This function will cause all of the mobiles to move one step,
     updating the world accordingly."""
     for mobile in world.mobiles:
         if currentTime >= mobile.whenItCanAct:
-            mobile.takeOneStep(currentTime)
+            mobile.takeOneStep(currentTime, world, screenChanges)
     
 
 
-def isNonActionEvent(event):
-    """Retrns True if this is an event that can be processed when the
-    player does not have an action, and False otherwise."""
-    return event.type == pygame.QUIT
-    
-def isActionEvent(event):
-    """Returns true if this is an event that can only be processed when
-    the player has an action, and False otherwise."""
-    return (event.type == pygame.KEYDOWN and
-        event.key in (pygame.K_s, pygame.K_w, pygame.K_d, pygame.K_a))
 
 
-def updateWorld(world, playerInputs):
+def updateWorld(world, region, eventList, screenChanges):
     currentTime = int(time.perf_counter()*1000)
-    events = playerInputs.events
-    if events:
-        # Non-Action Events
-        for event in filter(isNonActionEvent, events):
-            if event.type == pygame.QUIT:
-                world.gameOver = True
+    # Non-Action Events
+    for event in eventList.getNonActionEvents():
+        if isinstance(event, QuitGameEvent):
+            world.gameOver = True
+        elif isinstance(event, NewPlayerAddedEvent):
+            newPlayer = world.addPlayer(region, event.playerCatalogEntry)
+            newPlayer.addClient(event.clientConnection)
+            room = newPlayer.room
+            print(f"WelcomeClientMessage to just 1 client")
+            message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+            event.clientConnection.send(message)
+            # FIXME: Should probably update screenChanges
+        else:
+            raise Exception(f'Unexpected event: {event}')
     # Action Events
-    if currentTime < world.player.whenItCanAct:
-        # Player cannot act yet
-        if (world.player.queuedEvent is None) and events:
-            # Player does not have an event queued
-            for event in filter(isActionEvent, events):
-                world.player.queuedEvent = event
-                break
-    else:
-        # Player can act now
-        eventToActOn = world.player.queuedEvent
-        # We used the value, so clear it
-        world.player.queuedEvent = None
-        if eventToActOn is None:
-            # Set eventToActOn to the FIRST action event
-            for event in filter(isActionEvent, events):
-                eventToActOn = event
-                break
-        # Now we have set eventToActOn
-        if eventToActOn is not None:
-            if eventToActOn.type == pygame.KEYDOWN:
-                if eventToActOn.key == pygame.K_s:
-                    world.player.moveSouth()
-                    world.player.whenItCanAct = currentTime + 500
-                if eventToActOn.key == pygame.K_w:
-                    world.player.moveNorth()
-                    world.player.whenItCanAct = currentTime + 500
-                if eventToActOn.key == pygame.K_d:
-                    world.player.moveEast()
-                    world.player.whenItCanAct = currentTime + 500
-                if eventToActOn.key == pygame.K_a:
-                    world.player.moveWest()
-                    world.player.whenItCanAct = currentTime + 500
+    for player in world.players:
+        if not player.isDead:
+            if currentTime < player.whenItCanAct:
+                # Player cannot act yet
+                if player.queuedEvent is None:
+                    # Player does not have an event queued
+                    player.queuedEvent = eventList.getFirstActionEvent(player.playerId)
+            else:
+                # Player can act now
+                eventToActOn = player.queuedEvent
+                # We used the value, so clear it
+                player.queuedEvent = None
+                if eventToActOn is None:
+                    # Set eventToActOn to the FIRST action event
+                    eventToActOn = eventList.getFirstActionEvent(player.playerId)
+                # Now we have set eventToActOn
+                if eventToActOn is not None:
+                    if isinstance(eventToActOn, KeyPressedEvent):
+                        if eventToActOn.keyCode == KeyCode.GO_DOWN:
+                            player.moveSouth(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
+                        if eventToActOn.keyCode == KeyCode.GO_UP:
+                            player.moveNorth(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
+                        if eventToActOn.keyCode == KeyCode.GO_RIGHT:
+                            player.moveEast(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
+                        if eventToActOn.keyCode == KeyCode.GO_LEFT:
+                            player.moveWest(world, screenChanges)
+                            player.whenItCanAct = currentTime + 500
     # Move Mobiles
-    moveMobiles(world, currentTime)
+    moveMobiles(world, currentTime, screenChanges)
     # Check for Death
     handleDeath(world)
+    # Check for GameOver
+    handleGameOver(world)
             
 
 def handleDeath(world):
@@ -128,31 +145,106 @@ def handleDeath(world):
             cell = mobile.room.cellAt(x, y)
             cell.removeThing(mobile)
             world.mobiles.remove(mobile)
-    if world.player.isDead:
-        x, y = world.player.position
-        cell = world.player.room.cellAt(x, y)
-        cell.removeThing(world.player)
+    for player in world.players:
+        if player.isDead:
+            x, y = player.position
+            cell = player.room.cellAt(x, y)
+            cell.removeThing(player)
+            world.removePlayer(player)
+
+def handleGameOver(world):
+    reasonToKeepPlaying = False
+    for player in world.players:
+        if len(player.clientConnections) > 0 or player.displayed:
+            reasonToKeepPlaying = True
+    if not reasonToKeepPlaying:
         world.gameOver = True
 
+def processClientMessages(world, clients, eventList):
+    """This function gets any messages waiting on the queue from clients.
+    If this results in new events, they will be written to the eventList."""
+    for message, clientConnection in clients.receiveMessages():
+        if isinstance(message, JoinServerMessage):
+            print(f"Got JoinServerMessage to join client {message.playerId}.")
+            # FIXME: Can be made cleaner now that there is getPlayer()
+            playersWithId = [x for x in world.players if x.playerId == message.playerId]
+            assert len(playersWithId) <= 1
+            playerCatalogEntry = world.playerCatalog.getEntryById(message.playerId)
+            if playersWithId:
+                # Such a player exists; we just add a viewer
+                player = playersWithId[0]
+                player.addClient(clientConnection)
+                room = player.room
+                print(f"WelcomeClientMessage to just 1 client")
+                message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+                clientConnection.send(message)
+            elif playerCatalogEntry is not None:
+                # No such player now, but we could add one
+                eventList.addEvent(NewPlayerAddedEvent(playerCatalogEntry, clientConnection))
+            else:
+                # No such ID. We cannot welcome this client.
+                # FIXME: Should return an error message to the client!
+                pass
+        elif isinstance(message, KeyPressedMessage):
+            eventList.addEvent(KeyPressedEvent(clientConnection.playerId, message.keyCode))
+        elif isinstance(message, ClientDisconnectingMessage):
+            player = world.getPlayer(clientConnection.playerId)
+            player.removeClient(clientConnection)
+        else:
+            raise Exception(f"Message type not supported for message {message}.")
+    
 
-def renderWorld(player, display, imageLibrary):
-    display.show(player.room, imageLibrary)
+
+def renderWorld(world, display, region, screenChanges, clients):
+    # -- Local screen --
+    display.show(world.displayedPlayer.room, region.imageLibrary)
+
+    # -- Remote clients --
+    for player in world.players:
+        if len(player.clientConnections) > 0:
+            roomSwitch = screenChanges.getRoomSwitches(player)
+            if roomSwitch is not None:
+                oldRoom, newRoom = roomSwitch
+                message = NewRoomMessage(newRoom.width, newRoom.height, newRoom.gridInMessageFormat())
+            else:
+                room = player.room
+                roomChangeSet = screenChanges.getRoomChangeSet(room)
+                if isinstance(roomChangeSet, SetOfEverything):
+                    message = RefreshRoomMessage(room.gridInMessageFormat())
+                elif len(roomChangeSet) > 0:
+                    updates = [(x,y,room.cellAt(x,y).toMessageFormat()) for (x,y) in roomChangeSet]
+                    message = UpdateRoomMessage(updates)
+                else:
+                    message = None
+            if message is not None:
+                clients.sendMessageToPlayer(player.playerId, message)
 
 
 
 def mainLoop(world):
+    screenChanges = ScreenChanges()
+    eventList = EventList()
     display = PygameGridDisplay()
-    imageLibrary = ImageLibrary()
-    player = world.player
-    while not world.gameOver:
-        renderWorld(player, display, imageLibrary)
-        playerInputs = PlayerInputs(display.getEvents())
-        updateWorld(world, playerInputs)
-    display.quit()
+    region = objects.defaultRegion
+    clients = ServersideClientConnections()
 
+    world.setDisplayedPlayer(world.players[0].playerId)
+    
+    while not world.gameOver:
+        eventList.clear()
+        screenChanges.clear()
+        eventList.addPygameEvents(display.getEvents(), world.displayedPlayer.playerId)
+        processClientMessages(world, clients, eventList)
+        updateWorld(world, region, eventList, screenChanges)
+        renderWorld(world, display, region, screenChanges, clients)
+    display.quit()
+    clients.sendMessageToAll(ClientShouldExitMessage())
+    
 
 
 # ========= End Functions for Game =========
 
-kindsofthing.world = World()
-mainLoop(kindsofthing.world)
+world = World()
+playerCatalogEntry = random.choice(world.playerCatalog.entries)
+world.addPlayer(objects.defaultRegion, playerCatalogEntry)
+mainLoop(world)
