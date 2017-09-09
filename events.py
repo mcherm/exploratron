@@ -7,6 +7,10 @@ class KeyCode:
     GO_DOWN = 2
     GO_LEFT = 3
     GO_RIGHT = 4
+    MOVE_CAMERA_UP = 5
+    MOVE_CAMERA_DOWN = 6
+    MOVE_CAMERA_LEFT = 7
+    MOVE_CAMERA_RIGHT = 8
 
     
 
@@ -15,6 +19,21 @@ pygameKeyToKeyCode = {
     pygame.K_s: KeyCode.GO_DOWN,
     pygame.K_a: KeyCode.GO_LEFT,
     pygame.K_d: KeyCode.GO_RIGHT,
+    pygame.K_UP: KeyCode.MOVE_CAMERA_UP,
+    pygame.K_DOWN: KeyCode.MOVE_CAMERA_DOWN,
+    pygame.K_LEFT: KeyCode.MOVE_CAMERA_LEFT,
+    pygame.K_RIGHT: KeyCode.MOVE_CAMERA_RIGHT,
+}
+
+keyCodeToIsAction = {
+    KeyCode.GO_UP: True,
+    KeyCode.GO_DOWN: True,
+    KeyCode.GO_LEFT: True,
+    KeyCode.GO_RIGHT: True,
+    KeyCode.MOVE_CAMERA_UP: False,
+    KeyCode.MOVE_CAMERA_DOWN: False,
+    KeyCode.MOVE_CAMERA_LEFT: False,
+    KeyCode.MOVE_CAMERA_RIGHT: False,
 }
 
 
@@ -47,7 +66,7 @@ class KeyPressedEvent(PlayerEvent):
         super().__init__(playerId)
         self.keyCode = keyCode
     def isActionEvent(self):
-        return True
+        return keyCodeToIsAction[self.keyCode]
 
 class ClientConnectEvent(PlayerEvent):
     """An event where a new client is connecting to a specific player."""
