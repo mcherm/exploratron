@@ -43,6 +43,10 @@ class Trap(Thing):
         mobile.takeDamage(1)
         
 
+class Item(Thing):
+    """A parent class for any Thing that can be put in an inventory."""
+    pass
+
 
 """
 Kinds of things:
@@ -60,8 +64,9 @@ class Mobile(Thing):
     def __init__(self, region, tileName, hitPoints):
         super().__init__(region, tileName)
         self.whenItCanAct = 0
-        self.hitPoints=hitPoints
-        self.isDead=False
+        self.hitPoints = hitPoints
+        self.isDead = False
+        self.inventory = []
     def canEnter(self, mobile):
         return False
     def doBump(self, mobile, world, screenChanges):
@@ -183,7 +188,27 @@ class Mobile(Thing):
         print(self.hitPoints)
         if self.hitPoints < 1:
             self.isDead = True
-            print (self.isDead) 
+            print (self.isDead)
+    def receiveItem(self, item):
+        """This is called to potentially give an item to a mobile.
+        If the item is successfully put in the mobile's inventory
+        this returns True, if not it returns False."""
+        assert isinstance(item, Item)
+        self.inventory.append(item)
+        return True
+    def pickUpItem(self):
+        """This makes the mobile attempt to pick up the top item
+        in the space the mobile occupies. Picking it up might
+        succeed or it might not."""
+        cell = self.room.cellAt(self.position[0], self.position[1])
+        itemsInCell = [x for x in cell.things if isinstance(x, Item)]
+        if itemsInCell:
+            topItem = itemsInCell[-1]
+            if isinstance(topItem, Item):
+                iGotIt = self.receiveItem(topItem)
+                if iGotIt:
+                    cell.removeThing(topItem)
+            
             
     
 

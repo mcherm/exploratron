@@ -1,4 +1,4 @@
-from kindsofthing import Region, Thing, Wall, Door, Trap, Mobile
+from kindsofthing import Region, Thing, Wall, Door, Trap, Mobile, Item
 
 defaultRegion = Region()
 
@@ -41,4 +41,8 @@ class MouseMan(Mobile):
 class SnakeTrap(Trap):
     def __init__(self):
         super().__init__(defaultRegion, 'drawntiles64/green-snake')
+
+class Potion(Item):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/potion-blue")
 

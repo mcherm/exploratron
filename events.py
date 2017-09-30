@@ -7,6 +7,7 @@ class KeyCode:
     GO_DOWN = 2
     GO_LEFT = 3
     GO_RIGHT = 4
+    PICK_UP = 5
 
     
 
@@ -15,6 +16,7 @@ pygameKeyToKeyCode = {
     pygame.K_s: KeyCode.GO_DOWN,
     pygame.K_a: KeyCode.GO_LEFT,
     pygame.K_d: KeyCode.GO_RIGHT,
+    pygame.K_q: KeyCode.PICK_UP,
 }
 
 

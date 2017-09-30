@@ -26,6 +26,7 @@ room0 = Room(
     {
         (1,1): Chest(),
         (5,3): Chest(),
+        (1,2): Potion(),
     },
     {
         (5,1): GiantBee(),
