@@ -92,6 +92,8 @@ class Room:
                     for thing in thingOrThings:
                         self.cellAt(x,y).addThing(thing)
     def cellAt(self, x, y):
+        assert 0 <= x < self.width
+        assert 0 <= y < self.height
         return self.grid.cellAt(x,y)
     def playerEntersRoom(self):
         """The Game will call this when a player enters the room. The first

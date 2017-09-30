@@ -30,22 +30,67 @@ class ImageLibrary:
     
 class PygameGridDisplay:
     def __init__(self):
-        self.screen = pygame.display.set_mode( (1024,768) )
+        SCREEN_WIDTH_IN_TILES = 16
+        SCREEN_HEIGHT_IN_TILES = 11
+        self.camera = Camera(SCREEN_WIDTH_IN_TILES, SCREEN_HEIGHT_IN_TILES)
+        self.screen = pygame.display.set_mode(
+            (SCREEN_WIDTH_IN_TILES*TILE_SIZE, SCREEN_HEIGHT_IN_TILES*TILE_SIZE) )
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
     def show(self, room, imageLibrary):
         self.screen.fill( (0,0,0) )
-        for y in range(room.height):
-            for x in range(room.width):
-                cell = room.cellAt(x,y)
+        screenWidth, screenHeight = self.camera.screenWidthAndHeight
+        for screenY in range(min(screenHeight, room.height)):
+            for screenX in range(min(screenWidth, room.width)):
+                offsetX, offsetY = self.camera.offset
+                cell = room.cellAt(screenX + offsetX, screenY + offsetY)
                 for thing in cell.things:
                     image = imageLibrary.lookupById( thing.tileId )
-                    self.screen.blit( image, (TILE_SIZE*x, TILE_SIZE*y) )
+                    self.screen.blit( image, (TILE_SIZE*screenX, TILE_SIZE*screenY) )
         pygame.display.flip()
     def getEvents(self):
         return pygame.event.get()
     def quit(self):
         pygame.quit()
+
+
+class Camera:
+    def __init__(self, screenWidth, screenHeight):
+        self.screenWidthAndHeight = screenWidth, screenHeight
+        self.roomWidthAndHeight = 0,0
+        self.offset = 0,0
+    def newRoom(self, room):
+        self.roomWidthAndHeight = room.width, room.height
+        self.offset = 0,0
+    def moveCameraSouth(self):
+        x,y = self.offset
+        offsetY = self.offset[1]
+        screenY = self.screenWidthAndHeight[1]
+        roomY = self.roomWidthAndHeight[1]
+        if roomY > screenY + offsetY:
+            self.offset = x,y+1
+    def moveCameraNorth(self):
+        x,y = self.offset
+        offsetY = self.offset[1]
+        screenY = self.screenWidthAndHeight[1]
+        roomY = self.roomWidthAndHeight[1]
+        if offsetY > 0:
+            self.offset = x,y-1
+    def moveCameraEast(self):
+        x,y = self.offset
+        offsetX = self.offset[0]
+        screenX = self.screenWidthAndHeight[0]
+        roomX = self.roomWidthAndHeight[0]
+        if roomX > screenX + offsetX:
+            self.offset = x+1,y
+    def moveCameraWest(self):
+        x,y = self.offset
+        offsetX = self.offset[0]
+        screenX = self.screenWidthAndHeight[0]
+        roomX = self.roomWidthAndHeight[0]
+        if offsetX > 0:
+            self.offset = x-1,y
+
 
 
 class Region:

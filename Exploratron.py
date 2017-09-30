@@ -5,7 +5,7 @@
 import kindsofthing
 from gamecomponents import Location
 import objects
-from players import Player, thePlayerCatalog, PlayerCatalogEntry
+from players import Player, thePlayerCatalog, PlayerCatalogEntry, players_display
 from images import Region, TILE_SIZE, PygameGridDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
@@ -83,7 +83,7 @@ def moveMobiles(world, currentTime, screenChanges):
 
 
 
-def updateWorld(world, region, eventList, screenChanges):
+def updateWorld(world, region, eventList, screenChanges, camera):
     currentTime = int(time.perf_counter()*1000)
     # Non-Action Events
     for event in eventList.getNonActionEvents():
@@ -97,6 +97,16 @@ def updateWorld(world, region, eventList, screenChanges):
             message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
             event.clientConnection.send(message)
             # FIXME: Should probably update screenChanges
+        elif isinstance(event, KeyPressedEvent):
+            # FIXME: Need to updte ScreenChanges about how the camera moved.
+            if event.keyCode == KeyCode.MOVE_CAMERA_UP:
+                camera.moveCameraNorth()
+            elif event.keyCode == KeyCode.MOVE_CAMERA_DOWN:
+                camera.moveCameraSouth()
+            elif event.keyCode == KeyCode.MOVE_CAMERA_LEFT:
+                camera.moveCameraWest()
+            elif event.keyCode == KeyCode.MOVE_CAMERA_RIGHT:
+                camera.moveCameraEast()
         else:
             raise Exception(f'Unexpected event: {event}')
     # Action Events
@@ -121,16 +131,16 @@ def updateWorld(world, region, eventList, screenChanges):
                         if eventToActOn.keyCode == KeyCode.GO_DOWN:
                             player.moveSouth(world, screenChanges)
                             player.whenItCanAct = currentTime + 400
-                        if eventToActOn.keyCode == KeyCode.GO_UP:
+                        elif eventToActOn.keyCode == KeyCode.GO_UP:
                             player.moveNorth(world, screenChanges)
                             player.whenItCanAct = currentTime + 400
-                        if eventToActOn.keyCode == KeyCode.GO_RIGHT:
+                        elif eventToActOn.keyCode == KeyCode.GO_RIGHT:
                             player.moveEast(world, screenChanges)
                             player.whenItCanAct = currentTime + 400
-                        if eventToActOn.keyCode == KeyCode.GO_LEFT:
+                        elif eventToActOn.keyCode == KeyCode.GO_LEFT:
                             player.moveWest(world, screenChanges)
                             player.whenItCanAct = currentTime + 400
-                        if eventToActOn.keyCode == KeyCode.PICK_UP:
+                        elif eventToActOn.keyCode == KeyCode.PICK_UP:
                             player.pickUpItem()
                             player.whenItCanAct = currentTime + 400
     # Move Mobiles
@@ -227,7 +237,7 @@ def renderWorld(world, display, region, screenChanges, clients):
 def mainLoop(world):
     screenChanges = ScreenChanges()
     eventList = EventList()
-    display = PygameGridDisplay()
+    display = players_display
     region = objects.defaultRegion
     clients = ServersideClientConnections()
 
@@ -238,7 +248,7 @@ def mainLoop(world):
         screenChanges.clear()
         eventList.addPygameEvents(display.getEvents(), world.displayedPlayer.playerId)
         processClientMessages(world, clients, eventList)
-        updateWorld(world, region, eventList, screenChanges)
+        updateWorld(world, region, eventList, screenChanges, display.camera)        
         renderWorld(world, display, region, screenChanges, clients)
     display.quit()
     clients.sendMessageToAll(ClientShouldExitMessage())
