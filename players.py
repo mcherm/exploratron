@@ -7,6 +7,11 @@ from kindsofthing import Mobile
 from gamecomponents import Location
 
 
+# FIXME: This next line is bad. Michael should fix it
+from images import PygameGridDisplay
+players_display = PygameGridDisplay()
+
+
 
 class Player(Mobile):
     def __init__(self, region, tileName, hitPoints, playerId):
@@ -19,6 +24,9 @@ class Player(Mobile):
         oldRoom = self.room
         super().goToLocation(location, world, screenChanges)
         if self.room != oldRoom:
+            if self.displayed:
+                players_display.camera.newRoom(self.room)
+            # FIXME: That worked if the main player changed rooms, what about other players?
             screenChanges.playerSwitchedRooms(self, oldRoom, self.room)
             newMobiles = self.room.playerEntersRoom()
             if newMobiles:
