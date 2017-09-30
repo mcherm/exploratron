@@ -42,7 +42,19 @@ class SnakeTrap(Trap):
     def __init__(self):
         super().__init__(defaultRegion, 'drawntiles64/green-snake')
 
-class Potion(Item):
+class BluePotion(Item):
     def __init__(self):
         super().__init__(defaultRegion, "drawntiles64/potion-blue")
+
+class Sword(Item):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/sword")
+
+class Spear(Item):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/spear")
+
+class Wand(Item):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/wand")
 
