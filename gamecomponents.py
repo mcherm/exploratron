@@ -1,4 +1,5 @@
-from kindsofthing import Thing, Mobile
+from kindsofthing import Thing
+from mobile import Mobile
 
 
 class Location:
