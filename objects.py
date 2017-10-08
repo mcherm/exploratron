@@ -1,4 +1,5 @@
-from kindsofthing import Region, Thing, Wall, Door, Trap, Mobile, Item
+from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon
+from mobile import Mobile 
 
 defaultRegion = Region()
 
@@ -46,13 +47,13 @@ class BluePotion(Item):
     def __init__(self):
         super().__init__(defaultRegion, "drawntiles64/potion-blue")
 
-class Sword(Item):
+class Sword(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/sword")
+        super().__init__(defaultRegion, "drawntiles64/sword", 2)
 
-class Spear(Item):
+class Spear(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/spear")
+        super().__init__(defaultRegion, "drawntiles64/spear", 3)
 
 class Wand(Item):
     def __init__(self):

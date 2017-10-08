@@ -3,9 +3,8 @@
 # PlayerCatalog.
 #
 
-from kindsofthing import Mobile
 from gamecomponents import Location
-
+from mobile import Mobile
 
 # FIXME: This next line is bad. Michael should fix it
 from images import PygameGridDisplay
