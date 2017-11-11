@@ -5,8 +5,8 @@
 import kindsofthing
 from gamecomponents import Location
 import objects
-from players import Player, thePlayerCatalog, PlayerCatalogEntry, players_display
-from images import Region
+from players import Player, thePlayerCatalog, PlayerCatalogEntry
+from images import Region, PygameDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
@@ -212,6 +212,10 @@ def processClientMessages(world, clients, eventList):
 
 def renderWorld(world, display, region, screenChanges, clients):
     # -- Local screen --
+    localRoomSwitches = screenChanges.getRoomSwitches(world.displayedPlayer)
+    if localRoomSwitches is not None:
+        oldRoom, newRoom = localRoomSwitches
+        display.uiState.newRoom(newRoom)
     display.show(world.displayedPlayer.room, region.imageLibrary)
 
     # -- Remote clients --
@@ -239,7 +243,7 @@ def renderWorld(world, display, region, screenChanges, clients):
 def mainLoop(world):
     screenChanges = ScreenChanges()
     eventList = EventList()
-    display = players_display
+    display = PygameDisplay()
     region = objects.defaultRegion
     clients = ServersideClientConnections()
 
