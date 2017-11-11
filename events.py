@@ -12,6 +12,7 @@ class KeyCode:
     MOVE_CAMERA_LEFT = 7
     MOVE_CAMERA_RIGHT = 8
     PICK_UP = 9
+    TOGGLE_INVENTORY = 10
 
     
 
@@ -25,6 +26,7 @@ pygameKeyToKeyCode = {
     pygame.K_LEFT: KeyCode.MOVE_CAMERA_LEFT,
     pygame.K_RIGHT: KeyCode.MOVE_CAMERA_RIGHT,
     pygame.K_q: KeyCode.PICK_UP,
+    pygame.K_i: KeyCode.TOGGLE_INVENTORY,
 }
 
 keyCodeToIsAction = {
@@ -37,6 +39,7 @@ keyCodeToIsAction = {
     KeyCode.MOVE_CAMERA_LEFT: False,
     KeyCode.MOVE_CAMERA_RIGHT: False,
     KeyCode.PICK_UP: True,
+    KeyCode.TOGGLE_INVENTORY: False,
 }
 
 

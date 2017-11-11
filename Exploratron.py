@@ -6,7 +6,7 @@ import kindsofthing
 from gamecomponents import Location
 import objects
 from players import Player, thePlayerCatalog, PlayerCatalogEntry, players_display
-from images import Region, TILE_SIZE, PygameGridDisplay
+from images import Region
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
@@ -17,7 +17,7 @@ import random
 
 # ========= Start Classes for Game =========
 
-    
+
 
 
 class World:
@@ -83,7 +83,7 @@ def moveMobiles(world, currentTime, screenChanges):
 
 
 
-def updateWorld(world, region, eventList, screenChanges, camera):
+def updateWorld(world, region, eventList, screenChanges, uiState):
     currentTime = int(time.perf_counter()*1000)
     # Non-Action Events
     for event in eventList.getNonActionEvents():
@@ -98,15 +98,17 @@ def updateWorld(world, region, eventList, screenChanges, camera):
             event.clientConnection.send(message)
             # FIXME: Should probably update screenChanges
         elif isinstance(event, KeyPressedEvent):
-            # FIXME: Need to updte ScreenChanges about how the camera moved.
+            # FIXME: Need to update ScreenChanges about how the camera moved.
             if event.keyCode == KeyCode.MOVE_CAMERA_UP:
-                camera.moveCameraNorth()
+                uiState.moveCameraNorth()
             elif event.keyCode == KeyCode.MOVE_CAMERA_DOWN:
-                camera.moveCameraSouth()
+                uiState.moveCameraSouth()
             elif event.keyCode == KeyCode.MOVE_CAMERA_LEFT:
-                camera.moveCameraWest()
+                uiState.moveCameraWest()
             elif event.keyCode == KeyCode.MOVE_CAMERA_RIGHT:
-                camera.moveCameraEast()
+                uiState.moveCameraEast()
+            elif event.keyCode == KeyCode.TOGGLE_INVENTORY:
+                uiState.toggleInventory()
         else:
             raise Exception(f'Unexpected event: {event}')
     # Action Events
@@ -242,13 +244,14 @@ def mainLoop(world):
     clients = ServersideClientConnections()
 
     world.setDisplayedPlayer(world.players[0].playerId)
+    display.setDisplayedPlayer(world.players[0])
     
     while not world.gameOver:
         eventList.clear()
         screenChanges.clear()
         eventList.addPygameEvents(display.getEvents(), world.displayedPlayer.playerId)
         processClientMessages(world, clients, eventList)
-        updateWorld(world, region, eventList, screenChanges, display.camera)        
+        updateWorld(world, region, eventList, screenChanges, display.uiState)        
         renderWorld(world, display, region, screenChanges, clients)
     display.quit()
     clients.sendMessageToAll(ClientShouldExitMessage())
