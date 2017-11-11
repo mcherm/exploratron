@@ -13,10 +13,12 @@ dr2 = WoodenDoor(Location(0, (2,0)))
 dr3 = WoodenDoor(Location(3, (0,1)))
 dr4 = WoodenDoor(Location(2, (11,1)))
 dr5 = WoodenDoor(Location(4, (1,1)))
-dr6 = WoodenDoor(Location(3,(6,6)))
-#dr7 = WoodenDoor(Location(
+dr6 = WoodenDoor(Location(3, (6,6)))
+dr7 = WoodenDoor(Location(5, (0,1)))
+dr8 = WoodenDoor(Location(6, (0,1)))
+dr9 = WoodenDoor(Location(5, (6,6)))
+d10 = WoodenDoor(Location(4, (10,12)))
 sdr = InnerSecretDoor()
-
 
 room0 = Room(
     [
@@ -101,7 +103,7 @@ room4 = Room(
         [bkw,drt,drt,drt,drt,drt,bkw,bkw,bkw,bkw,bkw],
         [bkw,drt,bkw,bkw,drt,bkw,drt,drt,drt,bkw,bkw],
         [bkw,drt,drt,bkw,drt,bkw,drt,bkw,bkw,bkw,bkw],
-        [bkw,bkw,drt,bkw,drt,drt,drt,drt,drt,drt,bkw],
+        [bkw,bkw,drt,bkw,drt,drt,drt,drt,drt,drt,dr7],
         [bkw,bkw,bkw,bkw,bkw,bkw,bkw,bkw,bkw,bkw,bkw],
     ],
     {
@@ -111,6 +113,41 @@ room4 = Room(
 )
 
 
+room5 = Room(
+    [
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [d10, drt, drt, drt, drt, drt, bkw],
+        [bkw, bkw, drt, bkw, bkw, drt, bkw],
+        [bkw, bkw, drt, drt, drt, drt, bkw],
+        [bkw, bkw, drt, bkw, bkw, drt, bkw],
+        [bkw, bkw, drt, drt, drt, bkw, bkw],
+        [bkw, drt, drt, bkw, drt, drt, dr8],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
+    {
+        (4,5): Wand(),
+    }
+)
 
 
-rooms = [room0, room1, room2, room3, room4]
+room6 = Room(
+    [
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [dr9, drt, drt, drt, drt, drt, bkw],
+        [bkw, drt, bkw, bkw, bkw, drt, bkw],
+        [bkw, drt, drt, bkw, drt, drt, bkw],
+        [bkw, bkw, drt, bkw, bkw, drt, bkw],
+        [bkw, bkw, drt, bkw, drt, drt, bkw],
+        [bkw, bkw, drt, drt, bkw, bkw, bkw],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
+    {
+        (4,5): SnakeTrap(),
+    }
+)
+
+
+
+
+
+rooms = [room0, room1, room2, room3, room4, room5, room6]
