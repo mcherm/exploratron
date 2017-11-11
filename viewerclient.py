@@ -47,7 +47,7 @@ def test():
     msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
     mockRoom = MockRoom(msg1)
     imageLibrary = images.ImageLibrary()
-    display = images.PygameGridDisplay()
+    display = images.PygameDisplay()
     display.show(mockRoom, imageLibrary)
 #-----------------------
     
@@ -94,7 +94,7 @@ class ViewerClient():
             # --- Display ---
             if currentRoom is not None:
                 if display is None:
-                    display = images.PygameGridDisplay()
+                    display = images.PygameDisplay()
                     imageLibrary = images.ImageLibrary('drawntiles64')
                 display.show(currentRoom, imageLibrary)
             if display is not None:
@@ -113,7 +113,7 @@ def testDisplay():
     msg = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
     room = MockRoom(msg)
     
-    display = images.PygameGridDisplay()
+    display = images.PygameDisplay()
     imageLibrary = images.ImageLibrary()
     display.show(room, imageLibrary)
     timeToQuit = False

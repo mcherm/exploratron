@@ -32,33 +32,80 @@ class PygameGridDisplay:
     def __init__(self):
         SCREEN_WIDTH_IN_TILES = 16
         SCREEN_HEIGHT_IN_TILES = 11
-        self.camera = Camera(SCREEN_WIDTH_IN_TILES, SCREEN_HEIGHT_IN_TILES)
+        self.uiState = UIState(SCREEN_WIDTH_IN_TILES, SCREEN_HEIGHT_IN_TILES)
         self.screen = pygame.display.set_mode(
             (SCREEN_WIDTH_IN_TILES*TILE_SIZE, SCREEN_HEIGHT_IN_TILES*TILE_SIZE) )
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
     def show(self, room, imageLibrary):
         self.screen.fill( (0,0,0) )
-        screenWidth, screenHeight = self.camera.screenWidthAndHeight
+        screenWidth, screenHeight = self.uiState.screenWidthAndHeight
         for screenY in range(min(screenHeight, room.height)):
             for screenX in range(min(screenWidth, room.width)):
-                offsetX, offsetY = self.camera.offset
+                offsetX, offsetY = self.uiState.offset
                 cell = room.cellAt(screenX + offsetX, screenY + offsetY)
                 for thing in cell.things:
                     image = imageLibrary.lookupById( thing.tileId )
                     self.screen.blit( image, (TILE_SIZE*screenX, TILE_SIZE*screenY) )
-        pygame.display.flip()
     def getEvents(self):
         return pygame.event.get()
     def quit(self):
         pygame.quit()
 
 
-class Camera:
-    def __init__(self, screenWidth, screenHeight):
-        self.screenWidthAndHeight = screenWidth, screenHeight
+
+class PygameOverlayDisplay:
+    """This manages rendering UI components in the display."""
+    def __init__(self, surface):
+        self.surface = surface
+    def show(self, uiState):
+        if uiState.showInventory:
+            screenWidth, screenHeight = self.surface.get_size()
+            LIGHT_GREY = (120,120,120)
+            BORDER = 3
+            inventoryRegion = pygame.Rect(0, 0, TILE_SIZE + 2*BORDER, screenHeight)
+            inventoryRegion.centerx = screenWidth / 2
+            self.surface.fill(LIGHT_GREY, inventoryRegion)
+
+
+class PygameDisplay:
+    """This is an object which will render the game, using the pygame library.
+    It has two basic layers: a PygameGridDisplay which renders the room you
+    are in, and an PygameOverlayDisplay which shows UI components over top
+    of the grid."""
+    def __init__(self):
+        self.gridDisplay = PygameGridDisplay()
+        # FIXME: The surface should be owned by the PygameDisplay, not the GridDisplay.
+        self.overlayDisplay = PygameOverlayDisplay(self.gridDisplay.screen)
+    @property
+    def uiState(self):
+        return self.gridDisplay.uiState # Should move uiState to PygameDisplay, not GridDisplay
+    def show(self, room, imageLibrary):
+        self.gridDisplay.show(room, imageLibrary)
+        self.overlayDisplay.show(self.gridDisplay.uiState)
+        pygame.display.flip()
+    def setDisplayedPlayer(self, player):
+        self.uiState.setDisplayedPlayer(player)
+    def getEvents(self):
+        return pygame.event.get()
+    def quit(self):
+        pygame.quit()
+
+
+
+class UIState:
+    """This class contains information about the current state of controls that
+    make up the UI. That includes, for instance, the camera position."""
+    def __init__(self, initialScreenWidth, initialScreenHeight, player=None):
+        """Initialize a UIState. Caller must specify which player is displayed.
+        initial screen width and height are measured in TILES, not pixels."""
+        self.player = player
+        self.screenWidthAndHeight = initialScreenWidth, initialScreenHeight
         self.roomWidthAndHeight = 0,0
         self.offset = 0,0
+        self.showInventory = False
+    def setDisplayedPlayer(self, player):
+        self.player = player
     def newRoom(self, room):
         self.roomWidthAndHeight = room.width, room.height
         self.offset = 0,0
@@ -90,6 +137,8 @@ class Camera:
         roomX = self.roomWidthAndHeight[0]
         if offsetX > 0:
             self.offset = x-1,y
+    def toggleInventory(self):
+        self.showInventory = not self.showInventory
 
 
 
