@@ -6,10 +6,6 @@
 from gamecomponents import Location
 from mobile import Mobile
 
-# FIXME: This next line is bad. Michael should fix it
-from images import PygameDisplay
-players_display = PygameDisplay()
-
 
 
 class Player(Mobile):
@@ -23,9 +19,6 @@ class Player(Mobile):
         oldRoom = self.room
         super().goToLocation(location, world, screenChanges)
         if self.room != oldRoom:
-            if self.displayed:
-                players_display.uiState.newRoom(self.room)
-            # FIXME: That worked if the main player changed rooms, what about other players?
             screenChanges.playerSwitchedRooms(self, oldRoom, self.room)
             newMobiles = self.room.playerEntersRoom()
             if newMobiles:
