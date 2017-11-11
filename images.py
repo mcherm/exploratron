@@ -58,7 +58,7 @@ class PygameOverlayDisplay:
     """This manages rendering UI components in the display."""
     def __init__(self, surface):
         self.surface = surface
-    def show(self, uiState):
+    def show(self, uiState, imageLibrary):
         if uiState.showInventory:
             screenWidth, screenHeight = self.surface.get_size()
             LIGHT_GREY = (120,120,120)
@@ -66,6 +66,15 @@ class PygameOverlayDisplay:
             inventoryRegion = pygame.Rect(0, 0, TILE_SIZE + 2*BORDER, screenHeight)
             inventoryRegion.centerx = screenWidth / 2
             self.surface.fill(LIGHT_GREY, inventoryRegion)
+            items = uiState.player.inventory
+            itemXPos = inventoryRegion.left + BORDER
+            for itemNum, item in enumerate(items):
+                itemYPos = inventoryRegion.top + BORDER + itemNum * (TILE_SIZE + BORDER)
+                if itemYPos + TILE_SIZE + BORDER > inventoryRegion.bottom:
+                    # can't fit any more on the screen
+                    break
+                image = imageLibrary.lookupById( item.tileId )
+                self.surface.blit( image, (itemXPos, itemYPos))
 
 
 class PygameDisplay:
@@ -82,7 +91,7 @@ class PygameDisplay:
         return self.gridDisplay.uiState # Should move uiState to PygameDisplay, not GridDisplay
     def show(self, room, imageLibrary):
         self.gridDisplay.show(room, imageLibrary)
-        self.overlayDisplay.show(self.gridDisplay.uiState)
+        self.overlayDisplay.show(self.gridDisplay.uiState, imageLibrary)
         pygame.display.flip()
     def setDisplayedPlayer(self, player):
         self.uiState.setDisplayedPlayer(player)
@@ -138,7 +147,11 @@ class UIState:
         if offsetX > 0:
             self.offset = x-1,y
     def toggleInventory(self):
-        self.showInventory = not self.showInventory
+        if self.player:
+            self.showInventory = not self.showInventory
+        else:
+            # There is no player, so we can't show inventory
+            self.showInventory = False
 
 
 
