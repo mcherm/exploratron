@@ -1,14 +1,23 @@
 from kindsofthing import Thing, Item, Weapon
 import random
 
+class Stats:
+    def __init__(self):
+        """Create a new Stats, with all stats set to 0."""
+        self.strength = 0
+        self.speed = 0
+        self.health = 0
+
+
 
 class Mobile(Thing):
-    def __init__(self, region, tileName, hitPoints):
+    def __init__(self, region, tileName, health):
         super().__init__(region, tileName)
         self.whenItCanAct = 0
-        self.hitPoints = hitPoints
         self.isDead = False
         self.inventory = []
+        self.stats = Stats()
+        self.stats.health = health
     def canEnter(self, mobile):
         return False
     def doBump(self, mobile, world, screenChanges):
@@ -138,9 +147,9 @@ class Mobile(Thing):
             self.moveWest(world, screenChanges)
         self.whenItCanAct = currentTime + 500
     def takeDamage(self, amount):
-        self.hitPoints=self.hitPoints-amount
-        print(self.hitPoints)
-        if self.hitPoints < 1:
+        self.stats.health = self.stats.health-amount
+        print(self.stats.health)
+        if self.stats.health < 1:
             self.isDead = True
             print (self.isDead)
     def receiveItem(self, item):
