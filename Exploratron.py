@@ -132,19 +132,19 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
                     if isinstance(eventToActOn, KeyPressedEvent):
                         if eventToActOn.keyCode == KeyCode.GO_DOWN:
                             player.moveSouth(world, screenChanges)
-                            player.whenItCanAct = currentTime + 400
+                            player.whenItCanAct = currentTime + player.timeToWait()
                         elif eventToActOn.keyCode == KeyCode.GO_UP:
                             player.moveNorth(world, screenChanges)
-                            player.whenItCanAct = currentTime + 400
+                            player.whenItCanAct = currentTime + player.timeToWait()
                         elif eventToActOn.keyCode == KeyCode.GO_RIGHT:
                             player.moveEast(world, screenChanges)
-                            player.whenItCanAct = currentTime + 400
+                            player.whenItCanAct = currentTime + player.timeToWait()
                         elif eventToActOn.keyCode == KeyCode.GO_LEFT:
                             player.moveWest(world, screenChanges)
-                            player.whenItCanAct = currentTime + 400
+                            player.whenItCanAct = currentTime + player.timeToWait()
                         elif eventToActOn.keyCode == KeyCode.PICK_UP:
                             player.pickUpItem()
-                            player.whenItCanAct = currentTime + 400
+                            player.whenItCanAct = currentTime + player.timeToWait()
     # Move Mobiles
     moveMobiles(world, currentTime, screenChanges)
     # Check for Death

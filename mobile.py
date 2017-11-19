@@ -18,6 +18,7 @@ class Mobile(Thing):
         self.inventory = []
         self.stats = Stats()
         self.stats.health = health
+        self.stats.speed = 5
     def canEnter(self, mobile):
         return False
     def doBump(self, mobile, world, screenChanges):
@@ -27,6 +28,9 @@ class Mobile(Thing):
             pass
         else:
             self.takeDamage(wieldedWeapon.damage)
+    def timeToWait(self):
+        timeToWait = (500 - (self.stats.speed) * 20)
+        return timeToWait
     def getWieldedWeapon(self):
         """This returns the weapon that the mobile is wielding, or it
         returns None if the mobile is not wielding any weapon."""
@@ -145,7 +149,7 @@ class Mobile(Thing):
             self.moveEast(world, screenChanges)
         else:
             self.moveWest(world, screenChanges)
-        self.whenItCanAct = currentTime + 500
+        self.whenItCanAct = currentTime + self.timeToWait()
     def takeDamage(self, amount):
         self.stats.health = self.stats.health-amount
         print(self.stats.health)
