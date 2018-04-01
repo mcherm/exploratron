@@ -4,7 +4,7 @@
 
 import pygame
 from exploranetworking import *
-from events import pygameKeyToKeyCode
+from events import pygameKeyToKeyCode, KeyCode
 import select
 import images
 
@@ -72,8 +72,23 @@ class RemoteClient():
                     elif pygameEvent.type == pygame.KEYDOWN:
                         keyCode = pygameKeyToKeyCode.get(pygameEvent.key)
                         if keyCode is not None:
-                            message = KeyPressedMessage(keyCode)
-                            self.clientSocket.sendto(message.toBytes(), SERVER_ADDRESS)
+                            if keyCode == KeyCode.MOVE_CAMERA_UP:
+                                print("Trying to move camera UP") # FIXME: Remove
+                                display.uiState.moveCameraNorth()
+                            elif keyCode == KeyCode.MOVE_CAMERA_DOWN:
+                                print("Trying to move camera DOWN") # FIXME: Remove
+                                display.uiState.moveCameraSouth()
+                            elif keyCode == KeyCode.MOVE_CAMERA_LEFT:
+                                print("Trying to move camera LEFT") # FIXME: Remove
+                                display.uiState.moveCameraWest()
+                            elif keyCode == KeyCode.MOVE_CAMERA_RIGHT:
+                                print("Trying to move camera RIGHT") # FIXME: Remove
+                                display.uiState.moveCameraEast()
+                            elif keyCode == KeyCode.TOGGLE_INVENTORY:
+                                display.uiState.toggleInventory()
+                            else:
+                                message = KeyPressedMessage(keyCode)
+                                self.clientSocket.sendto(message.toBytes(), SERVER_ADDRESS)
                     else:
                         raise Exception(f"pygame event type {pygameEvent.type} not supported")
 
@@ -85,9 +100,14 @@ class RemoteClient():
                 if isinstance(message, WelcomeClientMessage):
                     print(f"Server sent WelcomeClientMessage.")
                     currentRoom = MockRoom(message)
+                    if display is None:
+                        display = images.PygameDisplay()
+                        imageLibrary = images.ImageLibrary('drawntiles64')
+                    display.uiState.newRoom(currentRoom)
                 elif isinstance(message, NewRoomMessage):
                     print(f"Server sent NewRoomMessage.")
                     currentRoom = MockRoom(message)
+                    display.uiState.newRoom(currentRoom)
                 elif isinstance(message, RefreshRoomMessage):
                     print(f"Server sent RefreshRoomMessage.")
                     currentRoom.refreshRoom(message)
@@ -102,9 +122,6 @@ class RemoteClient():
                 
             # --- Display ---
             if currentRoom is not None:
-                if display is None:
-                    display = images.PygameDisplay()
-                    imageLibrary = images.ImageLibrary('drawntiles64')
                 display.show(currentRoom, imageLibrary)
 
     def exit(self):
