@@ -2,8 +2,6 @@
 # This contains the game currently known as "Exploratron". 
 #
 
-import kindsofthing
-from gamecomponents import Location
 import objects
 from players import Player, thePlayerCatalog, PlayerCatalogEntry
 from images import Region, PygameDisplay
