@@ -34,9 +34,9 @@ class Mobile(Thing):
     def getWieldedWeapon(self):
         """This returns the weapon that the mobile is wielding, or it
         returns None if the mobile is not wielding any weapon."""
-        weponsInInventory = [x for x in self.inventory if isinstance(x, Weapon)]
-        if weponsInInventory:
-            return weponsInInventory[-1]
+        weaponsInInventory = [x for x in self.inventory if isinstance(x, Weapon)]
+        if weaponsInInventory:
+            return weaponsInInventory[-1]
         else:
             return None 
     def setLocation(self, room, position):

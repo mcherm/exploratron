@@ -3,12 +3,9 @@
 #
 
 import pygame
-import time
-from socket import socket, AF_INET, SOCK_DGRAM
 from exploranetworking import *
 from events import pygameKeyToKeyCode
 import select
-import random
 import images
 
 
