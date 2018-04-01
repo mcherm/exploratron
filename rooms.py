@@ -18,6 +18,7 @@ dr7 = WoodenDoor(Location(5, (0,1)))
 dr8 = WoodenDoor(Location(6, (0,1)))
 dr9 = WoodenDoor(Location(5, (6,6)))
 d10 = WoodenDoor(Location(4, (10,12)))
+d11 = WoodenDoor(Location(7, (6,10)))
 sdr = InnerSecretDoor()
 
 room0 = Room(
@@ -26,7 +27,7 @@ room0 = Room(
         [bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, drt, drt, st1, drt, drt, bkw],
         [bkw, drt, drt, drt, drt, drt, bkw],
-        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [bkw, bkw, bkw, bkw, bkw, d11, bkw],
     ],
     {
         (1,1): Chest(),
@@ -147,7 +148,48 @@ room6 = Room(
 )
 
 
+# The "combat room"
+room7 = Room(
+    [
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw, bkw, idr, bkw, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, idr, drt, bkw, drt, bkw],
+        [bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
+    {
+        (9,3): Sword(),
+        (3,17): Sword(),
+    },
+    {
+        (10,19): Minotar()
+    }
+)
 
 
 
-rooms = [room0, room1, room2, room3, room4, room5, room6]
+rooms = [room0, room1, room2, room3, room4, room5, room6, room7]
