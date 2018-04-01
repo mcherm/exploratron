@@ -59,3 +59,12 @@ class Wand(Item):
     def __init__(self):
         super().__init__(defaultRegion, "drawntiles64/wand")
 
+class ViciousHorns(Weapon):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/spear", 2) # Should be invisible tile
+
+class Minotar(Mobile):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/mouseman",
+                         health=12,
+                         inventory=[ViciousHorns()])

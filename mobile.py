@@ -11,11 +11,11 @@ class Stats:
 
 
 class Mobile(Thing):
-    def __init__(self, region, tileName, health):
+    def __init__(self, region, tileName, health, inventory=()):
         super().__init__(region, tileName)
         self.whenItCanAct = 0
         self.isDead = False
-        self.inventory = []
+        self.inventory = [x for x in inventory]
         self.stats = Stats()
         self.stats.health = health
         self.stats.speed = 5
