@@ -154,7 +154,6 @@ class Mobile(Thing):
         self.whenItCanAct = currentTime + self.timeToWait()
     def takeDamage(self, amount):
         self.stats.health = self.stats.health-amount
-        print(self.stats.health) # FIXME: This can be removed
         if self.stats.health < 1:
             self.isDead = True
             print (self.isDead)
