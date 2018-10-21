@@ -66,5 +66,5 @@ class ViciousHorns(Weapon):
 class Minotar(Mobile):
     def __init__(self):
         super().__init__(defaultRegion, "drawntiles64/mouseman",
-                         health=12,
+                         maxHealth=12,
                          inventory=[ViciousHorns()])
