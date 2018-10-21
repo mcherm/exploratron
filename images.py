@@ -59,9 +59,20 @@ class PygameOverlayDisplay:
     def __init__(self, surface):
         self.surface = surface
     def show(self, uiState, imageLibrary):
+        # health bar
+        LIGHT_GREY = (120, 120, 120)
+        RED = (255,0,0)
+        BAR_BORDER = 5
+        BAR_WIDTH = 20
+        SCALE = 8
+        maxHealth = 10
+        health = uiState.player.stats.health
+        inventoryRegion = pygame.Rect(BAR_BORDER, BAR_BORDER, health * SCALE, BAR_WIDTH)
+        self.surface.fill(RED, inventoryRegion)
+
+        # inventory
         if uiState.showInventory:
             screenWidth, screenHeight = self.surface.get_size()
-            LIGHT_GREY = (120,120,120)
             BORDER = 3
             inventoryRegion = pygame.Rect(0, 0, TILE_SIZE + 2*BORDER, screenHeight)
             inventoryRegion.centerx = screenWidth / 2
