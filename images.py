@@ -4,36 +4,50 @@ import os
 
 TILE_SIZE = 64
 
-class ImageLibrary:
-    def __init__(self, subdir):
-        rootDir = './img'
-        self.imageById = {}
+
+class LibraryWithIds:
+    """For both images and sounds, we want to refer to the media using names
+    (strings that match up with the filenames), but when we pass references to
+    the media across the network we want a briefer way to refer to them. This
+    library provides that, converting from names to IDs and allowing a lookup
+    by ID."""
+    def __init__(self, rootDir, extension, subdirs):
+        """This will walk all files in the given subdirs of the given rootDir, and treat
+        any file ending in the given extension as a media source."""
+        extensionLen = len(extension)
+        self.mediaById = {}
         self._idByName = {}
-        for root, dirs, files in os.walk(f'{rootDir}/{subdir}'):
-            files.sort() # important to sort them so the order is consistent
-            counter = 0
-            for file in files:
-                if file.endswith('.png'):
-                    name = f'{subdir}/{file[:-4]}'
-                    tileId = counter
-                    self._idByName[name] = tileId
-                    self.imageById[tileId] = pygame.image.load(f'{rootDir}/{name}.png')
-                    counter += 1
-    def lookupById(self, imgnum):
-        return self.imageById[imgnum]
-    def idByName(self, imageName):
-        """Pass in an imageName, this returns the tileId for it, or
-        raises an exception if that imageName is not known to this
-        imageLibrary."""
-        return self._idByName[imageName]
+        for subdir in subdirs:
+            for root, dirs, files in os.walk(f'{rootDir}/{subdir}'):
+                files.sort() # important to sort them so the order is consistent
+                counter = 0
+                for file in files:
+                    if file.endswith(extension):
+                        name = f'{subdir}/{file[:-extensionLen]}' # trim off the extension
+                        tileId = counter
+                        self._idByName[name] = tileId
+                        self.mediaById[tileId] = self.loadMedia(f'{rootDir}/{name}{extension}')
+                        counter += 1
+    def loadMedia(self, filename):
+        pass # Subclasses need to implement this
+    def lookupById(self, mediaId):
+        return self.mediaById[mediaId]
+    def idByName(self, mediaName):
+        return self._idByName[mediaName]
 
 
+class ImageLibrary(LibraryWithIds):
+    def __init__(self, subdirs):
+        super().__init__(rootDir='./img', extension='.png', subdirs=subdirs)
+    def loadMedia(self, filename):
+        return pygame.image.load(filename)
 
-class Sounds:
-    def __init__(self):
-        self.rootDir = "./sound/foundassets/freesound.org"
-    def lookupByName(self, soundName):
-        return pygame.mixer.Sound(f"{self.rootDir}/{soundName}.wav")
+
+class SoundLibrary(LibraryWithIds):
+    def __init__(self, subdirs):
+        super().__init__(rootDir='./sound', extension='.wav', subdirs=subdirs)
+    def loadMedia(self, filename):
+        return pygame.mixer.Sound(filename)
 
     
 class PygameGridDisplay:
@@ -187,6 +201,7 @@ class Region:
     """Someday, this might grow into the ability to have different
     regions with their own sets of rooms and their own image libraries."""
     def __init__(self):
-        pygame.init()
-        self.imageLibrary = ImageLibrary('drawntiles64')
-        self.sounds = Sounds()
+        pygame.init() # FIXME: if there are multiple regions, need to init() only before the first one
+        self.imageLibrary = ImageLibrary(['drawntiles64'])
+        self.soundLibrary = SoundLibrary(['foundassets/freesound.org'])
+        print("Help") # FIXME: Remove
