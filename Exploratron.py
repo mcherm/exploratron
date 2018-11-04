@@ -245,6 +245,12 @@ def mainLoop(world):
     region = objects.defaultRegion
     clients = ServersideClientConnections()
 
+
+    # ------ BEGIN SOUND TESTING ------
+    # sound = region.sounds.lookupByName("364922__mattix__door-opened")
+    # sound.play()
+    # ------ END SOUND TESTING ------
+
     world.setDisplayedPlayer(world.players[0].playerId)
     display.setDisplayedPlayer(world.players[0])
     

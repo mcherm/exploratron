@@ -27,6 +27,14 @@ class ImageLibrary:
         imageLibrary."""
         return self._idByName[imageName]
 
+
+
+class Sounds:
+    def __init__(self):
+        self.rootDir = "./sound/foundassets/freesound.org"
+    def lookupByName(self, soundName):
+        return pygame.mixer.Sound(f"{self.rootDir}/{soundName}.wav")
+
     
 class PygameGridDisplay:
     def __init__(self):
@@ -179,4 +187,6 @@ class Region:
     """Someday, this might grow into the ability to have different
     regions with their own sets of rooms and their own image libraries."""
     def __init__(self):
+        pygame.init()
         self.imageLibrary = ImageLibrary('drawntiles64')
+        self.sounds = Sounds()
