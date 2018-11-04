@@ -28,13 +28,19 @@ class Wall(Thing):
         return False
 
 
+# FIXME: I've injected sound effects here, but really they should be an optional property
+#        that can be set when the Door is created.
 class Door(Thing):
     """A thing that teleports you to a new location when you enter."""
     def __init__(self, region, tileName, destination):
         super().__init__(region, tileName)
         self.destination = destination
+        self.soundEffect = region.sounds.lookupByName("364922__mattix__door-opened")
     def doEnter(self, mobile, world, screenChanges):
         mobile.goToLocation(self.destination, world, screenChanges)
+        print(f"Door being entered by {mobile}") # FIXME: Remove
+        self.soundEffect.play()
+
 
 class Trap(Thing):
     """a thing that maks you take damage"""

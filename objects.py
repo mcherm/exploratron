@@ -30,6 +30,11 @@ class WoodenDoor(Door):
 class InnerDoor(Thing):
     def __init__(self):
         super().__init__(defaultRegion, 'drawntiles64/doorway-1')
+        self.soundEffect = defaultRegion.sounds.lookupByName("364922__mattix__door-opened")
+    def doEnter(self, mobile, world, screenChanges):
+        super().doEnter(mobile, world, screenChanges)
+        self.soundEffect.play()
+
 
 class GiantBee(Mobile):
     def __init__(self):
