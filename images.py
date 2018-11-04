@@ -60,23 +60,24 @@ class PygameOverlayDisplay:
         self.surface = surface
     def show(self, uiState, imageLibrary):
         # health bar
-        LIGHT_GREY = (120, 120, 120)
-        RED = (255,0,0)
-        BLACK = (0,0,0)
-        BAR_SPACE = 5
-        BAR_BORDER = 1
-        BAR_WIDTH = 16
-        SCALE = 10
-        FULL_BORDER = BAR_BORDER + BAR_SPACE
+        if uiState.player:
+            LIGHT_GREY = (120, 120, 120)
+            RED = (255,0,0)
+            BLACK = (0,0,0)
+            BAR_SPACE = 5
+            BAR_BORDER = 1
+            BAR_WIDTH = 16
+            SCALE = 10
+            FULL_BORDER = BAR_BORDER + BAR_SPACE
 
-        maxHealth = uiState.player.stats.maxHealth
-        health = uiState.player.stats.health
-        borderRect = pygame.Rect(BAR_SPACE, BAR_SPACE, maxHealth * SCALE + 2 * BAR_BORDER, BAR_WIDTH + 2 * BAR_BORDER)
-        maxHealthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, maxHealth * SCALE, BAR_WIDTH)
-        healthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, health * SCALE, BAR_WIDTH)
-        self.surface.fill(BLACK, borderRect)
-        self.surface.fill(LIGHT_GREY, maxHealthRect)
-        self.surface.fill(RED, healthRect)
+            maxHealth = uiState.player.stats.maxHealth
+            health = uiState.player.stats.health
+            borderRect = pygame.Rect(BAR_SPACE, BAR_SPACE, maxHealth * SCALE + 2 * BAR_BORDER, BAR_WIDTH + 2 * BAR_BORDER)
+            maxHealthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, maxHealth * SCALE, BAR_WIDTH)
+            healthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, health * SCALE, BAR_WIDTH)
+            self.surface.fill(BLACK, borderRect)
+            self.surface.fill(LIGHT_GREY, maxHealthRect)
+            self.surface.fill(RED, healthRect)
 
         # inventory
         if uiState.showInventory:
