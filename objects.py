@@ -37,7 +37,9 @@ class GiantBee(Mobile):
         
 class MouseMan(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, 'drawntiles64/mouseman', 3)
+        super().__init__(defaultRegion, 'drawntiles64/mouseman',
+                         maxHealth=3,
+                         inventory=[Bite()])
 
 class SnakeTrap(Trap):
     def __init__(self):
@@ -59,9 +61,13 @@ class Wand(Item):
     def __init__(self):
         super().__init__(defaultRegion, "drawntiles64/wand")
 
+class Bite(Weapon):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/transparent", 2)
+
 class ViciousHorns(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/spear", 2) # Should be invisible tile
+        super().__init__(defaultRegion, "drawntiles64/transparent", 3)
 
 class Minotar(Mobile):
     def __init__(self):
