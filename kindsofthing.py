@@ -35,7 +35,8 @@ class Door(Thing):
     def __init__(self, region, tileName, destination):
         super().__init__(region, tileName)
         self.destination = destination
-        self.soundEffect = region.sounds.lookupByName("364922__mattix__door-opened")
+        soundEffectId = region.soundLibrary.idByName("foundassets/freesound.org/364922__mattix__door-opened")
+        self.soundEffect = region.soundLibrary.lookupById(soundEffectId)
     def doEnter(self, mobile, world, screenChanges):
         mobile.goToLocation(self.destination, world, screenChanges)
         print(f"Door being entered by {mobile}") # FIXME: Remove

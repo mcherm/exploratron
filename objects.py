@@ -1,5 +1,5 @@
 from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon
-from mobile import Mobile 
+from mobile import Mobile
 
 defaultRegion = Region()
 
@@ -30,7 +30,8 @@ class WoodenDoor(Door):
 class InnerDoor(Thing):
     def __init__(self):
         super().__init__(defaultRegion, 'drawntiles64/doorway-1')
-        self.soundEffect = defaultRegion.sounds.lookupByName("364922__mattix__door-opened")
+        soundEffectId = defaultRegion.soundLibrary.idByName("foundassets/freesound.org/364922__mattix__door-opened")
+        self.soundEffect = defaultRegion.soundLibrary.lookupById(soundEffectId)
     def doEnter(self, mobile, world, screenChanges):
         super().doEnter(mobile, world, screenChanges)
         self.soundEffect.play()
