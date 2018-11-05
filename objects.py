@@ -25,17 +25,17 @@ class Chest(Thing):
 
 class WoodenDoor(Door):
     def __init__(self, destination):
-        super().__init__(defaultRegion, 'drawntiles64/doorway-1', destination)
+        super().__init__(defaultRegion, 'drawntiles64/doorway-1', destination,
+                         soundEffectName="foundassets/freesound.org/364922__mattix__door-opened")
 
 class InnerDoor(Thing):
     def __init__(self):
         super().__init__(defaultRegion, 'drawntiles64/doorway-1')
-        soundEffectId = defaultRegion.soundLibrary.idByName("foundassets/freesound.org/364922__mattix__door-opened")
-        self.soundEffect = defaultRegion.soundLibrary.lookupById(soundEffectId)
+        self.soundEffectId = defaultRegion.soundLibrary.idByName(
+            "foundassets/freesound.org/364922__mattix__door-opened")
     def doEnter(self, mobile, world, screenChanges):
         super().doEnter(mobile, world, screenChanges)
-        self.soundEffect.play()
-
+        screenChanges.roomPlaySound(mobile.room, self.soundEffectId)
 
 class GiantBee(Mobile):
     def __init__(self):
