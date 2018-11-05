@@ -204,4 +204,3 @@ class Region:
         pygame.init() # FIXME: if there are multiple regions, need to init() only before the first one
         self.imageLibrary = ImageLibrary(['drawntiles64'])
         self.soundLibrary = SoundLibrary(['foundassets/freesound.org'])
-        print("Help") # FIXME: Remove

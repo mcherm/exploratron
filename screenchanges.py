@@ -16,10 +16,12 @@ class ScreenChanges:
     def __init__(self):
         self.changesByRoom = defaultdict(set) # map of room -> set of (x,y) pairs
         self.playerRoomSwitches = {} # map of player -> (oldRoom,newRoom)
+        self.soundsToPlayByRoom = defaultdict(list) # map of room -> list of soundIds
     def clear(self):
         """Calling this clears out the full list of changes."""
         self.changesByRoom.clear()
         self.playerRoomSwitches.clear()
+        self.soundsToPlayByRoom.clear()
     def changeCell(self, room, x, y):
         """Calling this adds a change to one cell of one room."""
         self.changesByRoom[room].add((x,y))
@@ -31,6 +33,9 @@ class ScreenChanges:
     def generalRoomChanges(self, room):
         """Call this when various changes may have been made in a room."""
         self.changesByRoom[room] = SetOfEverything()
+    def roomPlaySound(self, room, soundId):
+        """Call this when a sound should be played."""
+        self.soundsToPlayByRoom[room].append(soundId)
     def playerSwitchedRooms(self, player, oldRoom, newRoom):
         """Call this when a player changes to a new room. If we want a
         player to be able to change rooms more than once per time that
@@ -58,5 +63,8 @@ class ScreenChanges:
                 else:
                     changeMessage = ' + '.join(str(x) for x in roomChangeSet)
                 print(f"  Room {room} has changed {changeMessage}.")
+        if self.soundsToPlayByRoom:
+            for room, roomSounds in self.soundsToPlayByRoom.items():
+                print(f"  Room {room} should play sounds {roomSounds}.")
 
 
