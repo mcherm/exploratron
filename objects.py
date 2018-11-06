@@ -13,7 +13,7 @@ class InnerSecretDoor(Thing):
 
 class Dirt(Thing):
     def __init__(self):
-        super().__init__(defaultRegion, 'drawntiles64/dirt-1')
+        super().__init__(defaultRegion, 'drawntiles64/grey_tile')
 
 class StairsDown(Door):
     def __init__(self, destination):
