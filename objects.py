@@ -39,7 +39,7 @@ class InnerDoor(Thing):
 
 class GiantBee(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, 'drawntiles64/angry-bee', 11)
+        super().__init__(defaultRegion, 'drawntiles64/angry-bee', 11, inventory=[Sting()])
         
 class MouseMan(Mobile):
     def __init__(self):
@@ -80,3 +80,6 @@ class Minotar(Mobile):
         super().__init__(defaultRegion, "drawntiles64/mouseman",
                          maxHealth=12,
                          inventory=[ViciousHorns()])
+class Sting(Weapon):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/transparent", 3)
