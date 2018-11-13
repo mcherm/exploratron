@@ -83,3 +83,7 @@ class Minotar(Mobile):
 class Sting(Weapon):
     def __init__(self):
         super().__init__(defaultRegion, "drawntiles64/transparent", 3)
+
+class Witch(Mobile):
+    def __init__(self):
+        super().__init__(defaultRegion, "drawntiles64/witch", maxHealth=8)
