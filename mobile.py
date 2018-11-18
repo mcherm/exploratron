@@ -21,9 +21,6 @@ class Mobile(Thing):
         self.stats.maxHealth = maxHealth
         self.stats.health = maxHealth
         self.stats.speed = 5
-        soundEffectName = "foundassets/freesound.org/364922__mattix__door-opened"
-        self.soundEffectId = None if soundEffectName is None else region.soundLibrary.idByName(soundEffectName)
-
     def canEnter(self, mobile):
         return False
     def doBump(self, mobile, world, screenChanges):
@@ -32,8 +29,7 @@ class Mobile(Thing):
         if wieldedWeapon == None:
             pass
         else:
-            #fixme play weapon sound herddde
-            screenChanges.roomPlaySound(self.room, self.soundEffectId)
+            screenChanges.roomPlaySound(self.room, wieldedWeapon.getHitSoundEffectId())
             self.takeDamage(wieldedWeapon.damage)
     def timeToWait(self):
         timeToWait = (500 - (self.stats.speed) * 20)

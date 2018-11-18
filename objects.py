@@ -57,11 +57,13 @@ class BluePotion(Item):
 
 class Sword(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/sword", 2)
+        super().__init__(defaultRegion, "drawntiles64/sword", 2,
+                         "foundassets/freesound.org/348112__mattix__crunch")
 
 class Spear(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/spear", 3)
+        super().__init__(defaultRegion, "drawntiles64/spear", 3,
+                         "foundassets/freesound.org/348112__mattix__crunch")
 
 class Wand(Item):
     def __init__(self):
@@ -69,11 +71,13 @@ class Wand(Item):
 
 class Bite(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/transparent", 2)
+        super().__init__(defaultRegion, "drawntiles64/transparent", 2,
+                         "foundassets/freesound.org/348112__mattix__crunch")
 
 class ViciousHorns(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/transparent", 3)
+        super().__init__(defaultRegion, "drawntiles64/transparent", 3,
+                         "foundassets/freesound.org/348112__mattix__crunch")
 
 class Minotar(Mobile):
     def __init__(self):
@@ -82,7 +86,8 @@ class Minotar(Mobile):
                          inventory=[ViciousHorns()])
 class Sting(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "drawntiles64/transparent", 3)
+        super().__init__(defaultRegion, "drawntiles64/transparent", 3,
+                         "foundassets/freesound.org/365658__mattix__bird-thrush-nightingale-01w")
 
 class Witch(Mobile):
     def __init__(self):

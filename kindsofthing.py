@@ -52,10 +52,16 @@ class Item(Thing):
 
 
 class Weapon(Item):
-    def __init__(self, region, tileName, damage):
+    def __init__(self, region, tileName, damage, hitSoundEffectName):
         super().__init__(region, tileName)
         self.damage = damage
-        
+        self.hitSoundEffectId = region.soundLibrary.idByName(hitSoundEffectName)
+    def getHitSoundEffectId(self):
+        """This returns the ID of the sound effect that should be played
+        when this weapon is used to successfully attack someone."""
+        return self.hitSoundEffectId
+
+
 
 
 """
