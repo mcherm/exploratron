@@ -21,6 +21,9 @@ class Mobile(Thing):
         self.stats.maxHealth = maxHealth
         self.stats.health = maxHealth
         self.stats.speed = 5
+        soundEffectName = "foundassets/freesound.org/364922__mattix__door-opened"
+        self.soundEffectId = None if soundEffectName is None else region.soundLibrary.idByName(soundEffectName)
+
     def canEnter(self, mobile):
         return False
     def doBump(self, mobile, world, screenChanges):
@@ -29,6 +32,8 @@ class Mobile(Thing):
         if wieldedWeapon == None:
             pass
         else:
+            #fixme play weapon sound herddde
+            screenChanges.roomPlaySound(self.room, self.soundEffectId)
             self.takeDamage(wieldedWeapon.damage)
     def timeToWait(self):
         timeToWait = (500 - (self.stats.speed) * 20)
@@ -135,7 +140,7 @@ class Mobile(Thing):
         the new location specified."""
         oldCell = self.room.cellAt(self.position[0], self.position[1])
         oldCell.removeThing(self)
-        self.room = world.rooms[ location.roomNumber ]
+        self.room = world.rooms[location.roomNumber]
         self.position = location.coordinates
         x,y = location.coordinates
         newCell = self.room.cellAt(x, y)
