@@ -68,8 +68,8 @@ class PlayerCatalog:
 
 
 thePlayerCatalog = PlayerCatalog()
-thePlayerCatalog.addEntry(PlayerCatalogEntry('drawntiles64/adventurer-1-boy', 9, "0", Location( 1, (2,1) )))
-thePlayerCatalog.addEntry(PlayerCatalogEntry('drawntiles64/adventurer-2-girl', 9, "1", Location( 1, (3,2) )))
-thePlayerCatalog.addEntry(PlayerCatalogEntry('drawntiles64/adventurer-3-girl', 9, "2", Location( 1, (1,2) )))
+thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-1-boy', 9, "0", Location( 1, (2,1) )))
+thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-2-girl', 9, "1", Location( 1, (3,2) )))
+thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-3-girl', 9, "2", Location( 1, (1,2) )))
 
     

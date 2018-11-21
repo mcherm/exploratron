@@ -51,6 +51,10 @@ class ScreenChanges:
         drastically) or a set containing (x,y) pairs for the locations
         in the room that have changed since clear() was called."""
         return self.changesByRoom[room]
+    def getRoomSounds(self, room):
+        """Returns a list of new sounds that should begin playing in the given
+        room starting with this set of ScreenChanges."""
+        return self.soundsToPlayByRoom[room]
     def printThemOut(self):
         """Used only for debugging, this dumps to the screen the whole
         list of changes."""

@@ -11,23 +11,22 @@ class LibraryWithIds:
     the media across the network we want a briefer way to refer to them. This
     library provides that, converting from names to IDs and allowing a lookup
     by ID."""
-    def __init__(self, rootDir, extension, subdirs):
-        """This will walk all files in the given subdirs of the given rootDir, and treat
+    def __init__(self, rootDir, extension, subdir):
+        """This will walk all files in the given subdir of the given rootDir, and treat
         any file ending in the given extension as a media source."""
         extensionLen = len(extension)
         self.mediaById = {}
         self._idByName = {}
-        for subdir in subdirs:
-            for root, dirs, files in os.walk(f'{rootDir}/{subdir}'):
-                files.sort() # important to sort them so the order is consistent
-                counter = 0
-                for file in files:
-                    if file.endswith(extension):
-                        name = f'{subdir}/{file[:-extensionLen]}' # trim off the extension
-                        tileId = counter
-                        self._idByName[name] = tileId
-                        self.mediaById[tileId] = self.loadMedia(f'{rootDir}/{name}{extension}')
-                        counter += 1
+        for root, dirs, files in os.walk(f'{rootDir}/{subdir}'):
+            files.sort() # important to sort them so the order is consistent
+            counter = 0
+            for file in files:
+                if file.endswith(extension):
+                    name = file[:-extensionLen] # trim off the extension
+                    tileId = counter
+                    self._idByName[name] = tileId
+                    self.mediaById[tileId] = self.loadMedia(f'{rootDir}/{subdir}/{name}{extension}')
+                    counter += 1
     def loadMedia(self, filename):
         pass # Subclasses need to implement this
     def lookupById(self, mediaId):
@@ -37,15 +36,15 @@ class LibraryWithIds:
 
 
 class ImageLibrary(LibraryWithIds):
-    def __init__(self, subdirs):
-        super().__init__(rootDir='./img', extension='.png', subdirs=subdirs)
+    def __init__(self, subdir):
+        super().__init__(rootDir='./img', extension='.png', subdir=subdir)
     def loadMedia(self, filename):
         return pygame.image.load(filename)
 
 
 class SoundLibrary(LibraryWithIds):
-    def __init__(self, subdirs):
-        super().__init__(rootDir='./sound', extension='.wav', subdirs=subdirs)
+    def __init__(self, subdir):
+        super().__init__(rootDir='./sound', extension='.wav', subdir=subdir)
     def loadMedia(self, filename):
         return pygame.mixer.Sound(filename)
 
@@ -123,7 +122,7 @@ class PygameDisplay:
     """This is an object which will render the game, using the pygame library.
     It has two basic layers: a PygameGridDisplay which renders the room you
     are in, and an PygameOverlayDisplay which shows UI components over top
-    of the grid."""
+    of the grid. It also deals with playing sounds."""
     def __init__(self):
         self.gridDisplay = PygameGridDisplay()
         # FIXME: The surface should be owned by the PygameDisplay, not the GridDisplay.
@@ -135,6 +134,12 @@ class PygameDisplay:
         self.gridDisplay.show(room, imageLibrary)
         self.overlayDisplay.show(self.gridDisplay.uiState, imageLibrary)
         pygame.display.flip()
+    def playSounds(self, soundEffectIds, soundLibrary):
+        """Causes the display to begin playing each of the sounds whose sound effect
+        ID is in the list provided."""
+        for soundEffectId in soundEffectIds:
+            sound = soundLibrary.lookupById(soundEffectId)
+            sound.play()
     def setDisplayedPlayer(self, player):
         self.uiState.setDisplayedPlayer(player)
     def getEvents(self):
@@ -202,5 +207,5 @@ class Region:
     regions with their own sets of rooms and their own image libraries."""
     def __init__(self):
         pygame.init() # FIXME: if there are multiple regions, need to init() only before the first one
-        self.imageLibrary = ImageLibrary(['drawntiles64'])
-        self.soundLibrary = SoundLibrary(['foundassets/freesound.org'])
+        self.imageLibrary = ImageLibrary('drawntiles64')
+        self.soundLibrary = SoundLibrary('foundassets/freesound.org')
