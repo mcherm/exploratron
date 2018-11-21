@@ -214,10 +214,9 @@ def renderWorld(world, display, region, screenChanges, clients):
     if localRoomSwitches is not None:
         oldRoom, newRoom = localRoomSwitches
         display.uiState.newRoom(newRoom)
-    display.show(world.displayedPlayer.room, region.imageLibrary)
-    for soundEffectId in screenChanges.soundsToPlayByRoom[world.displayedPlayer.room]:
-        sound = region.soundLibrary.lookupById(soundEffectId)
-        sound.play()
+    displayedRoom = world.displayedPlayer.room
+    display.show(displayedRoom, region.imageLibrary)
+    display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
 
     # -- Remote clients --
     for player in world.players:
