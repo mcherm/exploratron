@@ -46,7 +46,10 @@ class SoundLibrary(LibraryWithIds):
     def __init__(self, subdir):
         super().__init__(rootDir='./sound', extension='.wav', subdir=subdir)
     def loadMedia(self, filename):
-        return pygame.mixer.Sound(filename)
+        try:
+            return pygame.mixer.Sound(filename)
+        except pygame.error as err:
+            raise Exception(f"Unable to load sound '{filename}'. Are you sure that init() was called?") from err
 
     
 class PygameGridDisplay:

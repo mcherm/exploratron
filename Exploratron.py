@@ -3,7 +3,7 @@
 #
 
 import objects
-from players import Player, thePlayerCatalog, PlayerCatalogEntry
+from players import thePlayerCatalog, PlayerCatalogEntry
 from images import Region, PygameDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
@@ -225,6 +225,7 @@ def renderWorld(world, display, region, screenChanges, clients):
             if roomSwitch is not None:
                 oldRoom, newRoom = roomSwitch
                 message = NewRoomMessage(newRoom.width, newRoom.height, newRoom.gridInMessageFormat())
+                room = newRoom
             else:
                 room = player.room
                 roomChangeSet = screenChanges.getRoomChangeSet(room)
@@ -237,6 +238,10 @@ def renderWorld(world, display, region, screenChanges, clients):
                     message = None
             if message is not None:
                 clients.sendMessageToPlayer(player.playerId, message)
+            soundIds = screenChanges.getRoomSounds(room)
+            if soundIds:
+                soundMessage = PlaySoundsMessage(soundIds)
+                clients.sendMessageToPlayer(player.playerId, soundMessage)
 
 
 

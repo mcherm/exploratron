@@ -102,7 +102,9 @@ class RemoteClient():
                     currentRoom = MockRoom(message)
                     if display is None:
                         display = images.PygameDisplay()
-                        imageLibrary = images.ImageLibrary('drawntiles64')
+                        defaultRegion = images.Region()
+                        imageLibrary = defaultRegion.imageLibrary
+                        soundLibrary = defaultRegion.soundLibrary
                     display.uiState.newRoom(currentRoom)
                 elif isinstance(message, NewRoomMessage):
                     print(f"Server sent NewRoomMessage.")
@@ -114,6 +116,9 @@ class RemoteClient():
                 elif isinstance(message, UpdateRoomMessage):
                     print(f"Server sent UpdateRoomMessage.")
                     currentRoom.updateRoom(message)
+                elif isinstance(message, PlaySoundsMessage):
+                    print(f"Server sent PlaySoundsMessage.")
+                    display.playSounds(message.soundIds, soundLibrary)
                 elif isinstance(message, ClientShouldExitMessage):
                     print(f"Server sent ClientShouldExitMessage: {message}.")
                     shouldExit = True
