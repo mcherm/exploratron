@@ -28,6 +28,7 @@ class World:
         self.playerByPlayerId = {} # FIXME: Don't need map AND ALSO the list
         self.displayedPlayer = None
         self.playerCatalog = thePlayerCatalog
+        self.timeOfNextRegen = 0
     def addMobiles(self, newMobiles):
         """Call this to add some new mobiles to the list of active
         mobiles."""
@@ -68,6 +69,16 @@ class World:
 
 
 # ========= Start Functions for Game =========
+
+
+def regenMobiles(world, currentTime):
+    """Calls doRegen() on each mobile (so it can do things like
+    healing) but only call if it has been 10 seconds since the last
+    time that we updated them."""
+    if currentTime >= world.timeOfNextRegen:
+        world.timeOfNextRegen = currentTime + 10000
+        for mobile in world.mobiles + world.players:
+            mobile.doRegen()
 
 
 def moveMobiles(world, currentTime, screenChanges):
@@ -144,6 +155,7 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
                             player.pickUpItem()
                             player.whenItCanAct = currentTime + player.timeToWait()
     # Move Mobiles
+    regenMobiles(world, currentTime)
     moveMobiles(world, currentTime, screenChanges)
     # Check for Death
     handleDeath(world)
@@ -251,13 +263,6 @@ def mainLoop(world):
     display = PygameDisplay()
     region = objects.defaultRegion
     clients = ServersideClientConnections()
-
-
-    # ------ BEGIN SOUND TESTING ------
-    # sound = region.sounds.lookupByName("364922__mattix__door-opened")
-    # sound.play()
-    # ------ END SOUND TESTING ------
-
     world.setDisplayedPlayer(world.players[0].playerId)
     display.setDisplayedPlayer(world.players[0])
     

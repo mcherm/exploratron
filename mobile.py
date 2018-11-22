@@ -176,8 +176,10 @@ class Mobile(Thing):
             iGotIt = self.receiveItem(topItem)
             if iGotIt:
                 cell.removeThing(topItem)
-            
-            
-    
+    def doRegen(self):
+        """This gets called once every 10 seconds. When it is called the
+        mobile should perform regeneration updates such as healing damage."""
+        if self.stats.health < self.stats.maxHealth:
+            self.stats.health = self.stats.health + 1
 
 
