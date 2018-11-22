@@ -75,6 +75,13 @@ class UpdateRoomMessage(Message):
         Each cell provided fully replaces whatever was there before."""
         self.cells = cells
 
+class PlaySoundsMessage(Message):
+    """A message sent by the server to instruct the client to begin playing some
+    sounds."""
+    def __init__(self, soundIds):
+        """Constructor. soundIds is a list of sound ids."""
+        self.soundIds = soundIds
+
 class KeyPressedMessage(Message):
     """A message sent when a client wants a server to know a key has been pressed."""
     def __init__(self, keyCode):
@@ -90,7 +97,7 @@ class ClientDisconnectingMessage(Message):
 
 clientToServerMessages = [JoinServerMessage, KeyPressedMessage, ClientDisconnectingMessage]
 serverToClientMessages = [WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
-                          UpdateRoomMessage, ClientShouldExitMessage]
+                          UpdateRoomMessage, PlaySoundsMessage, ClientShouldExitMessage]
 
 _messageClass = {msg.messageName(): msg for msg in clientToServerMessages + serverToClientMessages}
 
