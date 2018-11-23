@@ -4,7 +4,6 @@ import random
 class Stats:
     def __init__(self):
         """Create a new Stats, with all stats set to 0."""
-        self.strength = 0
         self.speed = 0
         self.maxHealth = 0
         self.health = 0
