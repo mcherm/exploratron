@@ -39,12 +39,13 @@ class InnerDoor(Thing):
 
 class GiantBee(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, 'angry-bee', 11, inventory=[Sting()])
+        super().__init__(defaultRegion, 'angry-bee', 11, 1, inventory=[Sting()])
         
 class MouseMan(Mobile):
     def __init__(self):
         super().__init__(defaultRegion, 'mouseman',
                          maxHealth=3,
+                         maxMana=5,
                          inventory=[Bite()])
 
 class SnakeTrap(Trap):
@@ -83,6 +84,7 @@ class Minotar(Mobile):
     def __init__(self):
         super().__init__(defaultRegion, "mouseman",
                          maxHealth=12,
+                         maxMana=5,
                          inventory=[ViciousHorns()])
 class Sting(Weapon):
     def __init__(self):
@@ -91,4 +93,4 @@ class Sting(Weapon):
 
 class Witch(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, "witch", maxHealth=8)
+        super().__init__(defaultRegion, "witch", maxHealth=8, maxMana=19)

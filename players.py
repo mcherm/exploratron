@@ -9,8 +9,8 @@ from mobile import Mobile
 
 
 class Player(Mobile):
-    def __init__(self, region, tileName, hitPoints, playerId):
-        super().__init__(region, tileName, hitPoints)
+    def __init__(self, region, tileName, hitPoints, maxMana, playerId):
+        super().__init__(region, tileName, hitPoints, maxMana)
         self.queuedEvent = None
         self.playerId = playerId
         self.clientConnections = []
@@ -33,9 +33,10 @@ class Player(Mobile):
 class PlayerCatalogEntry:
     """Just contains information about one way a player can be
     created."""
-    def __init__(self, tileName, hitPoints, playerId, location):
+    def __init__(self, tileName, hitPoints, maxMana, playerId, location):
         self.tileName = tileName
         self.hitPoints = hitPoints
+        self.maxMana = maxMana
         self.playerId = playerId
         self.location = location
     def getPlayer(self, region):
@@ -43,6 +44,7 @@ class PlayerCatalogEntry:
             region=region,
             tileName=self.tileName,
             hitPoints=self.hitPoints,
+            maxMana=self.maxMana,
             playerId=self.playerId)
     def getLocation(self):
         return self.location
@@ -68,8 +70,8 @@ class PlayerCatalog:
 
 
 thePlayerCatalog = PlayerCatalog()
-thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-1-boy', 9, "0", Location( 1, (2,1) )))
-thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-2-girl', 9, "1", Location( 1, (3,2) )))
-thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-3-girl', 9, "2", Location( 1, (1,2) )))
+thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-1-boy', 9, 10, "0", Location( 1, (2,1) )))
+thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-2-girl', 9, 10, "1", Location( 1, (3,2) )))
+thePlayerCatalog.addEntry(PlayerCatalogEntry('adventurer-3-girl', 9, 11, "2", Location( 1, (1,2) )))
 
     
