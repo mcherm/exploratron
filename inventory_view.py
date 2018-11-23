@@ -12,6 +12,21 @@ BORDER = 3  # distance in pixels around each item
 AISLE_SIZE = TILE_SIZE // 2  # width of the aisle between columns of items
 
 
+CROSSHAIR_SIZE = 32
+HALF_CROSSHAIR_SIZE = CROSSHAIR_SIZE // 2
+
+class Crosshair:
+    def __init__(self):
+        self.image = None
+    def drawAt(self, surface, xy):
+        """Draw the crosshair centered at the given xy = (x,y) location."""
+        if self.image is None:
+            self.image = pygame.image.load("./img/special/crosshair.png")
+        x, y = xy
+        surface.blit(self.image, (x - HALF_CROSSHAIR_SIZE, y - HALF_CROSSHAIR_SIZE))
+crosshair = Crosshair()
+
+
 def pairwise(iterable):
     """Returns the contents as a list of pairs (padding the last slot with None
     if there were an odd number).
@@ -63,6 +78,8 @@ def drawInventory(inventory, surface, imageLibrary):
         if rightItem is not None:
             rightImage = imageLibrary.lookupById(rightItem.tileId)
             surface.blit(rightImage, (rightItemXPos, itemYPos))
-
+    crosshairX = inventoryRegion.centerx
+    crosshairY = inventoryRegion.top + BORDER + (TILE_SIZE // 2)
+    crosshair.drawAt(surface, (crosshairX, crosshairY))
 
 
