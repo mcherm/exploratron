@@ -9,8 +9,8 @@ from mobile import Mobile
 
 
 class Player(Mobile):
-    def __init__(self, region, tileName, hitPoints, maxMana, playerId):
-        super().__init__(region, tileName, hitPoints, maxMana)
+    def __init__(self, region, tileName, health, maxMana, playerId):
+        super().__init__(region, tileName, health, maxMana)
         self.queuedEvent = None
         self.playerId = playerId
         self.clientConnections = []
@@ -33,9 +33,9 @@ class Player(Mobile):
 class PlayerCatalogEntry:
     """Just contains information about one way a player can be
     created."""
-    def __init__(self, tileName, hitPoints, maxMana, playerId, location):
+    def __init__(self, tileName, health, maxMana, playerId, location):
         self.tileName = tileName
-        self.hitPoints = hitPoints
+        self.health = health
         self.maxMana = maxMana
         self.playerId = playerId
         self.location = location
@@ -43,7 +43,7 @@ class PlayerCatalogEntry:
         return Player(
             region=region,
             tileName=self.tileName,
-            hitPoints=self.hitPoints,
+            health=self.health,
             maxMana=self.maxMana,
             playerId=self.playerId)
     def getLocation(self):
