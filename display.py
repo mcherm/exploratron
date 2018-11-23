@@ -30,6 +30,7 @@ class PygameGridDisplay:
 LIGHT_GREY = (120, 120, 120)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
+PURPLE= (144, 9, 189)
 
 
 class PygameOverlayDisplay:
@@ -46,16 +47,29 @@ class PygameOverlayDisplay:
             BAR_WIDTH = 16
             SCALE = 10
             FULL_BORDER = BAR_BORDER + BAR_SPACE
+            MANA_OFFSET = FULL_BORDER + BAR_WIDTH + BAR_BORDER
 
+            #create health bar
             maxHealth = uiState.player.stats.maxHealth
             health = uiState.player.stats.health
-            borderRect = pygame.Rect(BAR_SPACE, BAR_SPACE, maxHealth * SCALE + 2 * BAR_BORDER,
+            healthBorderRect = pygame.Rect(BAR_SPACE, BAR_SPACE, maxHealth * SCALE + 2 * BAR_BORDER,
                                      BAR_WIDTH + 2 * BAR_BORDER)
             maxHealthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, maxHealth * SCALE, BAR_WIDTH)
             healthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, health * SCALE, BAR_WIDTH)
-            self.surface.fill(BLACK, borderRect)
+            self.surface.fill(BLACK, healthBorderRect)
             self.surface.fill(LIGHT_GREY, maxHealthRect)
             self.surface.fill(RED, healthRect)
+
+            #create mana bar
+            maxMana = uiState.player.stats.maxMana
+            mana = uiState.player.stats.mana
+            manaBorderRect = pygame.Rect(BAR_SPACE, BAR_SPACE + MANA_OFFSET, maxMana * SCALE + 2 * BAR_BORDER,
+                                     BAR_WIDTH + 2 * BAR_BORDER)
+            maxManaRect = pygame.Rect(FULL_BORDER, FULL_BORDER + MANA_OFFSET, maxMana * SCALE, BAR_WIDTH)
+            manaRect = pygame.Rect(FULL_BORDER, FULL_BORDER + MANA_OFFSET, mana * SCALE, BAR_WIDTH)
+            self.surface.fill(BLACK, manaBorderRect)
+            self.surface.fill(LIGHT_GREY, maxManaRect)
+            self.surface.fill(PURPLE, manaRect)
 
         # inventory
         if uiState.showInventory:
