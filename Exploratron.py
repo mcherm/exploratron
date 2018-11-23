@@ -4,7 +4,8 @@
 
 import objects
 from players import thePlayerCatalog, PlayerCatalogEntry
-from images import Region, PygameDisplay
+from images import Region
+from display import PygameDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything

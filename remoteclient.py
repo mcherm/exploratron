@@ -7,6 +7,7 @@ from exploranetworking import *
 from events import pygameKeyToKeyCode, KeyCode
 import select
 import images
+from display import PygameDisplay
 
 
 class MockThing:
@@ -44,7 +45,7 @@ def test():
     msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
     mockRoom = MockRoom(msg1)
     imageLibrary = images.ImageLibrary()
-    display = images.PygameDisplay()
+    display = PygameDisplay()
     display.show(mockRoom, imageLibrary)
 #-----------------------
     
@@ -101,7 +102,7 @@ class RemoteClient():
                     print(f"Server sent WelcomeClientMessage.")
                     currentRoom = MockRoom(message)
                     if display is None:
-                        display = images.PygameDisplay()
+                        display = PygameDisplay()
                         defaultRegion = images.Region()
                         imageLibrary = defaultRegion.imageLibrary
                         soundLibrary = defaultRegion.soundLibrary
@@ -140,7 +141,7 @@ def testDisplay():
     msg = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
     room = MockRoom(msg)
     
-    display = images.PygameDisplay()
+    display = PygameDisplay()
     imageLibrary = images.ImageLibrary()
     display.show(room, imageLibrary)
     timeToQuit = False
