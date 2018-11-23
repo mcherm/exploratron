@@ -7,11 +7,11 @@ class Stats:
         self.speed = 0
         self.maxHealth = 0
         self.health = 0
-
-
+        self.mana = 0
+        self.maxMana = 0
 
 class Mobile(Thing):
-    def __init__(self, region, tileName, maxHealth, inventory=()):
+    def __init__(self, region, tileName, maxHealth, maxMana, inventory=()):
         super().__init__(region, tileName)
         self.whenItCanAct = 0
         self.isDead = False
@@ -19,6 +19,8 @@ class Mobile(Thing):
         self.stats = Stats()
         self.stats.maxHealth = maxHealth
         self.stats.health = maxHealth
+        self.stats.maxMana = maxMana
+        self.stats.mana = maxMana
         self.stats.speed = 5
     def canEnter(self, mobile):
         return False
