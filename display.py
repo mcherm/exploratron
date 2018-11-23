@@ -1,7 +1,7 @@
 
 import pygame
 from images import TILE_SIZE
-from inventory_view import drawInventory
+from inventory_view import InventoryView
 
 
 
@@ -72,8 +72,8 @@ class PygameOverlayDisplay:
             self.surface.fill(PURPLE, manaRect)
 
         # inventory
-        if uiState.showInventory:
-            drawInventory(uiState.player.inventory, self.surface, imageLibrary)
+        if uiState.inventoryView:
+            uiState.inventoryView.show(self.surface, imageLibrary)
 
 
 class PygameDisplay:
@@ -124,7 +124,7 @@ class UIState:
         self.screenWidthAndHeight = initialScreenWidth, initialScreenHeight
         self.roomWidthAndHeight = 0, 0
         self.offset = 0, 0
-        self.showInventory = False
+        self.inventoryView = None
 
     def setDisplayedPlayer(self, player):
         self.player = player
@@ -132,6 +132,16 @@ class UIState:
     def newRoom(self, room):
         self.roomWidthAndHeight = room.width, room.height
         self.offset = 0, 0
+
+    def moveCrosshairTo(self, newPosition):
+        """Moves the crosshair position to the given (x,y) location (in pixels)."""
+        self.crosshairPosition = newPosition
+
+    def moveCrosshairBy(self, deltaPosition):
+        """Given (deltaX, deltaY) in pixels, moves the crosshair by that amount."""
+        self.crosshairPosition = (
+            self.crosshairPosition[0] + deltaPosition[0],
+            self.crosshairPosition[1] + deltaPosition[1])
 
     def moveCameraSouth(self):
         x, y = self.offset
@@ -167,8 +177,11 @@ class UIState:
 
     def toggleInventory(self):
         if self.player:
-            self.showInventory = not self.showInventory
+            if self.inventoryView is None:
+                self.inventoryView = InventoryView(self.player.inventory)
+            else:
+                self.inventoryView = None
         else:
             # There is no player, so we can't show inventory
-            self.showInventory = False
+            self.inventoryView = None
 

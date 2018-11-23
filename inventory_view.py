@@ -50,36 +50,52 @@ def pairwise(iterable):
 
 
 
-def drawInventory(inventory, surface, imageLibrary):
-    """This will draw the inventory (a list of items) onto the given surface, pulling
-    images from the given imageLibrary."""
-    screenWidth, screenHeight = surface.get_size()
-    rowsThatCanFit = (screenHeight - (2 * INVENTORY_MARGIN) - BORDER) // (TILE_SIZE + BORDER)
+class InventoryView:
+    """An instance of this class is part of the UI representing an active
+    view of the inventory. In the initialization of the class it will read
+    the inventory and decide how to lay it out; it will also maintain a
+    crosshair position and draw to the screen as needed."""
+    def __init__(self, inventory):
+        self.inventory = inventory
+        self.hasLaidOutScreen = False
+        # Other fields self.itemPairs, self.inventoryRegion, self.crosshairX, self.crosshairY
+        # are set during the layOutScreen() method
 
-    itemPairs = pairwise(inventory)
-    itemPairs = itemPairs[:rowsThatCanFit]  # truncate to what can fit on the screen
-    rows = len(itemPairs)
+    def layOutScreen(self, surface):
+        """This is called only the first time that we try drawing it; it decides
+        how everything is laid out. The layout cannot happen inside __init__()
+        because it depends on the surface."""
+        self.hasLaidOutScreen = True
+        screenWidth, screenHeight = surface.get_size()
+        rowsThatCanFit = (screenHeight - (2 * INVENTORY_MARGIN) - BORDER) // (TILE_SIZE + BORDER)
 
+        itemPairs = pairwise(self.inventory)
+        itemPairs = itemPairs[:rowsThatCanFit]  # truncate to what can fit on the screen
+        self.itemPairs = itemPairs
+        rows = len(itemPairs)
 
-    inventoryRegion = pygame.Rect(
-        0, 0,
-        BORDER + TILE_SIZE + AISLE_SIZE + TILE_SIZE + BORDER,
-        BORDER + rows * (TILE_SIZE + BORDER)
-    )
-    inventoryRegion.centerx = screenWidth / 2
-    inventoryRegion.move_ip(0, INVENTORY_MARGIN)
-    surface.fill(LIGHT_GREY, inventoryRegion)
-    leftItemXPos = inventoryRegion.left + BORDER
-    rightItemXPos = leftItemXPos + TILE_SIZE + AISLE_SIZE
-    for rowNum, (leftItem, rightItem) in enumerate(itemPairs):
-        itemYPos = inventoryRegion.top + BORDER + rowNum * (TILE_SIZE + BORDER)
-        leftImage = imageLibrary.lookupById(leftItem.tileId)
-        surface.blit(leftImage, (leftItemXPos, itemYPos))
-        if rightItem is not None:
-            rightImage = imageLibrary.lookupById(rightItem.tileId)
-            surface.blit(rightImage, (rightItemXPos, itemYPos))
-    crosshairX = inventoryRegion.centerx
-    crosshairY = inventoryRegion.top + BORDER + (TILE_SIZE // 2)
-    crosshair.drawAt(surface, (crosshairX, crosshairY))
+        inventoryRegion = pygame.Rect(
+            0, 0,
+            BORDER + TILE_SIZE + AISLE_SIZE + TILE_SIZE + BORDER,
+            BORDER + rows * (TILE_SIZE + BORDER)
+        )
+        inventoryRegion.centerx = screenWidth / 2
+        inventoryRegion.move_ip(0, INVENTORY_MARGIN)
+        self.inventoryRegion = inventoryRegion
+        self.crosshairX = inventoryRegion.centerx
+        self.crosshairY = inventoryRegion.top + BORDER + (TILE_SIZE // 2)
 
-
+    def show(self, surface, imageLibrary):
+        if not self.hasLaidOutScreen:
+            self.layOutScreen(surface)
+        surface.fill(LIGHT_GREY, self.inventoryRegion)
+        leftItemXPos = self.inventoryRegion.left + BORDER
+        rightItemXPos = leftItemXPos + TILE_SIZE + AISLE_SIZE
+        for rowNum, (leftItem, rightItem) in enumerate(self.itemPairs):
+            itemYPos = self.inventoryRegion.top + BORDER + rowNum * (TILE_SIZE + BORDER)
+            leftImage = imageLibrary.lookupById(leftItem.tileId)
+            surface.blit(leftImage, (leftItemXPos, itemYPos))
+            if rightItem is not None:
+                rightImage = imageLibrary.lookupById(rightItem.tileId)
+                surface.blit(rightImage, (rightItemXPos, itemYPos))
+        crosshair.drawAt(surface, (self.crosshairX, self.crosshairY))
