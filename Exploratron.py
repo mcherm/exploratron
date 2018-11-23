@@ -109,14 +109,14 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
             # FIXME: Should probably update screenChanges
         elif isinstance(event, KeyPressedEvent):
             # FIXME: Need to update ScreenChanges about how the camera moved.
-            if event.keyCode == KeyCode.MOVE_CAMERA_UP:
-                uiState.moveCameraNorth()
-            elif event.keyCode == KeyCode.MOVE_CAMERA_DOWN:
-                uiState.moveCameraSouth()
-            elif event.keyCode == KeyCode.MOVE_CAMERA_LEFT:
-                uiState.moveCameraWest()
-            elif event.keyCode == KeyCode.MOVE_CAMERA_RIGHT:
-                uiState.moveCameraEast()
+            if event.keyCode == KeyCode.MOVE_UI_UP:
+                uiState.moveUINorth()
+            elif event.keyCode == KeyCode.MOVE_UI_DOWN:
+                uiState.moveUISouth()
+            elif event.keyCode == KeyCode.MOVE_UI_LEFT:
+                uiState.moveUIWest()
+            elif event.keyCode == KeyCode.MOVE_UI_RIGHT:
+                uiState.moveUIEast()
             elif event.keyCode == KeyCode.TOGGLE_INVENTORY:
                 uiState.toggleInventory()
         else:

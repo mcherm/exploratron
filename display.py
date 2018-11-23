@@ -143,37 +143,47 @@ class UIState:
             self.crosshairPosition[0] + deltaPosition[0],
             self.crosshairPosition[1] + deltaPosition[1])
 
-    def moveCameraSouth(self):
-        x, y = self.offset
-        offsetY = self.offset[1]
-        screenY = self.screenWidthAndHeight[1]
-        roomY = self.roomWidthAndHeight[1]
-        if roomY > screenY + offsetY:
-            self.offset = x, y + 1
+    def moveUISouth(self):
+        if self.inventoryView:
+            self.inventoryView.moveCrosshairSouth()
+        else:
+            x, y = self.offset
+            offsetY = self.offset[1]
+            screenY = self.screenWidthAndHeight[1]
+            roomY = self.roomWidthAndHeight[1]
+            if roomY > screenY + offsetY:
+                self.offset = x, y + 1
 
-    def moveCameraNorth(self):
-        x, y = self.offset
-        offsetY = self.offset[1]
-        screenY = self.screenWidthAndHeight[1]
-        roomY = self.roomWidthAndHeight[1]
-        if offsetY > 0:
-            self.offset = x, y - 1
+    def moveUINorth(self):
+        if self.inventoryView:
+            self.inventoryView.moveCrosshairNorth()
+        else:
+            x, y = self.offset
+            offsetY = self.offset[1]
+            if offsetY > 0:
+                self.offset = x, y - 1
 
-    def moveCameraEast(self):
-        x, y = self.offset
-        offsetX = self.offset[0]
-        screenX = self.screenWidthAndHeight[0]
-        roomX = self.roomWidthAndHeight[0]
-        if roomX > screenX + offsetX:
-            self.offset = x + 1, y
+    def moveUIEast(self):
+        if self.inventoryView:
+            self.inventoryView.moveCrosshairEast()
+        else:
+            x, y = self.offset
+            offsetX = self.offset[0]
+            screenX = self.screenWidthAndHeight[0]
+            roomX = self.roomWidthAndHeight[0]
+            if roomX > screenX + offsetX:
+                self.offset = x + 1, y
 
-    def moveCameraWest(self):
-        x, y = self.offset
-        offsetX = self.offset[0]
-        screenX = self.screenWidthAndHeight[0]
-        roomX = self.roomWidthAndHeight[0]
-        if offsetX > 0:
-            self.offset = x - 1, y
+    def moveUIWest(self):
+        if self.inventoryView:
+            self.inventoryView.moveCrosshairWest()
+        else:
+            x, y = self.offset
+            offsetX = self.offset[0]
+            screenX = self.screenWidthAndHeight[0]
+            roomX = self.roomWidthAndHeight[0]
+            if offsetX > 0:
+                self.offset = x - 1, y
 
     def toggleInventory(self):
         if self.player:

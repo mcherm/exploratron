@@ -99,3 +99,15 @@ class InventoryView:
                 rightImage = imageLibrary.lookupById(rightItem.tileId)
                 surface.blit(rightImage, (rightItemXPos, itemYPos))
         crosshair.drawAt(surface, (self.crosshairX, self.crosshairY))
+
+    def moveCrosshairSouth(self):
+        self.crosshairY = self.crosshairY + TILE_SIZE + BORDER
+
+    def moveCrosshairNorth(self):
+        pass
+
+    def moveCrosshairEast(self):
+        pass
+
+    def moveCrosshairWest(self):
+        pass
