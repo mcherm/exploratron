@@ -73,18 +73,14 @@ class RemoteClient():
                     elif pygameEvent.type == pygame.KEYDOWN:
                         keyCode = pygameKeyToKeyCode.get(pygameEvent.key)
                         if keyCode is not None:
-                            if keyCode == KeyCode.MOVE_CAMERA_UP:
-                                print("Trying to move camera UP") # FIXME: Remove
-                                display.uiState.moveCameraNorth()
-                            elif keyCode == KeyCode.MOVE_CAMERA_DOWN:
-                                print("Trying to move camera DOWN") # FIXME: Remove
-                                display.uiState.moveCameraSouth()
-                            elif keyCode == KeyCode.MOVE_CAMERA_LEFT:
-                                print("Trying to move camera LEFT") # FIXME: Remove
-                                display.uiState.moveCameraWest()
-                            elif keyCode == KeyCode.MOVE_CAMERA_RIGHT:
-                                print("Trying to move camera RIGHT") # FIXME: Remove
-                                display.uiState.moveCameraEast()
+                            if keyCode == KeyCode.MOVE_UI_UP:
+                                display.uiState.moveUINorth()
+                            elif keyCode == KeyCode.MOVE_UI_DOWN:
+                                display.uiState.moveUISouth()
+                            elif keyCode == KeyCode.MOVE_UI_LEFT:
+                                display.uiState.moveUIWest()
+                            elif keyCode == KeyCode.MOVE_UI_RIGHT:
+                                display.uiState.moveUIEast()
                             elif keyCode == KeyCode.TOGGLE_INVENTORY:
                                 display.uiState.toggleInventory()
                             else:
