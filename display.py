@@ -26,12 +26,6 @@ class PygameGridDisplay:
                     image = imageLibrary.lookupById(thing.tileId)
                     self.screen.blit(image, (TILE_SIZE * screenX, TILE_SIZE * screenY))
 
-    def getEvents(self):
-        return pygame.event.get()
-
-    def quit(self):
-        pygame.quit()
-
 
 LIGHT_GREY = (120, 120, 120)
 RED = (255, 0, 0)
