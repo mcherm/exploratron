@@ -82,8 +82,16 @@ class InventoryView:
         inventoryRegion.centerx = screenWidth / 2
         inventoryRegion.move_ip(0, INVENTORY_MARGIN)
         self.inventoryRegion = inventoryRegion
-        self.crosshairX = inventoryRegion.centerx
-        self.crosshairY = inventoryRegion.top + BORDER + (TILE_SIZE // 2)
+        # location in pixels where crosshair goes if its position is (0,0)
+        self.crosshairBaseX = inventoryRegion.centerx
+        self.crosshairBaseY = inventoryRegion.top + BORDER + (TILE_SIZE // 2)
+        self.crosshairPositionX = 0
+        self.crosshairPositionY = 0
+
+    def crosshairPixelPos(self):
+        """Returns (x,y) position in pixels for the crosshair."""
+        return (self.crosshairBaseX + self.crosshairPositionX * (TILE_SIZE + AISLE_SIZE) // 2,
+                self.crosshairBaseY + self.crosshairPositionY * (TILE_SIZE + BORDER))
 
     def show(self, surface, imageLibrary):
         if not self.hasLaidOutScreen:
@@ -98,16 +106,20 @@ class InventoryView:
             if rightItem is not None:
                 rightImage = imageLibrary.lookupById(rightItem.tileId)
                 surface.blit(rightImage, (rightItemXPos, itemYPos))
-        crosshair.drawAt(surface, (self.crosshairX, self.crosshairY))
+        crosshair.drawAt(surface, self.crosshairPixelPos())
 
     def moveCrosshairSouth(self):
-        self.crosshairY = self.crosshairY + TILE_SIZE + BORDER
+        if self.crosshairPositionX == 0 and self.crosshairPositionY < len(self.itemPairs) - 1:
+            self.crosshairPositionY += 1
 
     def moveCrosshairNorth(self):
-        pass
+        if self.crosshairPositionX == 0 and self.crosshairPositionY > 0:
+            self.crosshairPositionY -= 1
 
     def moveCrosshairEast(self):
-        pass
+        if self.crosshairPositionX < 1:
+            self.crosshairPositionX += 1
 
     def moveCrosshairWest(self):
-        pass
+        if self.crosshairPositionX > -1:
+            self.crosshairPositionX -= 1
