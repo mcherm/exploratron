@@ -148,3 +148,16 @@ class InventoryView:
     def moveCrosshairWest(self):
         if self.crosshairPositionX > -1:
             self.crosshairPositionX -= 1
+
+    def takeAction(self, world, person):
+        if self.crosshairPositionX != 0:
+            pair = self.itemPairs[self.crosshairPositionY]
+            whichItem = 0 if self.crosshairPositionX < 0 else 1
+            item = pair[whichItem]
+            if item is not None:
+                person.inventory.remove(item) # take it out the inventory
+                person.placeItem(item)
+                self.itemPairs[self.crosshairPositionY] = (
+                    (None, pair[1]) if self.crosshairPositionX < 0 else (pair[0], None)
+                )
+
