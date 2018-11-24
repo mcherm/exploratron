@@ -7,9 +7,11 @@ import pygame
 from images import TILE_SIZE
 
 LIGHT_GREY = (120, 120, 120)
+TRACK_COLOR = (0,0,0)
 INVENTORY_MARGIN = 10  # distance in pixels from edge of screen to edge of showing the inventory
 BORDER = 3  # distance in pixels around each item
 AISLE_SIZE = TILE_SIZE // 2  # width of the aisle between columns of items
+TRACK_WIDTH = 7
 
 
 CROSSHAIR_SIZE = 32
@@ -93,6 +95,24 @@ class InventoryView:
         return (self.crosshairBaseX + self.crosshairPositionX * (TILE_SIZE + AISLE_SIZE) // 2,
                 self.crosshairBaseY + self.crosshairPositionY * (TILE_SIZE + BORDER))
 
+    def showTrack(self, surface):
+        """Draws the lines that show where the cursor can be moved."""
+        pygame.draw.line(
+            surface,
+            TRACK_COLOR,
+            (self.crosshairBaseX, self.crosshairBaseY),
+            (self.crosshairBaseX, self.crosshairBaseY + (len(self.itemPairs) - 1) * (TILE_SIZE + BORDER)),
+            TRACK_WIDTH
+        )
+        for i in range(0, len(self.itemPairs)):
+            pygame.draw.line(
+                surface,
+                TRACK_COLOR,
+                (self.crosshairBaseX - AISLE_SIZE//2, self.crosshairBaseY + i * (TILE_SIZE + BORDER)),
+                (self.crosshairBaseX + AISLE_SIZE//2, self.crosshairBaseY + i * (TILE_SIZE + BORDER)),
+                TRACK_WIDTH
+            )
+
     def show(self, surface, imageLibrary):
         if not self.hasLaidOutScreen:
             self.layOutScreen(surface)
@@ -106,6 +126,7 @@ class InventoryView:
             if rightItem is not None:
                 rightImage = imageLibrary.lookupById(rightItem.tileId)
                 surface.blit(rightImage, (rightItemXPos, itemYPos))
+        self.showTrack(surface)
         crosshair.drawAt(surface, self.crosshairPixelPos())
 
     def moveCrosshairSouth(self):
