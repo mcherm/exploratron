@@ -59,6 +59,7 @@ class InventoryView:
     crosshair position and draw to the screen as needed."""
     def __init__(self, inventory):
         self.inventory = inventory
+        self.shouldExit = False
         self.hasLaidOutScreen = False
         # Other fields self.itemPairs, self.inventoryRegion, self.crosshairX, self.crosshairY
         # are set during the layOutScreen() method
@@ -100,7 +101,7 @@ class InventoryView:
         pygame.draw.line(
             surface,
             TRACK_COLOR,
-            (self.crosshairBaseX, self.crosshairBaseY),
+            (self.crosshairBaseX, self.crosshairBaseY - TILE_SIZE//2),
             (self.crosshairBaseX, self.crosshairBaseY + (len(self.itemPairs) - 1) * (TILE_SIZE + BORDER)),
             TRACK_WIDTH
         )
@@ -134,6 +135,9 @@ class InventoryView:
             self.crosshairPositionY += 1
 
     def moveCrosshairNorth(self):
+        if self.crosshairPositionX == 0 and self.crosshairPositionY == 0:
+            # exit the inventory view
+            self.shouldExit = True
         if self.crosshairPositionX == 0 and self.crosshairPositionY > 0:
             self.crosshairPositionY -= 1
 
