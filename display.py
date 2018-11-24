@@ -157,6 +157,8 @@ class UIState:
     def moveUINorth(self):
         if self.inventoryView:
             self.inventoryView.moveCrosshairNorth()
+            if self.inventoryView.shouldExit:
+                self.inventoryView = None
         else:
             x, y = self.offset
             offsetY = self.offset[1]
