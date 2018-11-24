@@ -177,6 +177,10 @@ class Mobile(Thing):
             iGotIt = self.receiveItem(topItem)
             if iGotIt:
                 cell.removeThing(topItem)
+    def placeItem(self, item):
+        """This makes the mobile place an item in its current location."""
+        cell = self.room.cellAt(self.position[0], self.position[1])
+        cell.things.append(item)
     def doRegen(self):
         """This gets called once every 10 seconds. When it is called the
         mobile should perform regeneration updates such as healing damage."""

@@ -6,12 +6,13 @@ class KeyCode:
     GO_DOWN = 2
     GO_LEFT = 3
     GO_RIGHT = 4
-    MOVE_UI_UP = 5
-    MOVE_UI_DOWN = 6
-    MOVE_UI_LEFT = 7
-    MOVE_UI_RIGHT = 8
-    PICK_UP = 9
-    TOGGLE_INVENTORY = 10
+    PICK_UP = 5
+    TOGGLE_INVENTORY = 6
+    MOVE_UI_UP = 7
+    MOVE_UI_DOWN = 8
+    MOVE_UI_LEFT = 9
+    MOVE_UI_RIGHT = 10
+    UI_ACTION = 11
 
     
 
@@ -24,6 +25,7 @@ pygameKeyToKeyCode = {
     pygame.K_DOWN: KeyCode.MOVE_UI_DOWN,
     pygame.K_LEFT: KeyCode.MOVE_UI_LEFT,
     pygame.K_RIGHT: KeyCode.MOVE_UI_RIGHT,
+    pygame.K_SLASH: KeyCode.UI_ACTION,
     pygame.K_q: KeyCode.PICK_UP,
     pygame.K_i: KeyCode.TOGGLE_INVENTORY,
 }
@@ -33,12 +35,13 @@ keyCodeToIsAction = {
     KeyCode.GO_DOWN: True,
     KeyCode.GO_LEFT: True,
     KeyCode.GO_RIGHT: True,
+    KeyCode.PICK_UP: True,
+    KeyCode.TOGGLE_INVENTORY: False,
     KeyCode.MOVE_UI_UP: False,
     KeyCode.MOVE_UI_DOWN: False,
     KeyCode.MOVE_UI_LEFT: False,
     KeyCode.MOVE_UI_RIGHT: False,
-    KeyCode.PICK_UP: True,
-    KeyCode.TOGGLE_INVENTORY: False,
+    KeyCode.UI_ACTION: False,
 }
 
 

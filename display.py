@@ -187,6 +187,13 @@ class UIState:
             if offsetX > 0:
                 self.offset = x - 1, y
 
+    def takeAction(self, world, person):
+        """This is called when someone presses the UI action button."""
+        if self.inventoryView:
+            self.inventoryView.takeAction(world, person)
+        else:
+            pass
+
     def toggleInventory(self):
         if self.player:
             if self.inventoryView is None:
