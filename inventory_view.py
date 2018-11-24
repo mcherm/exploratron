@@ -123,7 +123,8 @@ class InventoryView:
         for rowNum, (leftItem, rightItem) in enumerate(self.itemPairs):
             itemYPos = self.inventoryRegion.top + BORDER + rowNum * (TILE_SIZE + BORDER)
             leftImage = imageLibrary.lookupById(leftItem.tileId)
-            surface.blit(leftImage, (leftItemXPos, itemYPos))
+            if leftImage is not None:
+                surface.blit(leftImage, (leftItemXPos, itemYPos))
             if rightItem is not None:
                 rightImage = imageLibrary.lookupById(rightItem.tileId)
                 surface.blit(rightImage, (rightItemXPos, itemYPos))
