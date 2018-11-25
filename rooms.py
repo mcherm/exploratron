@@ -33,7 +33,7 @@ room0 = Room(
         (1,1): Chest(),
         (5,3): Chest(),
         (1,2): BluePotion(),
-        (1,2): [Spear(), BluePotion(), Sword(), Wand(), Spear()],
+        (1,2): [Spear(), BluePotion(), Sword(), HealingWand(), Spear()],
     },
     {
         (5,1): GiantBee(),
@@ -68,7 +68,7 @@ room2 = Room(
     {
         (9,3): Chest(),
         (7,4): SnakeTrap(),
-        (10,1): Wand(),
+        (10,1): HealingWand(),
     },
     {
         (8,8): MouseMan(),
@@ -130,7 +130,7 @@ room5 = Room(
         [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
     ],
     {
-        (4,5): Wand(),
+        (4,5): HealingWand(),
     }
 )
 

@@ -1,4 +1,4 @@
-from kindsofthing import Thing, Item, Weapon
+from kindsofthing import Thing, Item, Weapon, Wand
 import random
 
 class Stats:
@@ -10,6 +10,7 @@ class Stats:
         self.mana = 0
         self.maxMana = 0
 
+
 class Inventory:
     """An instance of this class is the stuff that a mobile carries around with
     them.
@@ -20,7 +21,8 @@ class Inventory:
 
     def __init__(self, items=()):
         self.items = []
-        self.wieldedWeapon = None
+        self._wieldedWeapon = None
+        self._wieldedWand = None
         assert all(isinstance(x, Item) for x in items)
         for x in items:
             self.addItem(x)
@@ -33,15 +35,19 @@ class Inventory:
         then this returns False."""
         assert isinstance(item, Item)
         self.items.append(item)
-        if self.wieldedWeapon is None and isinstance(item, Weapon):
-            self.wieldedWeapon = item
+        if self._wieldedWeapon is None and isinstance(item, Weapon):
+            self._wieldedWeapon = item
+        if self._wieldedWand is None and isinstance(item, Wand):
+            self._wieldedWand = item
         return True
 
     def removeItem(self, item):
         """Removes an item from the inventory. If the given item is not in the
         inventory then this raises a ValueError."""
-        if item == self.wieldedWeapon:
-            self.wieldedWeapon = None
+        if item == self._wieldedWeapon:
+            self._wieldedWeapon = None
+        if item == self._wieldedWand:
+            self._wieldedWand = None
         self.items.remove(item)
 
     def wieldWeapon(self, weapon):
@@ -49,17 +55,33 @@ class Inventory:
         weapon. Otherwise, starts wielding the given weapon if it is a Weapon
         currently in the inventory, and raises ValueError if it isn't."""
         if weapon is None:
-            self.wieldedWeapon = None
+            self._wieldedWeapon = None
         else:
             if isinstance(weapon, Weapon) and weapon in self.items:
-                self.wieldedWeapon = weapon
+                self._wieldedWeapon = weapon
             else:
                 raise ValueError(f"{weapon} is not a weapon in the inventory.")
 
     def getWieldedWeapon(self):
         """Returns the currently wielded weapon, or None if no weapon is wielded."""
-        return self.wieldedWeapon
+        return self._wieldedWeapon
 
+    def wieldWand(self, wand):
+        """if wand is None, then this stops wielding the currently wielded
+        wand. Otherwise, starts wielding the given wand if it a Wand currently
+        in the inventory, and raises ValueError if it isn't."""
+        if wand is None:
+            self._wieldedWand = None
+        else:
+            if isinstance(wand, Wand) and wand in self.items:
+                self._wieldedWand = wand
+            else:
+                raise ValueError(f"{wand} is not a wand in the inventory.")
+
+
+    def getWieldedWand(self):
+        """Returns the currently wielded wand, or None if no wand is wielded."""
+        return self._wieldedWand
 
 
 class Mobile(Thing):
@@ -91,6 +113,10 @@ class Mobile(Thing):
         """This returns the weapon that the mobile is wielding, or it
         returns None if the mobile is not wielding any weapon."""
         return self.inventory.getWieldedWeapon()
+    def getWieldedWand(self):
+        """This returns the wand that the mobile is wielding, or it
+        returns None if the mobile is not wielding any wand."""
+        return self.inventory.getWieldedWand()
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
@@ -211,6 +237,13 @@ class Mobile(Thing):
         If the item is successfully put in the mobile's inventory
         this returns True, if not it returns False."""
         return self.inventory.addItem(item)
+    def cast(self, world, screenChanges):
+        """This makes the mobile attempt to cast the currently wielded
+        wand. If no wand is wielded or the current wand cannot be used,
+        this does nothing; otherwise the wand is cast."""
+        wand = self.getWieldedWand()
+        if wand is not None:
+            wand.cast(caster=self, world=world, screenChanges=screenChanges)
     def pickUpItem(self):
         """This makes the mobile attempt to pick up the top item
         in the space the mobile occupies. Picking it up might
@@ -231,5 +264,6 @@ class Mobile(Thing):
         mobile should perform regeneration updates such as healing damage."""
         if self.stats.health < self.stats.maxHealth:
             self.stats.health = self.stats.health + 1
-
+        if self.stats.mana < self.stats.maxMana:
+            self.stats.mana = self.stats.mana + 1
 

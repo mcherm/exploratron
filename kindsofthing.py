@@ -62,6 +62,28 @@ class Weapon(Item):
         return self.hitSoundEffectId
 
 
+class Wand(Item):
+    def __init__(self, region, manaCost, spellSoundEffectName, tileName="wand"):
+        super().__init__(region, tileName)
+        self.manaCost = manaCost
+        self.spellSoundEffectId = region.soundLibrary.idByName(spellSoundEffectName)
+    def getSpellSoundEffectId(self):
+        """This returns the ID of the sound effect that should be played
+        when this wand is used."""
+        return self.spellSoundEffectId
+    def cast(self, caster, world, screenChanges):
+        """Common behavior of all wands when cast. Returns True if the cast
+        was successful, and False if it fails."""
+        if caster.stats.mana < self.manaCost:
+            return False
+        else:
+            caster.stats.mana -= self.manaCost
+            screenChanges.roomPlaySound(caster.room, self.getSpellSoundEffectId())
+            self.takeEffect(caster, world, screenChanges)
+    def takeEffect(self, caster, world, screenChanges):
+        """Specific wands will override this to perform an action."""
+        pass
+
 
 
 """
