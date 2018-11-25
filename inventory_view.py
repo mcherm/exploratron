@@ -30,11 +30,11 @@ crosshair = Crosshair()
 
 
 def pairwise(iterable):
-    """Returns the contents as a list of pairs (padding the last slot with None
-    if there were an odd number).
+    """Returns the contents as a list of 2-element lists (padding the last slot
+    with None if there were an odd number).
 
     NOTE: If this were designed for reuse I would make it return an iterator
-    instead of a list."""
+    instead of a list and tuples instead of lists."""
     result = []
     it = iter(iterable)
     while True:
@@ -45,9 +45,9 @@ def pairwise(iterable):
         try:
             second = next(it)
         except StopIteration:
-            result.append((first, None))
+            result.append([first, None])
             break
-        result.append((first, second))
+        result.append([first, second])
     return result
 
 
@@ -58,14 +58,17 @@ class InventoryView:
     the inventory and decide how to lay it out; it will also maintain a
     crosshair position and draw to the screen as needed."""
 
-    def __init__(self, inventory):
-        """Passed an Inventory object with the current set of items to display."""
-        self.itemsInBag = list(inventory)
-        self.wornWeapon = inventory.getWieldedWeapon()
+    def __init__(self, player):
+        """Passed a Player whose Inventory we will display, and who will drop any items
+        carried off of the screen."""
+        self.player = player
+        self.itemsInBag = list(player.inventory)
+        self.wornWeapon = player.inventory.getWieldedWeapon()
         if self.wornWeapon is not None:
             self.itemsInBag.remove(self.wornWeapon) # Do not show worn weapon in the bag
         self.itemsInBag.append(None) # add a blank space in the bag
         self.shouldExit = False
+        self.itemBeingMoved = None
         self.hasLaidOutScreen = False
         # Other fields self.itemPairs, self.bagRegion, self.crosshairX, self.crosshairY
         # are set during the layOutScreen() method
@@ -79,7 +82,7 @@ class InventoryView:
         rowsThatCanFit = (screenHeight - (2 * INVENTORY_MARGIN) - BORDER) // (TILE_SIZE + BORDER)
 
         itemPairs = pairwise(self.itemsInBag)
-        itemPairs = itemPairs[:rowsThatCanFit]  # truncate to what can fit on the screen
+        itemPairs = itemPairs[:rowsThatCanFit]  # truncate to what can fit on the screen FIXME: Shouldn't do this
         self.itemPairs = itemPairs
         rows = len(itemPairs)
 
@@ -173,7 +176,15 @@ class InventoryView:
         self.showBag(surface, imageLibrary)
         self.showWornItems(surface, imageLibrary)
         self.showTrack(surface)
-        crosshair.drawAt(surface, self.crosshairPixelPos())
+        if self.itemBeingMoved is None:
+            crosshair.drawAt(surface, self.crosshairPixelPos())
+        else:
+            itemImage = imageLibrary.lookupById(self.itemBeingMoved.tileId)
+            x,y = self.crosshairPixelPos()
+            x -= TILE_SIZE // 2
+            y -= TILE_SIZE // 2
+            surface.blit(itemImage, (x,y))
+            crosshair.drawAt(surface, self.crosshairPixelPos())
 
     def moveCrosshairSouth(self):
         if self.crosshairPositionX == 0 and self.crosshairPositionY < len(self.itemPairs):
@@ -183,6 +194,8 @@ class InventoryView:
         if self.crosshairPositionX == 0 and self.crosshairPositionY == 0:
             # exit the inventory view
             self.shouldExit = True
+            if self.itemBeingMoved is not None:
+                self.dropItem(self.itemBeingMoved)
         if self.crosshairPositionX == 0 and self.crosshairPositionY > 0:
             self.crosshairPositionY -= 1
 
@@ -194,24 +207,44 @@ class InventoryView:
         if self.crosshairPositionX > -1:
             self.crosshairPositionX -= 1
 
-    def takeAction(self, person):
-        if self.crosshairPositionX == 0:
-            pass # Do nothing if in the center
-        elif self.crosshairPositionY == len(self.itemPairs):
-            pass # Do nothing if in the worn items section
+    def takeAction(self):
+        if self.itemBeingMoved is None:
+            if self.crosshairPositionX == 0:
+                pass # Do nothing if in the center
+            elif self.crosshairPositionY == len(self.itemPairs):
+                pass # Do nothing if in the worn items section
+            else:
+                # If on an item, start moving it around
+                pair = self.itemPairs[self.crosshairPositionY]
+                whichItem = 0 if self.crosshairPositionX < 0 else 1
+                item = pair[whichItem]
+                if item is not None:
+                    self.itemBeingMoved = item
+                    pair[whichItem] = None
         else:
-            # If on an item, drop it where we stand
-            pair = self.itemPairs[self.crosshairPositionY]
-            whichItem = 0 if self.crosshairPositionX < 0 else 1
-            item = pair[whichItem]
-            if item is not None:
-                try:
-                    person.inventory.removeItem(item) # take it out the inventory
-                except ValueError:
-                    # Must no longer be in the inventory. So do nothing
-                    return
-                person.placeItem(item)
-                self.itemPairs[self.crosshairPositionY] = (
-                    (None, pair[1]) if self.crosshairPositionX < 0 else (pair[0], None)
-                )
+            # Moving an item!
+            if self.crosshairPositionX == 0:
+                pass # Do nothing if in the center
+            elif self.crosshairPositionY == len(self.itemPairs):
+                pass # Do nothing if in the worn items section
+            else:
+                # In the bag
+                pair = self.itemPairs[self.crosshairPositionY]
+                whichItem = 0 if self.crosshairPositionX < 0 else 1
+                if pair[whichItem] is None:
+                    pair[whichItem] = self.itemBeingMoved
+                    self.itemBeingMoved = None
+                else:
+                    # Already an item in this location. Do nothing
+                    pass
 
+    def dropItem(self, item):
+        """Attempt to drop an item currently in the inventory. If the item actually turns
+        out NOT to be in the inventory at this moment, this will do nothing."""
+        if not self.player.isDead:
+            try:
+                self.player.inventory.removeItem(item)  # take it out the inventory
+            except ValueError:
+                # Must no longer be in the inventory. So do nothing
+                return
+            self.player.placeItem(item)

@@ -190,14 +190,14 @@ class UIState:
     def takeAction(self, world, person):
         """This is called when someone presses the UI action button."""
         if self.inventoryView:
-            self.inventoryView.takeAction(person)
+            self.inventoryView.takeAction()
         else:
             pass
 
     def toggleInventory(self):
         if self.player:
             if self.inventoryView is None:
-                self.inventoryView = InventoryView(self.player.inventory)
+                self.inventoryView = InventoryView(self.player)
             else:
                 self.inventoryView = None
         else:
