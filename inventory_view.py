@@ -5,7 +5,7 @@
 
 import pygame
 from images import TILE_SIZE
-from kindsofthing import Weapon
+from kindsofthing import Weapon, Wand
 
 
 LIGHT_GREY = (120, 120, 120)
@@ -68,8 +68,11 @@ class InventoryView:
         self.player = player
         self.itemsInBag = list(player.inventory)
         self.wieldedWeapon = player.inventory.getWieldedWeapon()
+        self.wieldedWand = player.inventory.getWieldedWand()
         if self.wieldedWeapon is not None:
-            self.itemsInBag.remove(self.wieldedWeapon) # Do not show worn weapon in the bag
+            self.itemsInBag.remove(self.wieldedWeapon) # Do not show wielded weapon in the bag
+        if self.wieldedWand is not None:
+            self.itemsInBag.remove(self.wieldedWand) # Do not show wielded wand in the bag
         self.itemsInBag.append(None) # add a blank space in the bag
         self.shouldExit = False
         self.itemBeingMoved = None
@@ -172,7 +175,15 @@ class InventoryView:
         surface.fill(LIGHT_GREY, self.wornItemsRegion)
         if self.wieldedWeapon is not None:
             wieldedWeaponImage = imageLibrary.lookupById(self.wieldedWeapon.tileId)
-            surface.blit(wieldedWeaponImage, (self.wornItemsRegion.left + BORDER, self.wornItemsRegion.top + BORDER))
+            surface.blit(wieldedWeaponImage,
+                         (self.wornItemsRegion.left + BORDER,
+                          self.wornItemsRegion.top + BORDER))
+        if self.wieldedWand is not None:
+            wieldedWandImage = imageLibrary.lookupById(self.wieldedWand.tileId)
+            surface.blit(wieldedWandImage,
+                         (self.wornItemsRegion.right - (TILE_SIZE + BORDER),
+                          self.wornItemsRegion.top + BORDER))
+
 
     def show(self, surface, imageLibrary):
         if not self.hasLaidOutScreen:
@@ -213,7 +224,8 @@ class InventoryView:
                 self.crosshairPositionX += 1
             elif self.crosshairPositionX == 0:
                 if self.crosshairPositionY == len(self.itemPairs):
-                    pass # cannot ever put things into the right-hand slot
+                    if self.wieldedWand is None and isinstance(self.itemBeingMoved, Wand):
+                        self.crosshairPositionX += 1
                 else:
                     if self.itemPairs[self.crosshairPositionY][1] is None:
                         self.crosshairPositionX += 1
@@ -251,10 +263,15 @@ class InventoryView:
             if self.crosshairPositionX == 0:
                 pass # Do nothing if in the center
             elif self.crosshairPositionY == len(self.itemPairs):
-                if self.crosshairPositionX < 0 and self.wieldedWeapon is not None:
+                if self.crosshairPositionX == -1 and self.wieldedWeapon is not None:
                     self.itemBeingMoved = self.wieldedWeapon
                     self.wieldedWeapon = None
                     self.wieldWeapon(None) # Immediately mark it not worn
+                    self.crosshairPositionX = 0 # Pop back to the center
+                elif self.crosshairPositionX == 1 and self.wieldedWand is not None:
+                    self.itemBeingMoved = self.wieldedWand
+                    self.wieldedWand = None
+                    self.wieldWand(None) # Immediately mark it as not worn
                     self.crosshairPositionX = 0 # Pop back to the center
                 else:
                     pass # Do nothing for other positions
@@ -304,12 +321,25 @@ class InventoryView:
 
     def wieldWeapon(self, item):
         """If item is None, stops wielding the current weapon. If item is anything
-        else, start wielding it. If for some reason this doesn't work (perhaps the
-        inventory has changed since the InventoryView launched), then this does
-        nothing."""
+        else, try to start wielding it as a Weapon. If for some reason this doesn't
+        work (perhaps the inventory has changed since the InventoryView launched),
+        then this does nothing."""
         if not self.player.isDead:
             try:
                 self.player.inventory.wieldWeapon(item)
             except ValueError:
                 # Must no longer be wielded. So do nothing
                 return
+
+    def wieldWand(self, item):
+        """If item is None, stops wielding the current wand. If item is anything
+        else, try to start wielding it as a Wand. If for some reason this doesn't
+        work (perhaps the inventory has changed since the InventoryView launched),
+        then this does nothing."""
+        if not self.player.isDead:
+            try:
+                self.player.inventory.wieldWand(item)
+            except ValueError:
+                # Must no longer be wielded. So do nothing
+                return
+

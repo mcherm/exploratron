@@ -1,4 +1,4 @@
-from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon
+from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, Wand
 from mobile import Mobile
 
 defaultRegion = Region()
@@ -66,10 +66,6 @@ class Spear(Weapon):
         super().__init__(defaultRegion, "spear", 3,
                          "348112__mattix__crunch")
 
-class Wand(Item):
-    def __init__(self):
-        super().__init__(defaultRegion, "wand")
-
 class Bite(Weapon):
     def __init__(self):
         super().__init__(defaultRegion, "transparent", 2,
@@ -94,3 +90,12 @@ class Sting(Weapon):
 class Witch(Mobile):
     def __init__(self):
         super().__init__(defaultRegion, "witch", maxHealth=8, maxMana=19)
+
+
+class HealingWand(Wand):
+    def __init__(self):
+        super().__init__(defaultRegion, manaCost=6,
+                         spellSoundEffectName="365658__mattix__bird-thrush-nightingale-01")
+        self.pointsHealed = 4
+    def takeEffect(self, caster, world, screenChanges):
+        caster.stats.health = min(caster.stats.health + self.pointsHealed, caster.stats.maxHealth)

@@ -153,6 +153,9 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
                         elif eventToActOn.keyCode == KeyCode.GO_LEFT:
                             player.moveWest(world, screenChanges)
                             player.whenItCanAct = currentTime + player.timeToWait()
+                        elif eventToActOn.keyCode == KeyCode.CAST:
+                            player.cast(world, screenChanges)
+                            player.whenItCanAct = currentTime + player.timeToWait()
                         elif eventToActOn.keyCode == KeyCode.PICK_UP:
                             player.pickUpItem()
                             player.whenItCanAct = currentTime + player.timeToWait()
