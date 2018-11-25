@@ -33,7 +33,7 @@ room0 = Room(
         (1,1): Chest(),
         (5,3): Chest(),
         (1,2): BluePotion(),
-        (1,2): [Spear() for x in range(7)],
+        (1,2): [Spear(), BluePotion(), Sword(), Wand(), Spear()],
     },
     {
         (5,1): GiantBee(),
