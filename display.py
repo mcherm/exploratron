@@ -190,7 +190,7 @@ class UIState:
     def takeAction(self, world, person):
         """This is called when someone presses the UI action button."""
         if self.inventoryView:
-            self.inventoryView.takeAction(world, person)
+            self.inventoryView.takeAction(person)
         else:
             pass
 
