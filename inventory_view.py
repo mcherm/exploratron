@@ -5,6 +5,8 @@
 
 import pygame
 from images import TILE_SIZE
+from kindsofthing import Weapon
+
 
 LIGHT_GREY = (120, 120, 120)
 TRACK_COLOR = (0,0,0)
@@ -63,9 +65,9 @@ class InventoryView:
         carried off of the screen."""
         self.player = player
         self.itemsInBag = list(player.inventory)
-        self.wornWeapon = player.inventory.getWieldedWeapon()
-        if self.wornWeapon is not None:
-            self.itemsInBag.remove(self.wornWeapon) # Do not show worn weapon in the bag
+        self.wieldedWeapon = player.inventory.getWieldedWeapon()
+        if self.wieldedWeapon is not None:
+            self.itemsInBag.remove(self.wieldedWeapon) # Do not show worn weapon in the bag
         self.itemsInBag.append(None) # add a blank space in the bag
         self.shouldExit = False
         self.itemBeingMoved = None
@@ -166,9 +168,9 @@ class InventoryView:
     def showWornItems(self, surface, imageLibrary):
         surface.fill(LIGHT_GREY, self.bridgeRegion)
         surface.fill(LIGHT_GREY, self.wornItemsRegion)
-        if self.wornWeapon is not None:
-            wornWeaponImage = imageLibrary.lookupById(self.wornWeapon.tileId)
-            surface.blit(wornWeaponImage, (self.wornItemsRegion.left + BORDER, self.wornItemsRegion.top + BORDER))
+        if self.wieldedWeapon is not None:
+            wieldedWeaponImage = imageLibrary.lookupById(self.wieldedWeapon.tileId)
+            surface.blit(wieldedWeaponImage, (self.wornItemsRegion.left + BORDER, self.wornItemsRegion.top + BORDER))
 
     def show(self, surface, imageLibrary):
         if not self.hasLaidOutScreen:
@@ -209,10 +211,16 @@ class InventoryView:
 
     def takeAction(self):
         if self.itemBeingMoved is None:
+            # Picking an item!
             if self.crosshairPositionX == 0:
                 pass # Do nothing if in the center
             elif self.crosshairPositionY == len(self.itemPairs):
-                pass # Do nothing if in the worn items section
+                if self.crosshairPositionX < 0 and self.wieldedWeapon is not None:
+                    self.itemBeingMoved = self.wieldedWeapon
+                    self.wieldedWeapon = None
+                    self.wieldWeapon(None) # Immediately mark it not worn
+                else:
+                    pass # Do nothing for other positions
             else:
                 # If on an item, start moving it around
                 pair = self.itemPairs[self.crosshairPositionY]
@@ -226,7 +234,12 @@ class InventoryView:
             if self.crosshairPositionX == 0:
                 pass # Do nothing if in the center
             elif self.crosshairPositionY == len(self.itemPairs):
-                pass # Do nothing if in the worn items section
+                if self.crosshairPositionX < 0 and self.wieldedWeapon is None and isinstance(self.itemBeingMoved, Weapon):
+                    self.wieldedWeapon = self.itemBeingMoved
+                    self.itemBeingMoved = None
+                    self.wieldWeapon(self.wieldedWeapon)
+                else:
+                    pass # Do nothing if in the worn items section
             else:
                 # In the bag
                 pair = self.itemPairs[self.crosshairPositionY]
@@ -248,3 +261,15 @@ class InventoryView:
                 # Must no longer be in the inventory. So do nothing
                 return
             self.player.placeItem(item)
+
+    def wieldWeapon(self, item):
+        """If item is None, stops wielding the current weapon. If item is anything
+        else, start wielding it. If for some reason this doesn't work (perhaps the
+        inventory has changed since the InventoryView launched), then this does
+        nothing."""
+        if not self.player.isDead:
+            try:
+                self.player.inventory.wieldWeapon(item)
+            except ValueError:
+                # Must no longer be wielded. So do nothing
+                return

@@ -44,6 +44,18 @@ class Inventory:
             self.wieldedWeapon = None
         self.items.remove(item)
 
+    def wieldWeapon(self, weapon):
+        """If weapon is None, then this stops wielding the currently wielded
+        weapon. Otherwise, starts wielding the given weapon if it is a Weapon
+        currently in the inventory, and raises ValueError if it isn't."""
+        if weapon is None:
+            self.wieldedWeapon = None
+        else:
+            if isinstance(weapon, Weapon) and weapon in self.items:
+                self.wieldedWeapon = weapon
+            else:
+                raise ValueError(f"{weapon} is not a weapon in the inventory.")
+
     def getWieldedWeapon(self):
         """Returns the currently wielded weapon, or None if no weapon is wielded."""
         return self.wieldedWeapon
