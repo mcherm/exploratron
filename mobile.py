@@ -10,12 +10,52 @@ class Stats:
         self.mana = 0
         self.maxMana = 0
 
+class Inventory:
+    """An instance of this class is the stuff that a mobile carries around with
+    them.
+
+    It has a separate wielded weapon. If no weapon is wielded and a new weapon
+    is put into the inventory, then it becomes the wielded weapon. Also the
+    wieldWeapon() method can be used to change it."""
+
+    def __init__(self, items=()):
+        self.items = []
+        self.wieldedWeapon = None
+        assert all(isinstance(x, Item) for x in items)
+        for x in items:
+            self.addItem(x)
+
+    def __iter__(self):
+        return iter(self.items)
+
+    def addItem(self, item):
+        """Attempts to add an item. If it can be added, this returns True, if not
+        then this returns False."""
+        assert isinstance(item, Item)
+        self.items.append(item)
+        if self.wieldedWeapon is None and isinstance(item, Weapon):
+            self.wieldedWeapon = item
+        return True
+
+    def removeItem(self, item):
+        """Removes an item from the inventory. If the given item is not in the
+        inventory then this raises a ValueError."""
+        if item == self.wieldedWeapon:
+            self.wieldedWeapon = None
+        self.items.remove(item)
+
+    def getWieldedWeapon(self):
+        """Returns the currently wielded weapon, or None if no weapon is wielded."""
+        return self.wieldedWeapon
+
+
+
 class Mobile(Thing):
     def __init__(self, region, tileName, maxHealth, maxMana, inventory=()):
         super().__init__(region, tileName)
         self.whenItCanAct = 0
         self.isDead = False
-        self.inventory = [x for x in inventory]
+        self.inventory = Inventory(inventory)
         self.stats = Stats()
         self.stats.maxHealth = maxHealth
         self.stats.health = maxHealth
@@ -38,11 +78,7 @@ class Mobile(Thing):
     def getWieldedWeapon(self):
         """This returns the weapon that the mobile is wielding, or it
         returns None if the mobile is not wielding any weapon."""
-        weaponsInInventory = [x for x in self.inventory if isinstance(x, Weapon)]
-        if weaponsInInventory:
-            return weaponsInInventory[-1]
-        else:
-            return None 
+        return self.inventory.getWieldedWeapon()
     def setLocation(self, room, position):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
@@ -163,9 +199,7 @@ class Mobile(Thing):
         """This is called to potentially give an item to a mobile.
         If the item is successfully put in the mobile's inventory
         this returns True, if not it returns False."""
-        assert isinstance(item, Item)
-        self.inventory.append(item)
-        return True
+        return self.inventory.addItem(item)
     def pickUpItem(self):
         """This makes the mobile attempt to pick up the top item
         in the space the mobile occupies. Picking it up might
