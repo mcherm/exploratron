@@ -20,15 +20,17 @@ CROSSHAIR_SIZE = 32
 HALF_CROSSHAIR_SIZE = CROSSHAIR_SIZE // 2
 
 class Crosshair:
-    def __init__(self):
+    def __init__(self, specialImageName):
+        self.specialImageName = specialImageName
         self.image = None
     def drawAt(self, surface, xy):
         """Draw the crosshair centered at the given xy = (x,y) location."""
         if self.image is None:
-            self.image = pygame.image.load("./img/special/crosshair.png")
+            self.image = pygame.image.load(f"./img/special/{self.specialImageName}.png")
         x, y = xy
         surface.blit(self.image, (x - HALF_CROSSHAIR_SIZE, y - HALF_CROSSHAIR_SIZE))
-crosshair = Crosshair()
+pointer = Crosshair("crosshair")
+hand = Crosshair("hand")
 
 
 def pairwise(iterable):
@@ -179,14 +181,15 @@ class InventoryView:
         self.showWornItems(surface, imageLibrary)
         self.showTrack(surface)
         if self.itemBeingMoved is None:
-            crosshair.drawAt(surface, self.crosshairPixelPos())
+            crosshair = pointer
         else:
             itemImage = imageLibrary.lookupById(self.itemBeingMoved.tileId)
             x,y = self.crosshairPixelPos()
             x -= TILE_SIZE // 2
             y -= TILE_SIZE // 2
             surface.blit(itemImage, (x,y))
-            crosshair.drawAt(surface, self.crosshairPixelPos())
+            crosshair = hand
+        crosshair.drawAt(surface, self.crosshairPixelPos())
 
     def moveCrosshairSouth(self):
         if self.crosshairPositionX == 0 and self.crosshairPositionY < len(self.itemPairs):
@@ -202,12 +205,45 @@ class InventoryView:
             self.crosshairPositionY -= 1
 
     def moveCrosshairEast(self):
-        if self.crosshairPositionX < 1:
-            self.crosshairPositionX += 1
+        if self.itemBeingMoved is None:
+            if self.crosshairPositionX < 1:
+                self.crosshairPositionX += 1
+        else:
+            if self.crosshairPositionX == -1:
+                self.crosshairPositionX += 1
+            elif self.crosshairPositionX == 0:
+                if self.crosshairPositionY == len(self.itemPairs):
+                    pass # cannot ever put things into the right-hand slot
+                else:
+                    if self.itemPairs[self.crosshairPositionY][1] is None:
+                        self.crosshairPositionX += 1
+                    else:
+                        pass # Cannot put into a full slot
+            elif self.crosshairPositionX == 1:
+                pass # can't move right from there
+            else:
+                assert False # x position should be -1, 0, or 1!
 
     def moveCrosshairWest(self):
-        if self.crosshairPositionX > -1:
-            self.crosshairPositionX -= 1
+        if self.itemBeingMoved is None:
+            if self.crosshairPositionX > -1:
+                self.crosshairPositionX -= 1
+        else:
+            if self.crosshairPositionX == 1:
+                self.crosshairPositionX -= 1
+            elif self.crosshairPositionX == 0:
+                if self.crosshairPositionY == len(self.itemPairs):
+                    if self.wieldedWeapon is None and isinstance(self.itemBeingMoved, Weapon):
+                        self.crosshairPositionX -= 1
+                else:
+                    if self.itemPairs[self.crosshairPositionY][0] is None:
+                        self.crosshairPositionX -= 1
+                    else:
+                        pass # Cannot put into a full slot
+            elif self.crosshairPositionX == -1:
+                pass # can't move left from there
+            else:
+                assert False # x position should be -1, 0, or 1!
 
     def takeAction(self):
         if self.itemBeingMoved is None:
@@ -219,6 +255,7 @@ class InventoryView:
                     self.itemBeingMoved = self.wieldedWeapon
                     self.wieldedWeapon = None
                     self.wieldWeapon(None) # Immediately mark it not worn
+                    self.crosshairPositionX = 0 # Pop back to the center
                 else:
                     pass # Do nothing for other positions
             else:
@@ -229,6 +266,7 @@ class InventoryView:
                 if item is not None:
                     self.itemBeingMoved = item
                     pair[whichItem] = None
+                    self.crosshairPositionX = 0 # Pop back to the center
         else:
             # Moving an item!
             if self.crosshairPositionX == 0:
@@ -238,6 +276,7 @@ class InventoryView:
                     self.wieldedWeapon = self.itemBeingMoved
                     self.itemBeingMoved = None
                     self.wieldWeapon(self.wieldedWeapon)
+                    self.crosshairPositionX = 0 # Pop back to the center
                 else:
                     pass # Do nothing if in the worn items section
             else:
@@ -247,6 +286,7 @@ class InventoryView:
                 if pair[whichItem] is None:
                     pair[whichItem] = self.itemBeingMoved
                     self.itemBeingMoved = None
+                    self.crosshairPositionX = 0 # Pop back to the center
                 else:
                     # Already an item in this location. Do nothing
                     pass

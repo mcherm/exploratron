@@ -206,7 +206,6 @@ class Mobile(Thing):
         self.stats.health = self.stats.health-amount
         if self.stats.health < 1:
             self.isDead = True
-            print (self.isDead)
     def receiveItem(self, item):
         """This is called to potentially give an item to a mobile.
         If the item is successfully put in the mobile's inventory
