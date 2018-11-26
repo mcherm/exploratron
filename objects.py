@@ -1,5 +1,6 @@
-from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, Wand
+from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, SelfOnlyWand
 from mobile import Mobile
+from spells import HealingSpell
 
 defaultRegion = Region()
 
@@ -92,10 +93,7 @@ class Witch(Mobile):
         super().__init__(defaultRegion, "witch", maxHealth=8, maxMana=19)
 
 
-class HealingWand(Wand):
+class HealingWand(SelfOnlyWand):
     def __init__(self):
         super().__init__(defaultRegion, manaCost=6,
-                         spellSoundEffectName="365658__mattix__bird-thrush-nightingale-01")
-        self.pointsHealed = 4
-    def takeEffect(self, caster, world, screenChanges):
-        caster.stats.health = min(caster.stats.health + self.pointsHealed, caster.stats.maxHealth)
+                         spell=HealingSpell(defaultRegion, healthHealed=4))

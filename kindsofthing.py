@@ -1,5 +1,6 @@
 
 from images import Region
+from spells import SingleTargetSpell
 
 
 
@@ -63,27 +64,31 @@ class Weapon(Item):
 
 
 class Wand(Item):
-    def __init__(self, region, manaCost, spellSoundEffectName, tileName="wand"):
+    def __init__(self, region, manaCost, spell, tileName="wand"):
         super().__init__(region, tileName)
         self.manaCost = manaCost
-        self.spellSoundEffectId = region.soundLibrary.idByName(spellSoundEffectName)
-    def getSpellSoundEffectId(self):
-        """This returns the ID of the sound effect that should be played
-        when this wand is used."""
-        return self.spellSoundEffectId
+        self.spell = spell
     def cast(self, caster, world, screenChanges):
-        """Common behavior of all wands when cast. Returns True if the cast
+        """Attempts to invoke the spell effect of the wand. Returns True if the cast
         was successful, and False if it fails."""
         if caster.stats.mana < self.manaCost:
             return False
         else:
-            caster.stats.mana -= self.manaCost
-            screenChanges.roomPlaySound(caster.room, self.getSpellSoundEffectId())
-            self.takeEffect(caster, world, screenChanges)
-    def takeEffect(self, caster, world, screenChanges):
-        """Specific wands will override this to perform an action."""
-        pass
+            caster.stats.mana -= self.manaCost  # spend the mana even if the spell fails
+            self.activateSpell(caster, world, screenChanges)
+    def activateSpell(self, caster, world, screenChanges):
+        raise NotImplementedError # intended to be overridden by subclasses
 
+
+class SelfOnlyWand(Wand):
+    """A wand with a spell that affects the caster. No aiming needed."""
+    def __init__(self, region, manaCost, spell, tileName="wand"):
+        assert isinstance(spell, SingleTargetSpell)
+        super().__init__(region, manaCost, spell, tileName)
+
+    def activateSpell(self, caster, world, screenChanges):
+        """This is how you activate a SingleTarget spell that affects the caster."""
+        self.spell.cast(caster, world, screenChanges)
 
 
 """
