@@ -1,6 +1,6 @@
 from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, SelfOnlyWand
 from mobile import Mobile
-from spells import HealingSpell
+from spells import HealingSpell, TeleportSpell
 
 defaultRegion = Region()
 
@@ -97,3 +97,8 @@ class HealingWand(SelfOnlyWand):
     def __init__(self):
         super().__init__(defaultRegion, manaCost=6,
                          spell=HealingSpell(defaultRegion, healthHealed=4))
+
+class TeleportWand(SelfOnlyWand):
+    def __init__(self, destination):
+        super().__init__(defaultRegion, manaCost=8,
+                         spell=TeleportSpell(defaultRegion, destination))
