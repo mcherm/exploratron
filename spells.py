@@ -3,6 +3,7 @@
 # a wand to be cast or to other kinds of things.
 #
 
+
 class Spell():
     def __init__(self, region, spellSoundEffectName):
         self._spellSoundEffectId = region.soundLibrary.idByName(spellSoundEffectName)
@@ -39,3 +40,18 @@ class HealingSpell(SingleTargetSpell):
         self.hasBeenCast(targetMobile.room, screenChanges)
         return True
 
+
+class TeleportSpell(SingleTargetSpell):
+    """A spell that teleports the target to a pre-specified location."""
+    def __init__(self, region, destination):
+        """destination is a Location which specifies where to teleport to."""
+        super().__init__(region, spellSoundEffectName="368682__mattix__knock-knock-02")
+        self.destination = destination
+
+    def cast(self, targetMobile, world, screenChanges):
+        startingRoom = targetMobile.room
+        targetMobile.goToLocation(self.destination, world, screenChanges)
+        endingRoom = targetMobile.room
+        # Make the spell effects visible/audible in BOTH locations
+        self.hasBeenCast(startingRoom, screenChanges)
+        self.hasBeenCast(endingRoom, screenChanges)

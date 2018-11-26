@@ -188,6 +188,7 @@ room7 = Room(
     {
         (9,3): Sword(),
         (3,17): Sword(),
+        (13,3): TeleportWand(Location(1, (1,1))),
     },
     {
         (10,19): Minotar()
