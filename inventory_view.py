@@ -289,13 +289,18 @@ class InventoryView:
             if self.crosshairPositionX == 0:
                 pass # Do nothing if in the center
             elif self.crosshairPositionY == len(self.itemPairs):
-                if self.crosshairPositionX < 0 and self.wieldedWeapon is None and isinstance(self.itemBeingMoved, Weapon):
+                if self.crosshairPositionX == -1 and self.wieldedWeapon is None and isinstance(self.itemBeingMoved, Weapon):
                     self.wieldedWeapon = self.itemBeingMoved
                     self.itemBeingMoved = None
                     self.wieldWeapon(self.wieldedWeapon)
                     self.crosshairPositionX = 0 # Pop back to the center
+                if self.crosshairPositionX == 1 and self.wieldedWand is None and isinstance(self.itemBeingMoved, Wand):
+                    self.wieldedWand = self.itemBeingMoved
+                    self.itemBeingMoved = None
+                    self.wieldWand(self.wieldedWand)
+                    self.crosshairPositionX = 0 # Pop back to the center
                 else:
-                    pass # Do nothing if in the worn items section
+                    pass # do nothing
             else:
                 # In the bag
                 pair = self.itemPairs[self.crosshairPositionY]
