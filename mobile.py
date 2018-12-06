@@ -1,5 +1,5 @@
 from kindsofthing import Thing, Item, Weapon, Wand
-import random
+
 
 class Stats:
     def __init__(self):
