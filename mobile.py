@@ -85,7 +85,7 @@ class Inventory:
 
 
 class Mobile(Thing):
-    def __init__(self, region, tileName, maxHealth, maxMana, inventory=()):
+    def __init__(self, region, tileName, maxHealth, maxMana, brainType, inventory=()):
         super().__init__(region, tileName)
         self.whenItCanAct = 0
         self.isDead = False
@@ -96,6 +96,7 @@ class Mobile(Thing):
         self.stats.maxMana = maxMana
         self.stats.mana = maxMana
         self.stats.speed = 5
+        self.brain = brainType()
     def canEnter(self, mobile):
         return False
     def doBump(self, mobile, world, screenChanges):
@@ -121,7 +122,7 @@ class Mobile(Thing):
         """This sets the location of a player to a specific grid and (x,y) coordinate."""
         self.room = room
         self.position = position
-    def moveSouth(self, world, screenChanges):
+    def moveSouth(self, currentTime, world, screenChanges):
         # -- find the new location --
         oldX, oldY = self.position
         newX = oldX
@@ -143,7 +144,8 @@ class Mobile(Thing):
         else:
             # -- let things happen --
             newCell.doBump(self, world, screenChanges)
-    def moveEast(self, world, screenChanges):
+        self.whenItCanAct = currentTime + self.timeToWait()
+    def moveEast(self, currentTime, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX + 1
         newY = oldY 
@@ -164,7 +166,8 @@ class Mobile(Thing):
         else:
             # -- let things happen --
             newCell.doBump(self, world, screenChanges)
-    def moveWest(self, world, screenChanges):
+        self.whenItCanAct = currentTime + self.timeToWait()
+    def moveWest(self, currentTime, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX - 1
         newY = oldY 
@@ -185,7 +188,8 @@ class Mobile(Thing):
         else:
             # -- let things happen --
             newCell.doBump(self, world, screenChanges)
-    def moveNorth(self, world, screenChanges):
+        self.whenItCanAct = currentTime + self.timeToWait()
+    def moveNorth(self, currentTime, world, screenChanges):
         oldX, oldY = self.position
         newX = oldX
         newY = oldY - 1
@@ -206,6 +210,7 @@ class Mobile(Thing):
         else:
             # -- let things happen --
             newCell.doBump(self, world, screenChanges)
+        self.whenItCanAct = currentTime + self.timeToWait()
     def goToLocation(self, location, world, screenChanges):
         """Calling this makes the player move from it's current location to
         the new location specified."""
@@ -217,17 +222,10 @@ class Mobile(Thing):
         newCell = self.room.cellAt(x, y)
         newCell.addThing(self)
         screenChanges.changeCell(self.room, x, y)
-    def takeOneStep(self, currentTime, world, screenChanges):
-        randomNumber = random.randrange(4)
-        if randomNumber == 0:
-            self.moveNorth(world, screenChanges)
-        elif randomNumber == 1:
-            self.moveSouth(world, screenChanges)
-        elif randomNumber == 2:
-            self.moveEast(world, screenChanges)
-        else:
-            self.moveWest(world, screenChanges)
-        self.whenItCanAct = currentTime + self.timeToWait()
+    def takeOneAction(self, currentTime, world, screenChanges):
+        """This is called when the mobile should have the opportunity to carry out
+        an action."""
+        self.brain.takeOneAction(self, currentTime, world, screenChanges)
     def takeDamage(self, amount):
         self.stats.health = self.stats.health-amount
         if self.stats.health < 1:
@@ -237,24 +235,28 @@ class Mobile(Thing):
         If the item is successfully put in the mobile's inventory
         this returns True, if not it returns False."""
         return self.inventory.addItem(item)
-    def cast(self, world, screenChanges):
+    def cast(self, currentTime, world, screenChanges):
         """This makes the mobile attempt to cast the currently wielded
         wand. If no wand is wielded or the current wand cannot be used,
         this does nothing; otherwise the wand is cast."""
         wand = self.getWieldedWand()
         if wand is not None:
             wand.cast(caster=self, world=world, screenChanges=screenChanges)
-    def pickUpItem(self):
+            self.whenItCanAct = currentTime + self.timeToWait()
+    def pickUpItem(self, currentTime, world, screenChanges):
         """This makes the mobile attempt to pick up the top item
         in the space the mobile occupies. Picking it up might
         succeed or it might not."""
-        cell = self.room.cellAt(self.position[0], self.position[1])
+        position = self.position
+        cell = self.room.cellAt(position[0], position[1])
         itemsInCell = [x for x in cell.things if isinstance(x, Item)]
         if itemsInCell:
             topItem = itemsInCell[-1]
             iGotIt = self.receiveItem(topItem)
             if iGotIt:
                 cell.removeThing(topItem)
+                screenChanges.changeCell(self.room, position[0], position[1])
+        self.whenItCanAct = currentTime + self.timeToWait()
     def placeItem(self, item):
         """This makes the mobile place an item in its current location."""
         cell = self.room.cellAt(self.position[0], self.position[1])

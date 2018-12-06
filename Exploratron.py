@@ -87,7 +87,7 @@ def moveMobiles(world, currentTime, screenChanges):
     updating the world accordingly."""
     for mobile in world.mobiles:
         if currentTime >= mobile.whenItCanAct:
-            mobile.takeOneStep(currentTime, world, screenChanges)
+            mobile.takeOneAction(currentTime, world, screenChanges)
     
 
 
@@ -142,23 +142,17 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
                 if eventToActOn is not None:
                     if isinstance(eventToActOn, KeyPressedEvent):
                         if eventToActOn.keyCode == KeyCode.GO_DOWN:
-                            player.moveSouth(world, screenChanges)
-                            player.whenItCanAct = currentTime + player.timeToWait()
+                            player.moveSouth(currentTime, world, screenChanges)
                         elif eventToActOn.keyCode == KeyCode.GO_UP:
-                            player.moveNorth(world, screenChanges)
-                            player.whenItCanAct = currentTime + player.timeToWait()
+                            player.moveNorth(currentTime, world, screenChanges)
                         elif eventToActOn.keyCode == KeyCode.GO_RIGHT:
-                            player.moveEast(world, screenChanges)
-                            player.whenItCanAct = currentTime + player.timeToWait()
+                            player.moveEast(currentTime, world, screenChanges)
                         elif eventToActOn.keyCode == KeyCode.GO_LEFT:
-                            player.moveWest(world, screenChanges)
-                            player.whenItCanAct = currentTime + player.timeToWait()
+                            player.moveWest(currentTime, world, screenChanges)
                         elif eventToActOn.keyCode == KeyCode.CAST:
-                            player.cast(world, screenChanges)
-                            player.whenItCanAct = currentTime + player.timeToWait()
+                            player.cast(currentTime, world, screenChanges)
                         elif eventToActOn.keyCode == KeyCode.PICK_UP:
-                            player.pickUpItem()
-                            player.whenItCanAct = currentTime + player.timeToWait()
+                            player.pickUpItem(currentTime, world, screenChanges)
     # Move Mobiles
     regenMobiles(world, currentTime)
     moveMobiles(world, currentTime, screenChanges)
