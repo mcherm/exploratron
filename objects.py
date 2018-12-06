@@ -1,5 +1,6 @@
 from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, SelfOnlyWand
 from mobile import Mobile
+from brain import RandomBrain
 from spells import HealingSpell, TeleportSpell
 
 defaultRegion = Region()
@@ -40,13 +41,14 @@ class InnerDoor(Thing):
 
 class GiantBee(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, 'angry-bee', 11, 1, inventory=[Sting()])
+        super().__init__(defaultRegion, 'angry-bee', 11, 1, RandomBrain, inventory=[Sting()])
         
 class MouseMan(Mobile):
     def __init__(self):
         super().__init__(defaultRegion, 'mouseman',
                          maxHealth=3,
                          maxMana=5,
+                         brainType=RandomBrain,
                          inventory=[Bite()])
 
 class SnakeTrap(Trap):
@@ -82,6 +84,7 @@ class Minotar(Mobile):
         super().__init__(defaultRegion, "mouseman",
                          maxHealth=12,
                          maxMana=5,
+                         brainType=RandomBrain,
                          inventory=[ViciousHorns()])
 class Sting(Weapon):
     def __init__(self):
@@ -90,7 +93,7 @@ class Sting(Weapon):
 
 class Witch(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, "witch", maxHealth=8, maxMana=19)
+        super().__init__(defaultRegion, "witch", maxHealth=8, maxMana=19, brainType=RandomBrain)
 
 
 class HealingWand(SelfOnlyWand):
