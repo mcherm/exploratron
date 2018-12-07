@@ -10,10 +10,150 @@
 import random
 from enum import Enum
 from mobile import Mobile
+from kindsofthing import Wall
 
 
 
 Alignment = Enum('Alignment', 'FRIENDLY NEUTRAL UNFRIENDLY')
+
+
+
+class Direction(Enum):
+    NORTH = 1
+    SOUTH = 2
+    EAST = 3
+    WEST = 4
+
+    def deltaX(self):
+        return _DIR_DELTA_X(self)
+
+    def deltaY(self):
+        return _DIR_DELTA_Y(self)
+
+
+_DIR_DELTA_X = {
+    Direction.NORTH: 0,
+    Direction.SOUTH: 0,
+    Direction.EAST: 1,
+    Direction.WEST: -1,
+}
+_DIR_DELTA_Y = {
+    Direction.NORTH: -1,
+    Direction.SOUTH: 1,
+    Direction.EAST: 0,
+    Direction.WEST: 0,
+}
+
+
+class _ImpassableClass:
+    def __repr__(self):
+        return "IMPASSABLE"
+
+IMPASSABLE = _ImpassableClass()
+
+class _UnreachableClass:
+    def __repr__(self):
+        return "UNREACHABLE"
+UNREACHABLE = _UnreachableClass()
+
+
+class DijkstraMap:
+    """This contains a grid of integers for each cell in a room. The first
+    version of it will be specific to finding a path to any allies, but
+    later I will generalize it.
+
+    Throughout, this uses values, which are EITHER a non-negative integer
+    or None (meaning not yet initialized), or IMPASSIBLE or UNREACHABLE."""
+    def __init__(self, room):
+        self.width = room.width
+        self.height = room.height
+        self.data = [None] * (self.width * self.height)
+        for y in range(self.height):
+            for x in range(self.width):
+                roomCell = room.cellAt(x, y)
+                isImpassible = False
+                hasFriendly = False
+                for thing in roomCell.things:
+                    if isinstance(thing, Wall):
+                        isImpassible = True
+                    if isinstance(thing, Mobile) and thing.brain.getAlignment() is Alignment.FRIENDLY:
+                        hasFriendly = True
+                if isImpassible:
+                    self.setValueAt(x, y, IMPASSABLE)
+                elif hasFriendly:
+                    self.setValueAt(x, y, 0)
+                else:
+                    pass # leave the rest as None
+
+    def valueAt(self, x, y):
+        """Returns the integer value at that position."""
+        assert 0 <= x < self.width
+        assert 0 <= y < self.height
+        return self.data[x + (y * self.width)]
+
+    def setValueAt(self, x, y, val):
+        assert 0 <= x < self.width
+        assert 0 <= y < self.height
+        assert val in (None, IMPASSABLE, UNREACHABLE) or (isinstance(val, int) and val >= 0)
+        self.data[x + (y * self.width)] = val
+
+    def dump(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                print(self.valueAt(x, y), end=" ")
+            print()
+
+    def neighborsOf(self, x, y):
+        """Given an x,y location, returns an iterator of (x,y) pairs of locations adjacent to it.
+        Would always return 4 pairs EXCEPT that it doesn't return entries that are outside of
+        the bounds."""
+        if y > 0:
+            yield (x, y-1)
+        if y + 2 < self.height:
+            yield (x, y+1)
+        if x > 0:
+            yield (x-1, y)
+        if x +2 < self.width:
+            yield (x+1, y)
+
+    def numericNeighborsOf(self, x, y):
+        """Given an x,y location, this returns an iterator of values in neighboring locations
+        which contain numbers. If no neighbors contain a number, this will return no values."""
+        for neighborX, neighborY in self.neighborsOf(x, y):
+            neighborVal = self.valueAt(neighborX, neighborY)
+            if neighborVal not in (None, IMPASSABLE, UNREACHABLE):
+                assert isinstance(neighborVal, int) and neighborVal >= 0
+                yield neighborVal
+
+    def singlePassPopulateValues(self):
+        """Performs a single pass of populating values. Returns the number of cells updated."""
+        numUpdates = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.valueAt(x, y) is None:
+                    # Try to populate it!
+                    lowestNeighbor = min(self.numericNeighborsOf(x, y), default=None)
+                    if lowestNeighbor is not None:
+                        self.setValueAt(x, y, lowestNeighbor + 1)
+                        numUpdates += 1
+        return numUpdates
+
+    def setNoneToUnreachable(self):
+        """Simply sets all values in the DijkstraMap that are None to UNREACHABLE."""
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.valueAt(x, y) is None:
+                    self.setValueAt(x, y, UNREACHABLE)
+
+    def populateValues(self):
+        """When this is called, it will iterate over the map until it has managed to
+        replace all None values with one of the other valid values."""
+        numUpdates = 1 # start with a dummy non-zero value
+        while numUpdates: # loop until there are no updates
+            numUpdates = self.singlePassPopulateValues()
+        self.setNoneToUnreachable()
+
+
 
 
 class Brain:
