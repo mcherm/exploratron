@@ -42,7 +42,7 @@ class InnerDoor(Thing):
 
 class GiantBee(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, 'angry-bee', 11, 1, AgressiveBrain, inventory=[Sting()])
+        super().__init__(defaultRegion, 'angry-bee', 11, 1, RandomBrain, inventory=[Sting()])
         
 class MouseMan(Mobile):
     def __init__(self):
@@ -62,12 +62,12 @@ class BluePotion(Item):
 
 class Sword(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "sword", 2,
+        super().__init__(defaultRegion, "sword", 3,
                          "348112__mattix__crunch")
 
 class Spear(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "spear", 3,
+        super().__init__(defaultRegion, "spear", 2,
                          "348112__mattix__crunch")
 
 class Bite(Weapon):
@@ -77,7 +77,7 @@ class Bite(Weapon):
 
 class ViciousHorns(Weapon):
     def __init__(self):
-        super().__init__(defaultRegion, "transparent", 3,
+        super().__init__(defaultRegion, "transparent", 1,
                          "348112__mattix__crunch")
 
 class Minotar(Mobile):
@@ -85,7 +85,7 @@ class Minotar(Mobile):
         super().__init__(defaultRegion, "mouseman",
                          maxHealth=12,
                          maxMana=5,
-                         brainType=RandomBrain,
+                         brainType=AgressiveBrain,
                          inventory=[ViciousHorns()])
 class Sting(Weapon):
     def __init__(self):

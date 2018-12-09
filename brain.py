@@ -210,21 +210,43 @@ class RandomBrain(Brain):
 
 
 
+
+
 class AgressiveBrain(Brain):
-    """A brain that attempts to attack any ally it detects, and wanders randomly
+    """A brain that attempts to attack any ally in the room, and wanders randomly
     otherwise."""
 
     def getAlignment(self):
         return Alignment.UNFRIENDLY
 
+    # FIXME: This creates the DijkstraMap every time. We can be smarter than that.
     def takeOneAction(self, mobile, currentTime, world, screenChanges):
-        neighboringAllies = []
-        for deltas, neighborCell in self.neighboringCells(mobile.room, mobile.position):
-            for thing in neighborCell.things:
-                if isinstance(thing, Mobile) and thing.brain.getAlignment() == Alignment.FRIENDLY:
-                    neighboringAllies.append((deltas, thing))
-        if neighboringAllies:
-            (deltas, ally) = random.choice(neighboringAllies)
+        room = mobile.room
+        dmap = DijkstraMap(room)
+        dmap.populateValues()
+        x, y = mobile.position
+        bestScoreSoFar = None
+        bestNeighbors = []
+        for nX, nY in dmap.neighborsOf(x, y):
+            score = dmap.valueAt(nX,nY)
+            if isinstance(score, int):
+                if bestScoreSoFar is None or bestScoreSoFar > score:
+                    # New best score
+                    bestScoreSoFar = score
+                    bestNeighbors = [(nX, nY)]
+                elif bestScoreSoFar == score:
+                    # ties the best one
+                    bestNeighbors.append((nX, nY))
+                else:
+                    # not as good as a previous one
+                    pass
+        if len(bestNeighbors) == 0:
+            # No route to an enemy
+            self.randomMove(mobile, currentTime, world, screenChanges)
+        else:
+            # Pick one of them to go to
+            nX, nY = random.choice(bestNeighbors)
+            deltas = nX - x, nY - y
             if deltas == (-1,0):
                 mobile.moveWest(currentTime, world, screenChanges)
             elif deltas == (1,0):
@@ -235,8 +257,5 @@ class AgressiveBrain(Brain):
                 mobile.moveNorth(currentTime, world, screenChanges)
             else:
                 assert False # Invalid value for deltas
-        else:
-            self.randomMove(mobile, currentTime, world, screenChanges)
-
 
 
