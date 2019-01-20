@@ -40,9 +40,17 @@ class Door(Thing):
         if self.soundEffectId is not None:
             screenChanges.roomPlaySound(mobile.room, self.soundEffectId)
 
+class Sign(Thing):
+    """A thing that displays a message when you enter it."""
+    def __init__(self, region, tileName, messageText):
+        """Create a new sign with the string messageText."""
+        super().__init__(region, tileName)
+        self.messageText = messageText
+    def doEnter(self, mobile, world, screenChanges):
+        screenChanges.showMessage(self.messageText)
 
 class Trap(Thing):
-    """a thing that maks you take damage"""
+    """A thing that makes you take damage"""
     def doEnter(self, mobile, world, screenChanges):
         mobile.takeDamage(1)
         

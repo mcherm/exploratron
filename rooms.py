@@ -34,6 +34,7 @@ room0 = Room(
         (5,3): Chest(),
         (1,2): BluePotion(),
         (1,2): [Spear(), BluePotion(), Sword(), HealingWand(), Spear()],
+        (5,3): PublicSign("Go South for Minotaur"),
     },
     {
         (5,1): GiantBee(),
