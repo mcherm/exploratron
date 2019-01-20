@@ -228,6 +228,8 @@ def renderWorld(world, display, region, screenChanges, clients):
     displayedRoom = world.displayedPlayer.room
     display.show(displayedRoom, region.imageLibrary)
     display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
+    if screenChanges.getNewMessage() is not None:
+        display.uiState.message = screenChanges.getNewMessage()
 
     # -- Remote clients --
     for player in world.players:

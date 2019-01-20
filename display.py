@@ -1,5 +1,6 @@
 
 import pygame
+from message import MessagePainter, Message
 from images import TILE_SIZE
 from inventory_view import InventoryView
 
@@ -38,6 +39,7 @@ class PygameOverlayDisplay:
 
     def __init__(self, surface):
         self.surface = surface
+        self.messagePainter = MessagePainter()
 
     def show(self, uiState, imageLibrary):
         # health bar
@@ -70,6 +72,10 @@ class PygameOverlayDisplay:
             self.surface.fill(BLACK, manaBorderRect)
             self.surface.fill(LIGHT_GREY, maxManaRect)
             self.surface.fill(PURPLE, manaRect)
+
+        # Messages
+        if uiState.message:
+            self.messagePainter.paintMessage(self.surface, uiState.message)
 
         # inventory
         if uiState.inventoryView:
@@ -125,6 +131,7 @@ class UIState:
         self.roomWidthAndHeight = 0, 0
         self.offset = 0, 0
         self.inventoryView = None
+        self.message = None # a single Message object that is shown until the user clears it
 
     def setDisplayedPlayer(self, player):
         self.player = player
@@ -191,6 +198,8 @@ class UIState:
         """This is called when someone presses the UI action button."""
         if self.inventoryView:
             self.inventoryView.takeAction()
+        elif self.message is not None:
+            self.message = None
         else:
             pass
 

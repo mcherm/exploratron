@@ -1,4 +1,4 @@
-from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, SelfOnlyWand
+from kindsofthing import Region, Thing, Wall, Door, Trap, Item, Weapon, SelfOnlyWand, Sign
 from mobile import Mobile
 from brain import RandomBrain, AgressiveBrain
 from spells import HealingSpell, TeleportSpell
@@ -39,6 +39,10 @@ class InnerDoor(Thing):
     def doEnter(self, mobile, world, screenChanges):
         super().doEnter(mobile, world, screenChanges)
         screenChanges.roomPlaySound(mobile.room, self.soundEffectId)
+
+class PublicSign(Sign):
+    def __init__(self, messageText):
+        super().__init__(defaultRegion, "chest2", messageText) # FIXME: Need better icon
 
 class GiantBee(Mobile):
     def __init__(self):

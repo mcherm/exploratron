@@ -4,6 +4,7 @@
 #
 
 from collections import defaultdict
+from message import Message
 
 
 class SetOfEverything:
@@ -17,11 +18,13 @@ class ScreenChanges:
         self.changesByRoom = defaultdict(set) # map of room -> set of (x,y) pairs
         self.playerRoomSwitches = {} # map of player -> (oldRoom,newRoom)
         self.soundsToPlayByRoom = defaultdict(list) # map of room -> list of soundIds
+        self.newMessage = None
     def clear(self):
         """Calling this clears out the full list of changes."""
         self.changesByRoom.clear()
         self.playerRoomSwitches.clear()
         self.soundsToPlayByRoom.clear()
+        self.newMessage = None
     def changeCell(self, room, x, y):
         """Calling this adds a change to one cell of one room."""
         self.changesByRoom[room].add((x,y))
@@ -55,6 +58,12 @@ class ScreenChanges:
         """Returns a list of new sounds that should begin playing in the given
         room starting with this set of ScreenChanges."""
         return self.soundsToPlayByRoom[room]
+    def showMessage(self, messageText):
+        """Begins displaying the given message in the UI."""
+        self.newMessage = Message(messageText)
+    def getNewMessage(self):
+        """Returns the new message to display, or None if there is none."""
+        return self.newMessage
     def printThemOut(self):
         """Used only for debugging, this dumps to the screen the whole
         list of changes."""
