@@ -1,6 +1,7 @@
 
 from images import Region
 from spells import SingleTargetSpell
+from message import Message
 
 
 
@@ -45,9 +46,9 @@ class Sign(Thing):
     def __init__(self, region, tileName, messageText):
         """Create a new sign with the string messageText."""
         super().__init__(region, tileName)
-        self.messageText = messageText
+        self.message = Message(messageText)
     def doEnter(self, mobile, world, screenChanges):
-        screenChanges.showMessage(self.messageText)
+        screenChanges.showMessage(self.message)
 
 class Trap(Thing):
     """A thing that makes you take damage"""
