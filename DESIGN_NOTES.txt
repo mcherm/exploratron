@@ -1,0 +1,16 @@
+#
+# DESIGN NOTES
+#
+
+===== UI and Actions ====
+
+I have a design problem that needs to be addressed. What is local, what is server-side. What is sent as an
+action. Etc. I need a coherent vision before I can make this logical.
+
+Property       Sign   Inventory  Sounds
+
+Visible to      No       No       Yes
+ all users
+
+
+=========================

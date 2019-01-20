@@ -58,9 +58,10 @@ class ScreenChanges:
         """Returns a list of new sounds that should begin playing in the given
         room starting with this set of ScreenChanges."""
         return self.soundsToPlayByRoom[room]
-    def showMessage(self, messageText):
+    def showMessage(self, message):
         """Begins displaying the given message in the UI."""
-        self.newMessage = Message(messageText)
+        assert isinstance(message, Message)
+        self.newMessage = message
     def getNewMessage(self):
         """Returns the new message to display, or None if there is none."""
         return self.newMessage
