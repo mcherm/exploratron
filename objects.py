@@ -42,7 +42,7 @@ class InnerDoor(Thing):
 
 class PublicSign(Sign):
     def __init__(self, messageText):
-        super().__init__(defaultRegion, "chest2", messageText) # FIXME: Need better icon
+        super().__init__(defaultRegion, "sign", messageText)
 
 class GiantBee(Mobile):
     def __init__(self):
