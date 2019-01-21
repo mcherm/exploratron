@@ -19,7 +19,9 @@ dr8 = WoodenDoor(Location(6, (0,1)))
 dr9 = WoodenDoor(Location(5, (6,6)))
 d10 = WoodenDoor(Location(4, (10,12)))
 d11 = WoodenDoor(Location(7, (6,10)))
+d12 = WoodenDoor(Location(8, (3,2)))
 sdr = InnerSecretDoor()
+
 
 room0 = Room(
     [
@@ -46,7 +48,7 @@ room0 = Room(
 room1 = Room(
     [
         [bkw, bkw, bkw, bkw, bkw],
-        [bkw, drt, drt, drt, bkw],
+        [bkw, drt, drt, drt, d12],
         [bkw, drt, drt, drt, bkw],
         [bkw, bkw, dr2, bkw, bkw],
     ]
@@ -196,6 +198,23 @@ room7 = Room(
     }
 )
 
+room8 = Room(
+    [
+        [drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [drt, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, bkw, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt, idr, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, bkw, idr, bkw, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, drt, drt, bkw, bkw, bkw, idr, bkw, bkw, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, idr, drt, drt, bkw, drt, drt, drt, drt, bkw, bkw, idr, bkw, bkw, bkw, bkw, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, idr, drt, drt, drt, idr, drt, drt, drt, bkw, bkw, bkw, bkw, bkw, idr, bkw, idr, bkw, bkw, idr],
+        [drt, drt, bkw, drt, bkw, drt, drt, idr, drt, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, bkw, idr, bkw, bkw, bkw, bkw, bkw, idr, bkw],
+        [drt, drt, bkw, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, idr, bkw, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, drt],
+    ]
+)
 
 
-rooms = [room0, room1, room2, room3, room4, room5, room6, room7]
+rooms = [room0, room1, room2, room3, room4, room5, room6, room7, room8]
