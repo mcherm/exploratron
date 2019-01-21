@@ -9,9 +9,11 @@ from display import PygameDisplay
 from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
+from players import Player
 import rooms
 import time
 import random
+import itertools
 
 
 # ========= Start Classes for Game =========
@@ -163,18 +165,18 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
             
 
 def handleDeath(world):
-    for mobile in world.mobiles:
+    for mobile in itertools.chain(world.mobiles, world.players):
         if mobile.isDead:
             x, y = mobile.position
             cell = mobile.room.cellAt(x, y)
+            for item in mobile.inventory:
+                mobile.placeItem(item)
             cell.removeThing(mobile)
-            world.mobiles.remove(mobile)
-    for player in world.players:
-        if player.isDead:
-            x, y = player.position
-            cell = player.room.cellAt(x, y)
-            cell.removeThing(player)
-            world.removePlayer(player)
+            if isinstance(mobile, Player):
+                world.removePlayer(mobile)
+            else:
+                world.mobiles.remove(mobile)
+
 
 def handleGameOver(world):
     reasonToKeepPlaying = False

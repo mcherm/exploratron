@@ -46,7 +46,7 @@ class PublicSign(Sign):
 
 class GiantBee(Mobile):
     def __init__(self):
-        super().__init__(defaultRegion, 'angry-bee', 11, 1, RandomBrain, inventory=[Sting()])
+        super().__init__(defaultRegion, 'angry-bee', 11, 1, RandomBrain, inventory=[Sting(), BluePotion()])
         
 class MouseMan(Mobile):
     def __init__(self):
