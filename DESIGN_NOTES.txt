@@ -7,10 +7,27 @@
 I have a design problem that needs to be addressed. What is local, what is server-side. What is sent as an
 action. Etc. I need a coherent vision before I can make this logical.
 
-Property       Sign   Inventory  Sounds
+Property       Sign   Inventory  Sounds  Room Images
 
-Visible to      No       No       Yes
+Visible to      No       No       Yes       Yes
  all users
+
+
+
+Action             Scope
+---------------   ---------
+GO_UP               Remote
+GO_DOWN             Remote
+GO_LEFT             Remote
+GO_RIGHT            Remote
+PICK_UP             Remote
+CAST                Remote
+TOGGLE_INVENTORY    Local
+MOVE_UI_UP          Local
+MOVE_UI_DOWN        Local
+MOVE_UI_LEFT        Local
+MOVE_UI_RIGHT       Local
+UI_ACTION           Either
 
 
 =========================
