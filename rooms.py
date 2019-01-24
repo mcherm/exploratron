@@ -19,7 +19,7 @@ dr8 = WoodenDoor(Location(6, (0,1)))
 dr9 = WoodenDoor(Location(5, (6,6)))
 d10 = WoodenDoor(Location(4, (10,12)))
 d11 = WoodenDoor(Location(7, (6,10)))
-d12 = WoodenDoor(Location(8, (3,2)))
+d12 = WoodenDoor(Location(8, (15,19)))
 sdr = InnerSecretDoor()
 
 
@@ -213,7 +213,39 @@ room8 = Room(
         [drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, idr, drt, drt, drt, idr, drt, drt, drt, bkw, bkw, bkw, bkw, bkw, idr, bkw, idr, bkw, bkw, idr],
         [drt, drt, bkw, drt, bkw, drt, drt, idr, drt, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, bkw, drt, bkw, idr, bkw, bkw, bkw, bkw, bkw, idr, bkw],
         [drt, drt, bkw, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, idr, bkw, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, drt],
-    ]
+        [drt, drt, bkw, drt, drt, idr, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, bkw, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, idr, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, drt, idr, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt],
+        [drt, drt, bkw, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, bkw, bkw, bkw, idr, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt],
+        [drt, drt, bkw, drt, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, idr, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt],
+        [drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, idr, drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt],
+        [bkw, bkw, bkw, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, idr, drt, bkw, drt, idr, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, bkw, drt],
+        [bkw, drt, drt, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, idr, bkw, bkw, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt],
+        [bkw, drt, bkw, drt, bkw, drt, drt, drt, drt, drt, bkw, drt, bkw, bkw, bkw, idr, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt, drt, drt, drt, bkw, drt],
+        [drt, bkw, drt, drt, bkw, drt, drt, drt, drt, drt, bkw, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt],
+        [drt, bkw, idr, bkw, bkw, bkw, bkw, bkw, idr, bkw, bkw, drt, bkw, bkw, bkw, bkw, drt, bkw, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt],
+        [bkw, bkw, drt, drt, idr, drt, bkw, drt, drt, drt, drt, drt, idr, drt, drt, bkw, drt, bkw, idr, bkw, bkw, bkw, bkw, idr, bkw, bkw, bkw, bkw, drt, bkw, drt],
+        [bkw, drt, drt, drt, bkw, drt, bkw, drt, drt, drt, drt, drt, bkw, drt, drt, bkw, drt, idr, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, bkw, drt],
+        [bkw, bkw, bkw, bkw, bkw, drt, bkw, drt, drt, drt, drt, drt, bkw, bkw, idr, bkw, bkw, bkw, bkw, bkw, idr, bkw, bkw, drt, drt, drt, drt, bkw, drt, bkw, drt],
+        [drt, drt, bkw, drt, drt, drt, idr, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, idr, bkw, drt],
+        [drt, drt, bkw, drt, bkw, bkw, bkw, drt, drt, drt, drt, drt, bkw, drt, bkw, bkw, bkw, bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, bkw, drt, bkw, drt],
+        [drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw, drt, bkw, drt, drt, idr, drt, drt, drt, drt, idr, drt, drt, drt, drt, bkw, drt, bkw, drt],
+        [drt, drt, bkw, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw, drt, bkw, drt, drt, bkw, bkw, idr, bkw, idr, bkw, idr, bkw ,bkw, idr, bkw, idr, bkw, drt],
+        [drt, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt, bkw, drt, drt, idr, drt, drt, bkw, drt, bkw, drt, bkw, bkw, drt, bkw, drt, bkw, drt],
+        [drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, bkw, drt, drt, bkw, drt, drt, bkw, drt, bkw, drt, bkw, bkw, drt, bkw, drt, bkw, drt],
+        [drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt, bkw, drt, bkw, bkw, drt, bkw, drt, bkw, drt],
+        [drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, drt, bkw, drt],
+        [drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, drt, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, drt],
+    ],
+    {
+        (14, 18): SnakeTrap(),
+        (16, 18): SnakeTrap(),
+        (14, 20): SnakeTrap(),
+        (28, 29): SnakeTrap(),
+    },
+    {
+        (20, 1): Minotar()
+    }
 )
 
 
