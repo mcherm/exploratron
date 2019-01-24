@@ -242,6 +242,7 @@ room8 = Room(
         (16, 18): SnakeTrap(),
         (14, 20): SnakeTrap(),
         (28, 29): SnakeTrap(),
+        ( 9, 29): Sword(),
     },
     {
         (20, 1): Minotar()
