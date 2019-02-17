@@ -2,6 +2,10 @@
 # This contains the game currently known as "Exploratron". 
 #
 
+from pygame import init as pygame_init
+pygame_init() # Need to run this before some of the code that runs during imports
+
+
 import objects
 from players import thePlayerCatalog, PlayerCatalogEntry
 from images import Region
@@ -106,7 +110,7 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
             newPlayer.addClient(event.clientConnection)
             room = newPlayer.room
             print(f"WelcomeClientMessage to just 1 client")
-            message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+            message = WelcomeClientMessage( room.gridData() )
             event.clientConnection.send(message)
             # FIXME: Should probably update screenChanges
         elif isinstance(event, KeyPressedEvent):
@@ -202,7 +206,7 @@ def processClientMessages(world, clients, eventList):
                 player.addClient(clientConnection)
                 room = player.room
                 print(f"WelcomeClientMessage to just 1 client")
-                message = WelcomeClientMessage( room.width, room.height, room.gridInMessageFormat() )
+                message = WelcomeClientMessage( room.gridData() )
                 clientConnection.send(message)
             elif playerCatalogEntry is not None:
                 # No such player now, but we could add one
@@ -239,16 +243,19 @@ def renderWorld(world, display, region, screenChanges, clients):
             roomSwitch = screenChanges.getRoomSwitches(player)
             if roomSwitch is not None:
                 oldRoom, newRoom = roomSwitch
-                message = NewRoomMessage(newRoom.width, newRoom.height, newRoom.gridInMessageFormat())
+                message = NewRoomMessage(newRoom.gridData())
                 room = newRoom
             else:
                 room = player.room
                 roomChangeSet = screenChanges.getRoomChangeSet(room)
                 if isinstance(roomChangeSet, SetOfEverything):
-                    message = RefreshRoomMessage(room.gridInMessageFormat())
+                    message = RefreshRoomMessage(room.gridData())
                 elif len(roomChangeSet) > 0:
-                    updates = [(x,y,room.cellAt(x,y).toMessageFormat()) for (x,y) in roomChangeSet]
-                    message = UpdateRoomMessage(updates)
+                    def cellDataFromCell(cell):
+                        """Given a cell, returns a CellData for it."""
+                        return CellData(tuple(thing.tileId for thing in cell.things))
+                    updates = [(x, y, cellDataFromCell(room.cellAt(x,y))) for (x,y) in roomChangeSet]
+                    message = UpdateRoomMessage(GridDataChange(updates))
                 else:
                     message = None
             if message is not None:

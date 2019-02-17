@@ -57,6 +57,5 @@ class Region:
     """Someday, this might grow into the ability to have different
     regions with their own sets of rooms and their own image libraries."""
     def __init__(self):
-        pygame.init() # FIXME: if there are multiple regions, need to init() only before the first one
         self.imageLibrary = ImageLibrary('drawntiles64')
         self.soundLibrary = SoundLibrary('foundassets/freesound.org')
