@@ -1,8 +1,8 @@
 #
-# Unit tests for exploranetworking using the pytest library
+# Unit tests for clientdata using the pytest library
 #
 
-from exploranetworking import *
+from clientdata import *
 
 
 def test_CellData_Singleton():

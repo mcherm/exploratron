@@ -1,6 +1,6 @@
 from kindsofthing import Thing
 from mobile import Mobile
-from exploranetworking import GridData, CellData
+from clientdata import GridData, CellData
 
 
 class Location:

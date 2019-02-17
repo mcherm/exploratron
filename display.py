@@ -3,7 +3,7 @@ import pygame
 from message import MessagePainter
 from images import TILE_SIZE
 from inventory_view import InventoryView
-from exploranetworking import GridData
+from clientdata import GridData
 
 
 
