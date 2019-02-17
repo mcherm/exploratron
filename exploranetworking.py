@@ -140,6 +140,34 @@ def bytesToMessage(byteString):
     return _messageClass[messageType].fromDataJSON(jsonMessage["data"])
 
 
+class ClientsideConnection:
+    """Each client keeps one instance of this class, which has information about the
+    connection."""
+    def __init__(self, serverAddress, playerId):
+        self.serverAddress = serverAddress
+        self.playerId = playerId
+        self.clientSocket = socket(AF_INET, SOCK_DGRAM)
+        self.clientSocket.settimeout(1)
+        self.clientSocket.sendto(JoinServerMessage(playerId).toBytes(), serverAddress)
+    def send(self, message):
+        assert isinstance(message, Message)
+        print(f"sending to {self.serverAddress}: {message}")
+        self.clientSocket.sendto(message.toBytes(), self.serverAddress)
+    def receiveOneMessage(self):
+        """This should be called at least once per event loop. It will check to see if there
+        are messages ready to read. The method will return None if no messages are ready to
+        be received, if one or more messages are available to be read it will return one
+        Message."""
+        readyToReadSockets, (), () = select.select([self.clientSocket], [], [], 0)
+        if readyToReadSockets:
+            byteStr, address = readyToReadSockets[0].recvfrom(UDP_MAX_SIZE)
+            print(f"Server sent: {byteStr}.")
+            message = bytesToMessage(byteStr)
+            return message
+        else:
+            return None
+
+
 class ServersideClientConnection:
     """The server keeps instances of this class, each of which has information about
     a particular active client."""
