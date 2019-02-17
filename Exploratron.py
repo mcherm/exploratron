@@ -240,6 +240,7 @@ def renderWorld(world, display, region, screenChanges, clients):
     # -- Remote clients --
     for player in world.players:
         if len(player.clientConnections) > 0:
+            # --- Send at most one message about drawing the tile ---
             roomSwitch = screenChanges.getRoomSwitches(player)
             if roomSwitch is not None:
                 oldRoom, newRoom = roomSwitch
@@ -260,10 +261,19 @@ def renderWorld(world, display, region, screenChanges, clients):
                     message = None
             if message is not None:
                 clients.sendMessageToPlayer(player.playerId, message)
+
+            # --- Possibly a message about sounds ---
             soundIds = screenChanges.getRoomSounds(room)
             if soundIds:
                 soundMessage = PlaySoundsMessage(soundIds)
                 clients.sendMessageToPlayer(player.playerId, soundMessage)
+
+            # --- Possibly a message about displayed properties ---
+            visibleData = VisibleData.fromEnvironment(player)
+            for serversideClientConnection in clients.connectionsByPlayer.get(player.playerId):
+                if visibleData != serversideClientConnection.visibleData:
+                    serversideClientConnection.send(UpdateVisibleDataMessage(visibleData))
+                    serversideClientConnection.visibleData = visibleData
 
 
 

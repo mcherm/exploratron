@@ -10,9 +10,21 @@ from collections import defaultdict
 UDP_MAX_SIZE = 4096
 
 
-# ===== Some type definitions that are designed to be implemented in JSON to cary data =====
+# ===== Some type definitions that are designed to be implemented in JSON to carry data =====
 
-class CellData:
+# FIXME: This section should probably be in a separate file (because of dependencies)
+
+class SerializableDataStructure:
+    """Common parent class for some types which are intended to be passed around in the
+    messages sent to the front-end."""
+    def toJSON(self):
+        raise NotImplementedError # subclasses should implement this
+    @classmethod
+    def fromJSON(cls):
+        raise NotImplementedError # subclasses should implement this
+
+
+class CellData(SerializableDataStructure):
     """In JSON, a CellData is EITHER a number (representing the single tileId in that
     location) OR a list of numbers (representing the stack of tiles in that
     location)."""
@@ -23,9 +35,6 @@ class CellData:
 
     def __eq__(self, other):
         return isinstance(other, CellData) and  self._tileIds == other._tileIds
-
-    def __hash__(self):
-        return hash(self._tileIds)
 
     @classmethod
     def fromJSON(cls, json):
@@ -50,7 +59,7 @@ class CellData:
             yield x
 
 
-class GridData:
+class GridData(SerializableDataStructure):
     """A GridData represents the contents of a room. In JSON, a grid is a 2-D array
     (list of lists) of (the JSON representation of) cells."""
     def __init__(self, width, height, allCells):
@@ -90,7 +99,7 @@ class GridData:
         self._allCells[x + self.width * y] = cellData
 
 
-class GridDataChange:
+class GridDataChange(SerializableDataStructure):
     """This represents a set of changes that can be applied to an existing grid.
     In JSON, it is a list of three-element lists [x,y,cell] where x and y should
     be within the range of the grid it is to be applied to and cell is (the JSON
@@ -121,10 +130,45 @@ class GridDataChange:
             gridData._setCellAt(x, y, cellData)
 
 
+class VisibleData(SerializableDataStructure):
+    """This represents only the properties that are continuously displayed on the
+    client side and sent every time they change. So it includes things like the
+    current player's rendered stats, but not things like the current message or
+    inventory which would be large and don't need to be sent every time."""
+    def __init__(self, health, maxHealth, mana, maxMana):
+        self.health = health
+        self.maxHealth = maxHealth
+        self.mana = mana
+        self.maxMana = maxMana
+
+    def __eq__(self, other):
+        return isinstance(other, VisibleData) and self.__dict__ == other.__dict__
+
+    @classmethod
+    def fromJSON(cls, json):
+        """Initialize a DisplayedPlayerData from the corresponding JSON."""
+        return cls(**json)
+
+    @classmethod
+    def fromEnvironment(cls, player):
+        """Initialize a DisplayedPlayerData from whatever sources are needed, which is
+        currently just the player that is active on this connection."""
+        return cls(
+            health=player.stats.health,
+            maxHealth=player.stats.maxHealth,
+            mana=player.stats.mana,
+            maxMana=player.stats.maxMana)
+
+    def toJSON(self):
+        """Return this DisplayedPlayerData in JSON format."""
+        return copy.copy(self.__dict__)
+
+
 # ===== The messages themselves =====
 
 
 class Message:
+    """An abstract parent for all of the message types."""
     @classmethod
     def messageName(cls):
         className = cls.__name__
@@ -213,6 +257,18 @@ class PlaySoundsMessage(Message):
         """Constructor. soundIds is a list of sound ids."""
         self.soundIds = soundIds
 
+class UpdateVisibleDataMessage(Message):
+    """A message sent by the server to update the properties of the currently-displayed
+    player."""
+    def __init__(self, visibleData):
+        assert isinstance(visibleData, VisibleData)
+        self.visibleData = visibleData
+    def dataJSON(self):
+        return self.visibleData.toJSON()
+    @classmethod
+    def fromDataJSON(cls, dataJSON):
+        return cls(visibleData=VisibleData.fromJSON(dataJSON))
+
 class KeyPressedMessage(Message):
     """A message sent when a client wants a server to know a key has been pressed."""
     def __init__(self, keyCode):
@@ -228,7 +284,8 @@ class ClientDisconnectingMessage(Message):
 
 clientToServerMessages = [JoinServerMessage, KeyPressedMessage, ClientDisconnectingMessage]
 serverToClientMessages = [WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
-                          UpdateRoomMessage, PlaySoundsMessage, ClientShouldExitMessage]
+                          UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage,
+                          ClientShouldExitMessage]
 
 _messageClass = {msg.messageName(): msg for msg in clientToServerMessages + serverToClientMessages}
 
@@ -247,6 +304,7 @@ class ServersideClientConnection:
         self.serverSocket = serverSocket
         self.address = address
         self.playerId = joinServerMessage.playerId
+        self.visibleData = None # Either None, or the last VisibleData sent to this client.
     def send(self, message):
         assert isinstance(message, Message)
         print(f"sending to {self.address}: {message}")
@@ -262,7 +320,7 @@ class ServersideClientConnections:
     that are currently connected."""
     def __init__(self):
         self.connectionsByAddr = {} # a map of address -> ServersideClientConnection
-        self.connectionsByPlayer = defaultdict(list) # a map of "playerId" -> [ServersideClientConnections]
+        self.connectionsByPlayer = defaultdict(list) # a map of "playerId" -> [ServersideClientConnection]
         self.serverSocket = socket(AF_INET, SOCK_DGRAM)
         self.serverSocket.bind(('', 12000))
     def numConnections(self):
@@ -300,23 +358,12 @@ class ServersideClientConnections:
         return result
     def sendMessageToAll(self, message):
         for clientConnection in self.connectionsByAddr.values():
-            clientConnection.sendRaw(message.toBytes())
+            clientConnection.send(message)
     def sendMessageToPlayer(self, playerId, message):
         """Sends a message to all connections for a given playerId."""
         for clientConnection in self.connectionsByPlayer.get(playerId):
-            clientConnection.sendRaw(message.toBytes())
+            clientConnection.send(message)
     def numClients(self, playerId):
         """Given a playerId, returns the number of currently connected clients
         following that player."""
         return len(self.connectionsByPlayer.get(playerId))
-        
-        
-    
-
-##sampleBytes = b'{"message":"NewRoom","data":{"width":4,"height":3,"imageIds":[[2,2,2,2],[2,3,3,2],[2,3,24,2],[2,2,5,2]]}}'
-##
-##msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
-##msg2 = KeyPressedMessage( keyCode=115 )
-##print(sampleBytes)
-##print(msg1.toBytes())
-

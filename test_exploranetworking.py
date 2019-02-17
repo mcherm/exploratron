@@ -67,3 +67,16 @@ def test_GridChange_Apply():
     assert list(grid.cellAt(1,2).tileIds()) == [8,5]
 
 
+def test_VisibleData_1():
+    jsonData = {"health": 10, "maxHealth": 10, "mana": 4, "maxMana": 8}
+    assert VisibleData.fromJSON(jsonData).toJSON() == jsonData
+
+
+def test_VisibleData_eq():
+    jsonDataA = {"health": 10, "maxHealth": 10, "mana": 4, "maxMana": 8}
+    jsonDataB = {"health": 10, "maxHealth": 25, "mana": 4, "maxMana": 8}
+    visibleDataA1 = VisibleData.fromJSON(jsonDataA)
+    visibleDataA2 = VisibleData.fromJSON(jsonDataA)
+    visibleDataB1 = VisibleData.fromJSON(jsonDataB)
+    assert visibleDataA1 == visibleDataA2
+    assert visibleDataA1 != visibleDataB1
