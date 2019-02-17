@@ -20,6 +20,7 @@ PLAYER_ID = "0"
 class RemoteClient():
     def __init__(self, playerId):
         print(f'Test Client')
+        self.playerId = playerId
         self.clientsideConnection = ClientsideConnection(SERVER_ADDRESS, playerId)
 
     def mainLoop(self):
@@ -27,7 +28,6 @@ class RemoteClient():
         imageLibrary = None
         soundLibrary = None
         currentGridData = None
-        currentVisibleData = None
         shouldExit = False
         while not shouldExit:
             # --- Look for local events ---
@@ -65,6 +65,7 @@ class RemoteClient():
                         imageLibrary = defaultRegion.imageLibrary
                         soundLibrary = defaultRegion.soundLibrary
                     display.uiState.newRoom(currentGridData)
+                    display.setDisplayedPlayerId(self.playerId)
                 elif isinstance(message, NewRoomMessage):
                     currentGridData = message.gridData
                     display.uiState.newRoom(currentGridData)
@@ -75,7 +76,7 @@ class RemoteClient():
                 elif isinstance(message, PlaySoundsMessage):
                     display.playSounds(message.soundIds, soundLibrary)
                 elif isinstance(message, UpdateVisibleDataMessage):
-                    currentVisibleData = message.visibleData
+                    display.setVisibleData(message.visibleData)
                 elif isinstance(message, ClientShouldExitMessage):
                     shouldExit = True
                 else:

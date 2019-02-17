@@ -38,8 +38,8 @@ class PygameOverlayDisplay:
         self.messagePainter = MessagePainter()
 
     def show(self, uiState, imageLibrary):
-        # health bar
-        if uiState.player:
+        # health and mana bars
+        if uiState.visibleData:
             BAR_SPACE = 5
             BAR_BORDER = 1
             BAR_WIDTH = 16
@@ -48,8 +48,8 @@ class PygameOverlayDisplay:
             MANA_OFFSET = FULL_BORDER + BAR_WIDTH + BAR_BORDER
 
             #create health bar
-            maxHealth = uiState.player.stats.maxHealth
-            health = uiState.player.stats.health
+            maxHealth = uiState.visibleData.maxHealth
+            health = uiState.visibleData.health
             healthBorderRect = pygame.Rect(BAR_SPACE, BAR_SPACE, maxHealth * SCALE + 2 * BAR_BORDER,
                                      BAR_WIDTH + 2 * BAR_BORDER)
             maxHealthRect = pygame.Rect(FULL_BORDER, FULL_BORDER, maxHealth * SCALE, BAR_WIDTH)
@@ -59,8 +59,8 @@ class PygameOverlayDisplay:
             self.surface.fill(RED, healthRect)
 
             #create mana bar
-            maxMana = uiState.player.stats.maxMana
-            mana = uiState.player.stats.mana
+            maxMana = uiState.visibleData.maxMana
+            mana = uiState.visibleData.mana
             manaBorderRect = pygame.Rect(BAR_SPACE, BAR_SPACE + MANA_OFFSET, maxMana * SCALE + 2 * BAR_BORDER,
                                      BAR_WIDTH + 2 * BAR_BORDER)
             maxManaRect = pygame.Rect(FULL_BORDER, FULL_BORDER + MANA_OFFSET, maxMana * SCALE, BAR_WIDTH)
@@ -87,7 +87,7 @@ class PygameDisplay:
     def __init__(self):
         STARTING_WIDTH_IN_TILES = 16
         STARTING_HEIGHT_IN_TILES = 11
-        self._uiState = UIState(STARTING_WIDTH_IN_TILES, STARTING_HEIGHT_IN_TILES)
+        self.uiState = UIState(STARTING_WIDTH_IN_TILES, STARTING_HEIGHT_IN_TILES)
         self.screen = pygame.display.set_mode(
             (STARTING_WIDTH_IN_TILES * TILE_SIZE, STARTING_HEIGHT_IN_TILES * TILE_SIZE))
         pygame.event.set_allowed(None)
@@ -96,13 +96,9 @@ class PygameDisplay:
         self.gridDisplay = PygameGridDisplay(self.screen)
         self.overlayDisplay = PygameOverlayDisplay(self.screen)
 
-    @property
-    def uiState(self):
-        return self._uiState
-
     def show(self, gridData, imageLibrary):
         self.gridDisplay.show(gridData, self.uiState, imageLibrary)
-        self.overlayDisplay.show(self._uiState, imageLibrary)
+        self.overlayDisplay.show(self.uiState, imageLibrary)
         pygame.display.flip()
 
     def playSounds(self, soundEffectIds, soundLibrary):
@@ -112,12 +108,15 @@ class PygameDisplay:
             sound = soundLibrary.lookupById(soundEffectId)
             sound.play()
 
-    def setDisplayedPlayer(self, player): # FIXME: Deprecated
+    def setDisplayedPlayerId(self, playerId):
+        self.uiState.setDisplayedPlayerId(playerId)
+
+    def setDisplayedPlayer(self, player): # FIXME: Deprecated - only needed for inventory
         self.uiState.setDisplayedPlayer(player)
 
     def setVisibleData(self, visibleData):
         """Call this to update the continually-displayed visible data."""
-        pass # FIXME: Need to write this, then replace setDisplayedPlayer()
+        self.uiState.setVisibleData(visibleData)
 
     def getEvents(self):
         return pygame.event.get()
@@ -130,18 +129,28 @@ class UIState:
     """This class contains information about the current state of controls that
     make up the UI. That includes, for instance, the camera position."""
 
-    def __init__(self, initialScreenWidth, initialScreenHeight, player=None):
-        """Initialize a UIState. Caller must specify which player is displayed.
-        initial screen width and height are measured in TILES, not pixels."""
-        self.player = player
+    def __init__(self, initialScreenWidth, initialScreenHeight,):
+        """Initialize a UIState. Caller must specify initial screen width and height
+        are measured in TILES, not pixels."""
+        self.playerId = None
+        self.player = None # FIXME: Deprecated
         self.screenWidthAndHeight = initialScreenWidth, initialScreenHeight
         self.roomWidthAndHeight = 0, 0
         self.offset = 0, 0
+        self.visibleData = None
         self.inventoryView = None
         self.message = None # a single Message object that is shown until the user clears it
 
-    def setDisplayedPlayer(self, player):
+    def setDisplayedPlayerId(self, playerId):
+        self.playerId = playerId
+
+    def setDisplayedPlayer(self, player): # FIXME: Deprecated - only needed for inventory
+        self.setDisplayedPlayerId(player.playerId)
         self.player = player
+
+    def setVisibleData(self, visibleData):
+        """Call this to update the continually-displayed visible data."""
+        self.visibleData = visibleData
 
     def newRoom(self, gridData):
         assert isinstance(gridData, GridData)
@@ -212,7 +221,7 @@ class UIState:
             pass
 
     def toggleInventory(self):
-        if self.player:
+        if self.playerId:
             if self.inventoryView is None:
                 self.inventoryView = InventoryView(self.player)
             else:
