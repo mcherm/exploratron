@@ -21,7 +21,7 @@ import random
 import itertools
 
 
-# ========= Start Classes for Game =========
+# ========= Start of Classes for Game =========
 
 
 
@@ -71,12 +71,12 @@ class World:
 
         
         
-# ========= End Classes for Game =========
+# ========= End of Classes for Game =========
 
 
 
 
-# ========= Start Functions for Game =========
+# ========= Start of Functions for Game =========
 
 
 def regenMobiles(world, currentTime):
@@ -223,25 +223,34 @@ def processClientMessages(world, clients, eventList):
             player.removeClient(clientConnection)
         else:
             raise Exception(f"Message type not supported for message {message}.")
-    
 
 
 def renderWorld(world, display, region, screenChanges, clients):
-    # -- Local screen --
+    renderWorldLocal(world, display, region, screenChanges)
+    renderWorldRemote(world, screenChanges, clients)
+
+
+def renderWorldLocal(world, display, region, screenChanges):
+    # --- draw the tiles ---
     localRoomSwitches = screenChanges.getRoomSwitches(world.displayedPlayer)
     if localRoomSwitches is not None:
         oldRoom, newRoom = localRoomSwitches
         display.uiState.newRoom(newRoom.gridData())
     displayedRoom = world.displayedPlayer.room
     display.show(displayedRoom.gridData(), region.imageLibrary)
+    # --- start any sounds ---
     display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
+    # --- possibly a message ---
     if screenChanges.getNewMessage() is not None:
         display.uiState.message = screenChanges.getNewMessage()
+    # --- update the visible data ---
+    display.setVisibleData(VisibleData.fromEnvironment(world.displayedPlayer))
 
-    # -- Remote clients --
+
+def renderWorldRemote(world, screenChanges, clients):
     for player in world.players:
         if len(player.clientConnections) > 0:
-            # --- Send at most one message about drawing the tile ---
+            # --- Send at most one message about drawing the tiles ---
             roomSwitch = screenChanges.getRoomSwitches(player)
             if roomSwitch is not None:
                 oldRoom, newRoom = roomSwitch
@@ -256,7 +265,8 @@ def renderWorld(world, display, region, screenChanges, clients):
                     def cellDataFromCell(cell):
                         """Given a cell, returns a CellData for it."""
                         return CellData(tuple(thing.tileId for thing in cell.things))
-                    updates = [(x, y, cellDataFromCell(room.cellAt(x,y))) for (x,y) in roomChangeSet]
+
+                    updates = [(x, y, cellDataFromCell(room.cellAt(x, y))) for (x, y) in roomChangeSet]
                     message = UpdateRoomMessage(GridDataChange(updates))
                 else:
                     message = None
@@ -277,7 +287,6 @@ def renderWorld(world, display, region, screenChanges, clients):
                     serversideClientConnection.visibleData = visibleData
 
 
-
 def mainLoop(world):
     screenChanges = ScreenChanges()
     eventList = EventList()
@@ -285,8 +294,9 @@ def mainLoop(world):
     region = objects.defaultRegion
     clients = ServersideClientConnections()
     world.setDisplayedPlayer(world.players[0].playerId)
-    display.setDisplayedPlayer(world.players[0])
-    
+    display.setDisplayedPlayerId(world.players[0])
+    display.setDisplayedPlayer(world.players[0]) # FIXME: This one is deprecated - needed only for inventory
+
     while not world.gameOver:
         eventList.clear()
         screenChanges.clear()
@@ -299,9 +309,14 @@ def mainLoop(world):
     
 
 
-# ========= End Functions for Game =========
+# ========= End of Functions for Game =========
+
+# ========= Start of Run It All ==========
 
 world = World()
 playerCatalogEntry = random.choice(world.playerCatalog.entries)
 world.addPlayer(objects.defaultRegion, playerCatalogEntry)
 mainLoop(world)
+
+
+# ========= End of Run It All ==========
