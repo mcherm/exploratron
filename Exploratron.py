@@ -14,6 +14,7 @@ from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayer
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
 from players import Player
+from clientdata import CellData
 import rooms
 import time
 import random
