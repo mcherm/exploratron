@@ -8,22 +8,16 @@ from clientdata import GridData
 
 
 class PygameGridDisplay:
-    def __init__(self):
-        SCREEN_WIDTH_IN_TILES = 16
-        SCREEN_HEIGHT_IN_TILES = 11
-        self.uiState = UIState(SCREEN_WIDTH_IN_TILES, SCREEN_HEIGHT_IN_TILES)
-        self.screen = pygame.display.set_mode(
-            (SCREEN_WIDTH_IN_TILES * TILE_SIZE, SCREEN_HEIGHT_IN_TILES * TILE_SIZE))
-        pygame.event.set_allowed(None)
-        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
+    def __init__(self, screen):
+        self.screen = screen
 
-    def show(self, gridData, imageLibrary):
+    def show(self, gridData, uiState, imageLibrary):
         assert isinstance(gridData, GridData)
         self.screen.fill((0, 0, 0))
-        screenWidth, screenHeight = self.uiState.screenWidthAndHeight
+        screenWidth, screenHeight = uiState.screenWidthAndHeight
         for screenY in range(min(screenHeight, gridData.height)):
             for screenX in range(min(screenWidth, gridData.width)):
-                offsetX, offsetY = self.uiState.offset
+                offsetX, offsetY = uiState.offset
                 cellData = gridData.cellAt(screenX + offsetX, screenY + offsetY)
                 for tileId in cellData.tileIds():
                     image = imageLibrary.lookupById(tileId)
@@ -33,7 +27,7 @@ class PygameGridDisplay:
 LIGHT_GREY = (120, 120, 120)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
-PURPLE= (144, 9, 189)
+PURPLE = (144, 9, 189)
 
 
 class PygameOverlayDisplay:
@@ -91,17 +85,24 @@ class PygameDisplay:
     of the grid. It also deals with playing sounds."""
 
     def __init__(self):
-        self.gridDisplay = PygameGridDisplay()
-        # FIXME: The surface should be owned by the PygameDisplay, not the GridDisplay.
-        self.overlayDisplay = PygameOverlayDisplay(self.gridDisplay.screen)
+        STARTING_WIDTH_IN_TILES = 16
+        STARTING_HEIGHT_IN_TILES = 11
+        self._uiState = UIState(STARTING_WIDTH_IN_TILES, STARTING_HEIGHT_IN_TILES)
+        self.screen = pygame.display.set_mode(
+            (STARTING_WIDTH_IN_TILES * TILE_SIZE, STARTING_HEIGHT_IN_TILES * TILE_SIZE))
+        pygame.event.set_allowed(None)
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
+
+        self.gridDisplay = PygameGridDisplay(self.screen)
+        self.overlayDisplay = PygameOverlayDisplay(self.screen)
 
     @property
     def uiState(self):
-        return self.gridDisplay.uiState  # Should move uiState to PygameDisplay, not GridDisplay
+        return self._uiState
 
     def show(self, gridData, imageLibrary):
-        self.gridDisplay.show(gridData, imageLibrary)
-        self.overlayDisplay.show(self.gridDisplay.uiState, imageLibrary)
+        self.gridDisplay.show(gridData, self.uiState, imageLibrary)
+        self.overlayDisplay.show(self._uiState, imageLibrary)
         pygame.display.flip()
 
     def playSounds(self, soundEffectIds, soundLibrary):
@@ -111,8 +112,12 @@ class PygameDisplay:
             sound = soundLibrary.lookupById(soundEffectId)
             sound.play()
 
-    def setDisplayedPlayer(self, player):
+    def setDisplayedPlayer(self, player): # FIXME: Deprecated
         self.uiState.setDisplayedPlayer(player)
+
+    def setVisibleData(self, visibleData):
+        """Call this to update the continually-displayed visible data."""
+        pass # FIXME: Need to write this, then replace setDisplayedPlayer()
 
     def getEvents(self):
         return pygame.event.get()
