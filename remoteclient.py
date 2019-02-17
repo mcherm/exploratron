@@ -2,6 +2,10 @@
 # This is a client that connects to a certain character.
 #
 
+from pygame import init as pygame_init
+pygame_init() # Need to run this before some of the code that runs during imports
+
+
 import pygame
 from exploranetworking import *
 from events import pygameKeyToKeyCode, KeyCode
@@ -16,33 +20,36 @@ class MockThing:
 
 class MockCell:
     def __init__(self, tileData):
-        if isinstance(tileData, int):
+        if isinstance(tileData, CellData):
+            self.things = [MockThing(tileId) for tileId in tileData.tileIds()]
+        elif isinstance(tileData, int):
             self.things = [MockThing(tileData)]
         elif isinstance(tileData, list):
             self.things = [MockThing(tileId) for tileId in tileData]
         else:
-            raise Exception("tileData must be an int or a list of ints.")
+            raise Exception("tileData must be a CellData, an int, or a list of ints.")
 
 class MockRoom:
     def __init__(self, message):
         assert isinstance(message, (WelcomeClientMessage, NewRoomMessage))
-        self.width = message.width
-        self.height = message.height
-        self.grid = [ [MockCell(tileData) for tileData in row] for row in message.grid]
+        gridData = message.gridData
+        self.width = gridData.width
+        self.height = gridData.height
+        self.grid = [[MockCell(gridData.cellAt(x,y)) for x in range(self.width)] for y in range(self.height)]
     def refreshRoom(self, message):
         assert isinstance(message, RefreshRoomMessage)
         self.grid =  [ [MockCell(tileData) for tileData in row] for row in message.grid]
     def updateRoom(self, message):
         assert isinstance(message, UpdateRoomMessage)
-        for x, y, tileData in message.cells:
-            self.grid[y][x] = MockCell(tileData)
+        for x, y, cellData in message.gridDataChange.changes():
+            self.grid[y][x] = MockCell(cellData)
     def cellAt(self, x, y):
         return self.grid[y][x]
 
 
 #------ TEST CODE ------
 def test():
-    msg1 = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
+    msg1 = NewRoomMessage( 4, 5, GridData.fromJSON([[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]]) )
     mockRoom = MockRoom(msg1)
     imageLibrary = images.ImageLibrary()
     display = PygameDisplay()
@@ -95,7 +102,7 @@ class RemoteClient():
                 byteStr, address = readyToReadSockets[0].recvfrom(UDP_MAX_SIZE)
                 message = bytesToMessage(byteStr)
                 if isinstance(message, WelcomeClientMessage):
-                    print(f"Server sent WelcomeClientMessage.")
+                    print(f"Server sent WelcomeClientMessage: {byteStr}.")
                     currentRoom = MockRoom(message)
                     if display is None:
                         display = PygameDisplay()
@@ -104,23 +111,23 @@ class RemoteClient():
                         soundLibrary = defaultRegion.soundLibrary
                     display.uiState.newRoom(currentRoom)
                 elif isinstance(message, NewRoomMessage):
-                    print(f"Server sent NewRoomMessage.")
+                    print(f"Server sent NewRoomMessage: {byteStr}")
                     currentRoom = MockRoom(message)
                     display.uiState.newRoom(currentRoom)
                 elif isinstance(message, RefreshRoomMessage):
-                    print(f"Server sent RefreshRoomMessage.")
+                    print(f"Server sent RefreshRoomMessage: {byteStr}")
                     currentRoom.refreshRoom(message)
                 elif isinstance(message, UpdateRoomMessage):
-                    print(f"Server sent UpdateRoomMessage.")
+                    print(f"Server sent UpdateRoomMessage: {byteStr}")
                     currentRoom.updateRoom(message)
                 elif isinstance(message, PlaySoundsMessage):
-                    print(f"Server sent PlaySoundsMessage.")
+                    print(f"Server sent PlaySoundsMessage: {byteStr}")
                     display.playSounds(message.soundIds, soundLibrary)
                 elif isinstance(message, ClientShouldExitMessage):
-                    print(f"Server sent ClientShouldExitMessage: {message}.")
+                    print(f"Server sent ClientShouldExitMessage: {byteStr}.")
                     shouldExit = True
                 else:
-                    raise Exception(f"Message type {message} not supported.")
+                    raise Exception(f"Server sent message type '{message}' which is not supported; was {byteStr}")
                 
             # --- Display ---
             if currentRoom is not None:
@@ -134,7 +141,7 @@ class RemoteClient():
         
 
 def testDisplay():
-    msg = NewRoomMessage( 4, 5, [[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]] )
+    msg = NewRoomMessage( 4, 5, GridData.fromJSON([[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]]) )
     room = MockRoom(msg)
     
     display = PygameDisplay()

@@ -1,5 +1,6 @@
 from kindsofthing import Thing
 from mobile import Mobile
+from exploranetworking import GridData, CellData
 
 
 class Location:
@@ -48,19 +49,20 @@ class Cell:
 
 
 class Grid:
-    """A grid has rows and colums of cells."""
+    """A grid has rows and columns of cells."""
     def __init__(self, width, height):
         self.cells = [ [Cell() for x in range(width)] for y in range(height)]
         self.width = width
         self.height = height
     def cellAt(self, x, y):
         return self.cells[y][x]
-    def toMessageFormat(self):
-        """This returns the information of what is in the grid in the form
-        of a 2-D array (list of lists) of 'cells' where a cell is EITHER
-        a number (representing the single tileId in that location) OR a
-        list of numbers (representing the stack of tiles in that location)."""
-        return [[cell.toMessageFormat() for cell in row] for row in self.cells]
+    def toGridData(self):
+        """This returns the information of what is in the grid in the form of
+        a GridData."""
+        allCells = []
+        for row in self.cells:
+            allCells.extend([CellData(tuple(x.tileId for x in cell.things)) for cell in row])
+        return GridData(self.width, self.height, allCells)
 
 
 class Room:
@@ -113,10 +115,8 @@ class Room:
                     self.cellAt(x,y).addThing(mobile)
                     result.append(mobile)
             return result
-    def gridInMessageFormat(self):
-        """This returns the information of what is in the room in the form
-        of a 2-D array (list of lists) of 'cells' where a cell is EITHER
-        a number (representing the single tileId in that location) OR a
-        list of numbers (representing the stack of tiles in that location)."""
-        return self.grid.toMessageFormat()
-    
+    def gridData(self):
+        """Returns an exploranetworking.GridData of the information in the
+        room."""
+        return self.grid.toGridData()
+
