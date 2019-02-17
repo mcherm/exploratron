@@ -92,6 +92,9 @@ class RemoteClient():
                 elif isinstance(message, PlaySoundsMessage):
                     print(f"Server sent PlaySoundsMessage: {byteStr}")
                     display.playSounds(message.soundIds, soundLibrary)
+                elif isinstance(message, UpdateVisibleDataMessage):
+                    print(f"Server sent UpdateVisibleDataMessage: {byteStr}")
+                    # FIXME: Ignore this until the UI works from it
                 elif isinstance(message, ClientShouldExitMessage):
                     print(f"Server sent ClientShouldExitMessage: {byteStr}.")
                     shouldExit = True
