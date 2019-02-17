@@ -78,6 +78,7 @@ class GridData:
         return [[self.cellAt(x,y).toJSON() for x in range(self.width)] for y in range(self.height)]
 
     def cellAt(self, x, y):
+        """Returns the CellData at the specified x,y location (which must be valid for this GridData)."""
         assert 0 <= x < self.width
         assert 0 <= y <= self.height
         return self._allCells[x + self.width * y]

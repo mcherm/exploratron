@@ -14,46 +14,14 @@ import images
 from display import PygameDisplay
 
 
-class MockThing:
-    def __init__(self, tileId):
-        self.tileId = tileId
-
-class MockCell:
-    def __init__(self, tileData):
-        if isinstance(tileData, CellData):
-            self.things = [MockThing(tileId) for tileId in tileData.tileIds()]
-        elif isinstance(tileData, int):
-            self.things = [MockThing(tileData)]
-        elif isinstance(tileData, list):
-            self.things = [MockThing(tileId) for tileId in tileData]
-        else:
-            raise Exception("tileData must be a CellData, an int, or a list of ints.")
-
-class MockRoom:
-    def __init__(self, message):
-        assert isinstance(message, (WelcomeClientMessage, NewRoomMessage))
-        gridData = message.gridData
-        self.width = gridData.width
-        self.height = gridData.height
-        self.grid = [[MockCell(gridData.cellAt(x,y)) for x in range(self.width)] for y in range(self.height)]
-    def refreshRoom(self, message):
-        assert isinstance(message, RefreshRoomMessage)
-        self.grid =  [ [MockCell(tileData) for tileData in row] for row in message.grid]
-    def updateRoom(self, message):
-        assert isinstance(message, UpdateRoomMessage)
-        for x, y, cellData in message.gridDataChange.changes():
-            self.grid[y][x] = MockCell(cellData)
-    def cellAt(self, x, y):
-        return self.grid[y][x]
 
 
 #------ TEST CODE ------
 def test():
-    msg1 = NewRoomMessage( 4, 5, GridData.fromJSON([[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]]) )
-    mockRoom = MockRoom(msg1)
+    gridData = GridData.fromJSON([[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]])
     imageLibrary = images.ImageLibrary()
     display = PygameDisplay()
-    display.show(mockRoom, imageLibrary)
+    display.show(gridData, imageLibrary)
 #-----------------------
     
 SERVER_ADDRESS = ("127.0.0.1", 12000)
@@ -67,7 +35,8 @@ class RemoteClient():
 
         self.clientSocket.sendto(JoinServerMessage(playerId).toBytes(), SERVER_ADDRESS)
     def mainLoop(self):
-        currentRoom = None
+        currentRoom = None # FIXME: Remove
+        currentGridData = None
         display = None
         imageLibrary = None
         shouldExit = False
@@ -103,23 +72,23 @@ class RemoteClient():
                 message = bytesToMessage(byteStr)
                 if isinstance(message, WelcomeClientMessage):
                     print(f"Server sent WelcomeClientMessage: {byteStr}.")
-                    currentRoom = MockRoom(message)
+                    currentGridData = message.gridData
                     if display is None:
                         display = PygameDisplay()
                         defaultRegion = images.Region()
                         imageLibrary = defaultRegion.imageLibrary
                         soundLibrary = defaultRegion.soundLibrary
-                    display.uiState.newRoom(currentRoom)
+                    display.uiState.newRoom(currentGridData)
                 elif isinstance(message, NewRoomMessage):
                     print(f"Server sent NewRoomMessage: {byteStr}")
-                    currentRoom = MockRoom(message)
-                    display.uiState.newRoom(currentRoom)
+                    currentGridData = message.gridData
+                    display.uiState.newRoom(currentGridData)
                 elif isinstance(message, RefreshRoomMessage):
                     print(f"Server sent RefreshRoomMessage: {byteStr}")
-                    currentRoom.refreshRoom(message)
+                    currentGridData = message.gridData
                 elif isinstance(message, UpdateRoomMessage):
                     print(f"Server sent UpdateRoomMessage: {byteStr}")
-                    currentRoom.updateRoom(message)
+                    message.gridDataChange.applyToGrid(currentGridData)
                 elif isinstance(message, PlaySoundsMessage):
                     print(f"Server sent PlaySoundsMessage: {byteStr}")
                     display.playSounds(message.soundIds, soundLibrary)
@@ -130,8 +99,8 @@ class RemoteClient():
                     raise Exception(f"Server sent message type '{message}' which is not supported; was {byteStr}")
                 
             # --- Display ---
-            if currentRoom is not None:
-                display.show(currentRoom, imageLibrary)
+            if currentGridData is not None:
+                display.show(currentGridData, imageLibrary)
 
     def exit(self):
         """This should be called after the main loop exits. It will inform the server
@@ -141,12 +110,10 @@ class RemoteClient():
         
 
 def testDisplay():
-    msg = NewRoomMessage( 4, 5, GridData.fromJSON([[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]]) )
-    room = MockRoom(msg)
-    
+    gridData = GridData.fromJSON([[7,7,7,7],[7,0,0,7],[7,0,[0,12],7],[7,0,0,7],[7,7,8,7]])
     display = PygameDisplay()
     imageLibrary = images.ImageLibrary()
-    display.show(room, imageLibrary)
+    display.show(gridData, imageLibrary)
     timeToQuit = False
     while not timeToQuit:
         events = display.getEvents()

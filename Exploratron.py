@@ -230,9 +230,9 @@ def renderWorld(world, display, region, screenChanges, clients):
     localRoomSwitches = screenChanges.getRoomSwitches(world.displayedPlayer)
     if localRoomSwitches is not None:
         oldRoom, newRoom = localRoomSwitches
-        display.uiState.newRoom(newRoom)
+        display.uiState.newRoom(newRoom.gridData())
     displayedRoom = world.displayedPlayer.room
-    display.show(displayedRoom, region.imageLibrary)
+    display.show(displayedRoom.gridData(), region.imageLibrary)
     display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
     if screenChanges.getNewMessage() is not None:
         display.uiState.message = screenChanges.getNewMessage()

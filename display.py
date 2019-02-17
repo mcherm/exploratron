@@ -1,8 +1,9 @@
 
 import pygame
-from message import MessagePainter, Message
+from message import MessagePainter
 from images import TILE_SIZE
 from inventory_view import InventoryView
+from exploranetworking import GridData
 
 
 
@@ -16,15 +17,16 @@ class PygameGridDisplay:
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
 
-    def show(self, room, imageLibrary):
+    def show(self, gridData, imageLibrary):
+        assert isinstance(gridData, GridData)
         self.screen.fill((0, 0, 0))
         screenWidth, screenHeight = self.uiState.screenWidthAndHeight
-        for screenY in range(min(screenHeight, room.height)):
-            for screenX in range(min(screenWidth, room.width)):
+        for screenY in range(min(screenHeight, gridData.height)):
+            for screenX in range(min(screenWidth, gridData.width)):
                 offsetX, offsetY = self.uiState.offset
-                cell = room.cellAt(screenX + offsetX, screenY + offsetY)
-                for thing in cell.things:
-                    image = imageLibrary.lookupById(thing.tileId)
+                cellData = gridData.cellAt(screenX + offsetX, screenY + offsetY)
+                for tileId in cellData.tileIds():
+                    image = imageLibrary.lookupById(tileId)
                     self.screen.blit(image, (TILE_SIZE * screenX, TILE_SIZE * screenY))
 
 
@@ -97,8 +99,8 @@ class PygameDisplay:
     def uiState(self):
         return self.gridDisplay.uiState  # Should move uiState to PygameDisplay, not GridDisplay
 
-    def show(self, room, imageLibrary):
-        self.gridDisplay.show(room, imageLibrary)
+    def show(self, gridData, imageLibrary):
+        self.gridDisplay.show(gridData, imageLibrary)
         self.overlayDisplay.show(self.gridDisplay.uiState, imageLibrary)
         pygame.display.flip()
 
@@ -136,8 +138,9 @@ class UIState:
     def setDisplayedPlayer(self, player):
         self.player = player
 
-    def newRoom(self, room):
-        self.roomWidthAndHeight = room.width, room.height
+    def newRoom(self, gridData):
+        assert isinstance(gridData, GridData)
+        self.roomWidthAndHeight = gridData.width, gridData.height
         self.offset = 0, 0
 
     def moveCrosshairTo(self, newPosition):
