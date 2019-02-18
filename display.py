@@ -2,8 +2,9 @@
 import pygame
 from message import MessagePainter
 from images import TILE_SIZE
-from inventory_view import InventoryView
-from clientdata import GridData
+from inventory_view import LocalInventoryView, RemoteInventoryView
+from clientdata import GridData, InventoryData
+from exploranetworking import RequestInventoryMessage
 
 
 
@@ -111,9 +112,6 @@ class PygameDisplay:
     def setDisplayedPlayerId(self, playerId):
         self.uiState.setDisplayedPlayerId(playerId)
 
-    def setDisplayedPlayer(self, player): # FIXME: Deprecated - only needed for inventory
-        self.uiState.setDisplayedPlayer(player)
-
     def setVisibleData(self, visibleData):
         """Call this to update the continually-displayed visible data."""
         self.uiState.setVisibleData(visibleData)
@@ -133,7 +131,6 @@ class UIState:
         """Initialize a UIState. Caller must specify initial screen width and height
         are measured in TILES, not pixels."""
         self.playerId = None
-        self.player = None # FIXME: Deprecated
         self.screenWidthAndHeight = initialScreenWidth, initialScreenHeight
         self.roomWidthAndHeight = 0, 0
         self.offset = 0, 0
@@ -143,10 +140,6 @@ class UIState:
 
     def setDisplayedPlayerId(self, playerId):
         self.playerId = playerId
-
-    def setDisplayedPlayer(self, player): # FIXME: Deprecated - only needed for inventory
-        self.setDisplayedPlayerId(player.playerId)
-        self.player = player
 
     def setVisibleData(self, visibleData):
         """Call this to update the continually-displayed visible data."""
@@ -220,13 +213,36 @@ class UIState:
         else:
             pass
 
-    def toggleInventory(self):
-        if self.playerId:
+    def toggleInventoryLocal(self, player):
+        """Toggle whether the inventory is displayed. This version is intended for use
+        in a local display where the actual player object is available for performing
+        actions like drop and equip."""
+        if player:
             if self.inventoryView is None:
-                self.inventoryView = InventoryView(self.player)
+                self.inventoryView = LocalInventoryView(player)
             else:
                 self.inventoryView = None
         else:
             # There is no player, so we can't show inventory
             self.inventoryView = None
+
+    def toggleInventoryRemote(self, clientsideConnection):
+        """Toggle whether the inventory is displayed.
+
+        For the moment, during a cleanup, there are two different versions of this,
+        one for the local server and one for a remote viewer. I hope to fix that
+        eventually."""
+        if self.playerId:
+            if self.inventoryView is None:
+                clientsideConnection.send(RequestInventoryMessage())
+            else:
+                self.inventoryView = None
+        else:
+            # There is no player, so we can't show inventory
+            self.inventoryView = None
+
+    def showInventoryRemote(self, inventoryData):
+        """Begin showing an inventory. This is used by the remote view once
+        an inventory becomes available."""
+        self.inventoryView = RemoteInventoryView(inventoryData)
 

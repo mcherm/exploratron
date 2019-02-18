@@ -6,6 +6,7 @@ class ClientDataStructure:
     messages sent to the front-end."""
     def toJSON(self):
         raise NotImplementedError # subclasses should implement this
+
     @classmethod
     def fromJSON(cls):
         raise NotImplementedError # subclasses should implement this
@@ -151,3 +152,73 @@ class VisibleData(ClientDataStructure):
         return copy.copy(self.__dict__)
 
 
+class InventoryItemData(ClientDataStructure):
+    """This represents a single item in an inventory. It is defined as:
+    [uniqueId, tileId, featureCode]. (It would be more elegant to use a dict, but
+    space might matter so we'll use the list instead.)"""
+    def __init__(self, uniqueId, tileId, featureCode):
+        self.uniqueId = uniqueId
+        self.tileId = tileId
+        self.featureCode = featureCode
+
+    def __eq__(self, other):
+        return isinstance(other, InventoryItemData) and  self.uniqueId == other.uniqueId
+
+    @classmethod
+    def fromJSON(cls, json):
+        """Initialize from the corresponding JSON."""
+        assert isinstance(json, list)
+        assert len(json) == 3
+        return cls(*json)
+
+    @classmethod
+    def fromItem(cls, item):
+        """Initialize an InventoryItemData from an actual Item."""
+        return cls(
+            uniqueId=item.uniqueId(),
+            tileId=item.tileId,
+            featureCode=item.featureCode())
+
+    def toJSON(self):
+        """Return this in JSON format."""
+        return [self.uniqueId, self.tileId, self.featureCode]
+
+    def isWeapon(self):
+        return self.featureCode == "W"
+
+    def isWand(self):
+        return self.featureCode == "S"
+
+
+class InventoryData(ClientDataStructure):
+    """This represents a snapshot of the inventory."""
+    def __init__(self, items, wieldedWeaponId, wieldedWandId):
+        self.items = items # a list of InventoryItemData objects
+        self.wieldedWeaponId = wieldedWeaponId
+        self.wieldedWandId = wieldedWandId
+
+    @classmethod
+    def fromJSON(cls, json):
+        """Initialize from the corresponding JSON."""
+        items = [InventoryItemData.fromJSON(x) for x in json["items"]]
+        wieldedWeaponId = json["wieldedWeaponId"]
+        wieldedWandId = json["wieldedWandId"]
+        return cls(items, wieldedWeaponId, wieldedWandId)
+
+    @classmethod
+    def fromInventory(cls, inventory):
+        """Initialize from an Inventory."""
+        items = [InventoryItemData.fromItem(item) for item in inventory.items]
+        wieldedWeapon = inventory.getWieldedWeapon()
+        wieldedWeaponId = None if wieldedWeapon is None else wieldedWeapon.uniqueId()
+        wieldedWand = inventory.getWieldedWand()
+        wieldedWandId = None if wieldedWand is None else wieldedWand.uniqueId()
+        return cls(items, wieldedWeaponId, wieldedWandId)
+
+    def toJSON(self):
+        """Return this in JSON format."""
+        return {
+            "items": [x.toJSON() for x in self.items],
+            "wieldedWeaponId": self.wieldedWeaponId,
+            "wieldedWandId": self.wieldedWandId,
+        }

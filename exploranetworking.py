@@ -4,7 +4,7 @@ import copy
 import select
 from socket import socket, AF_INET, SOCK_DGRAM
 from collections import defaultdict
-from clientdata import GridData, GridDataChange, VisibleData
+from clientdata import GridData, GridDataChange, VisibleData, InventoryData
 
 
 # Max number of bytes WE choose to allow in a UDP packet.
@@ -118,6 +118,25 @@ class KeyPressedMessage(Message):
     def __init__(self, keyCode):
         self.keyCode = keyCode
 
+class RequestInventoryMessage(Message):
+    """A message a client sends to request the inventory of the current player."""
+
+class InventoryMessage(Message):
+    """A message the server sends on request to provide the current inventory of a player."""
+    def __init__(self, inventoryData):
+        self.inventoryData = inventoryData
+    def dataJSON(self):
+        return self.inventoryData.toJSON()
+    @classmethod
+    def fromDataJSON(cls, dataJSON):
+        return cls(inventoryData=InventoryData.fromJSON(dataJSON))
+
+class DropItemMessage(Message):
+    """A message the client sends to have the current player drop an item."""
+
+class EquipMessage(Message):
+    """A message the client sends to have the current player wield a weapon or wand in their inventory."""
+
 class ClientShouldExitMessage(Message):
     """A message sent when the server is telling the client to quit playing."""
 
@@ -126,9 +145,10 @@ class ClientDisconnectingMessage(Message):
     no longer needs to receive updates."""
 
 
-clientToServerMessages = [JoinServerMessage, KeyPressedMessage, ClientDisconnectingMessage]
+clientToServerMessages = [JoinServerMessage, KeyPressedMessage, RequestInventoryMessage, DropItemMessage,
+                          EquipMessage, ClientDisconnectingMessage]
 serverToClientMessages = [WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
-                          UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage,
+                          UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage, InventoryMessage,
                           ClientShouldExitMessage]
 
 _messageClass = {msg.messageName(): msg for msg in clientToServerMessages + serverToClientMessages}

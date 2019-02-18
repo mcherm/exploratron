@@ -3,6 +3,7 @@
 #
 
 from clientdata import *
+from kindsofthing import Item
 
 
 def test_CellData_Singleton():
@@ -80,3 +81,44 @@ def test_VisibleData_eq():
     visibleDataB1 = VisibleData.fromJSON(jsonDataB)
     assert visibleDataA1 == visibleDataA2
     assert visibleDataA1 != visibleDataB1
+
+
+def test_InventoryItemData_1():
+    jsonData = [4392386512, 6, "N"]
+    inventoryItemData = InventoryItemData.fromJSON(jsonData)
+    assert inventoryItemData.uniqueId == 4392386512
+    assert inventoryItemData.tileId == 6
+    assert inventoryItemData.featureCode == "N"
+    assert inventoryItemData.toJSON() == jsonData
+
+
+def test_InventoryItemData_eq():
+    jsonDataA = [4392386512, 6, "N"]
+    jsonDataB = [4392479488, 6, "N"]
+    inventoryItemDataA1 = InventoryItemData.fromJSON(jsonDataA)
+    inventoryItemDataA2 = InventoryItemData.fromJSON(jsonDataA)
+    inventoryItemDataB1 = InventoryItemData.fromJSON(jsonDataB)
+    assert inventoryItemDataA1 == inventoryItemDataA2
+    assert inventoryItemDataA1 != inventoryItemDataB1
+
+
+def test_InventoryItemData_weapon():
+    def ii(code):
+        return InventoryItemData.fromJSON([4392386512, 6, code])
+    assert not ii("N").isWeapon()
+    assert ii("W").isWeapon()
+    assert not ii("S").isWeapon()
+
+
+def test_InventoryItemData_wand():
+    def ii(code):
+        return InventoryItemData.fromJSON([4392386512, 6, code])
+    assert not ii("N").isWand()
+    assert not ii("W").isWand()
+    assert ii("S").isWand()
+
+
+def test_InventoryData_1():
+    jsonData = {"items": [[4392479488, 3, "N"], [4392386512, 4, "S"]], "wieldedWeaponId": None, "wieldedWandId": 4392386512}
+    inventoryData = InventoryData.fromJSON(jsonData)
+    assert inventoryData.toJSON() == jsonData
