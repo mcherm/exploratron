@@ -11,6 +11,12 @@ from clientdata import GridData, GridDataChange, VisibleData, InventoryData
 UDP_MAX_SIZE = 4096
 
 
+# Surely this will be needed someplace else... but for now this is the only place it is used
+class EquipmentTypeCode:
+    WEAPON = "W"
+    WAND = "S"
+
+
 class Message:
     """An abstract parent for all of the message types."""
     @classmethod
@@ -133,9 +139,16 @@ class InventoryMessage(Message):
 
 class DropItemMessage(Message):
     """A message the client sends to have the current player drop an item."""
+    def __init__(self, itemUniqueId):
+        self.itemUniqueId = itemUniqueId
 
 class EquipMessage(Message):
-    """A message the client sends to have the current player wield a weapon or wand in their inventory."""
+    """A message the client sends to have the current player wield a weapon or wand in their inventory.
+    None can be used for the uniqueId which will un-wield an item. Attempting to wield an item not
+    found in the inventory or an item of the wron type will have no affect."""
+    def __init__(self, equipmentType, itemUniqueId):
+        self.equipmentType = equipmentType
+        self.itemUniqueId = itemUniqueId
 
 class ClientShouldExitMessage(Message):
     """A message sent when the server is telling the client to quit playing."""

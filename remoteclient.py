@@ -48,6 +48,8 @@ class RemoteClient():
                                 display.uiState.moveUIEast()
                             elif keyCode == KeyCode.TOGGLE_INVENTORY:
                                 display.uiState.toggleInventoryRemote(self.clientsideConnection)
+                            elif keyCode == KeyCode.UI_ACTION:
+                                display.uiState.takeAction()
                             else:
                                 message = KeyPressedMessage(keyCode)
                                 self.clientsideConnection.send(message)
@@ -78,7 +80,7 @@ class RemoteClient():
                 elif isinstance(message, UpdateVisibleDataMessage):
                     display.setVisibleData(message.visibleData)
                 elif isinstance(message, InventoryMessage):
-                    display.uiState.showInventoryRemote(message.inventoryData)
+                    display.uiState.showInventoryRemote(self.clientsideConnection, message.inventoryData)
                 elif isinstance(message, ClientShouldExitMessage):
                     shouldExit = True
                 else:

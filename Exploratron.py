@@ -124,7 +124,7 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
             elif event.keyCode == KeyCode.MOVE_UI_RIGHT:
                 uiState.moveUIEast()
             elif event.keyCode == KeyCode.UI_ACTION:
-                uiState.takeAction(world, world.displayedPlayer)
+                uiState.takeAction()
             elif event.keyCode == KeyCode.TOGGLE_INVENTORY:
                 uiState.toggleInventoryLocal(world.displayedPlayer)
         else:
@@ -175,7 +175,7 @@ def handleDeath(world):
             x, y = mobile.position
             cell = mobile.room.cellAt(x, y)
             for item in mobile.inventory:
-                mobile.placeItem(item)
+                mobile.dropItem(item)
             cell.removeThing(mobile)
             if isinstance(mobile, Player):
                 world.removePlayer(mobile)
@@ -222,6 +222,24 @@ def processClientMessages(world, clients, eventList):
             inventory = world.getPlayer(clientConnection.playerId).inventory
             inventoryData = InventoryData.fromInventory(inventory)
             clientConnection.send(InventoryMessage(inventoryData))
+        elif isinstance(message, DropItemMessage):
+            # FIXME: The following should update screenChanges. To do that, this should be an event
+            world.getPlayer(clientConnection.playerId).dropItem(message.itemUniqueId)
+        elif isinstance(message, EquipMessage):
+            # FIXME: This probably should be an event also.
+            player = world.getPlayer(clientConnection.playerId)
+            if message.itemUniqueId is None:
+                item = None
+            else:
+                item = player.inventory.findItemById(message.itemUniqueId)
+                # Note: if item they gave wasn't in the inventory we'll still
+                #   unwield any existing wielded item. That is the desired behavior.
+            if message.equipmentType == EquipmentTypeCode.WEAPON:
+                player.inventory.wieldWeapon(item)
+            elif message.equipmentType == EquipmentTypeCode.WAND:
+                player.inventory.wieldWand(item)
+            else:
+                raise AssertionError(f"Unknown EquipmentTypeCode: '{message.equipmentType}'")
         elif isinstance(message, ClientDisconnectingMessage):
             player = world.getPlayer(clientConnection.playerId)
             player.removeClient(clientConnection)
