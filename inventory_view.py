@@ -6,6 +6,7 @@
 import pygame
 from images import TILE_SIZE
 from clientdata import InventoryData
+from exploranetworking import DropItemMessage, EquipMessage, EquipmentTypeCode
 
 
 LIGHT_GREY = (120, 120, 120)
@@ -353,8 +354,8 @@ class LocalInventoryView(InventoryView):
     """A subclass of InventoryView that has direct access to the player object and
     uses that to perform actions like dropping and wielding."""
     def __init__(self, player):
-        self.player = player
         super().__init__(InventoryData.fromInventory(player.inventory))
+        self.player = player
 
     def _itemOrNone(self, itemData):
         """If itemData is None, this returns None. If itemData is an ItemData found in the player's
@@ -363,22 +364,10 @@ class LocalInventoryView(InventoryView):
         return None if itemData is None else self.player.inventory.findItemById(itemData.uniqueId)
 
     def dropItem(self, itemData):
-        """Attempt to drop an item currently in the inventory. If the item actually turns
-        out NOT to be in the inventory at this moment, this will do nothing."""
         if not self.player.isDead:
-            try:
-                item = self._itemOrNone(itemData)
-                self.player.inventory.removeItem(item)  # take it out the inventory
-                self.player.placeItem(item) # put it on the ground
-            except ValueError:
-                # Must no longer be in the inventory. So do nothing
-                return
+            self.player.dropItem(itemData.uniqueId)
 
     def wieldWeapon(self, itemData):
-        """If itemData is None, stops wielding the current weapon. If itemData is anything
-        else, try to start wielding it as a Weapon. If for some reason this doesn't
-        work (perhaps the inventory has changed since the InventoryView launched),
-        then this does nothing."""
         if not self.player.isDead:
             try:
                 self.player.inventory.wieldWeapon(self._itemOrNone(itemData))
@@ -387,10 +376,6 @@ class LocalInventoryView(InventoryView):
                 return
 
     def wieldWand(self, itemData):
-        """If itemData is None, stops wielding the current wand. If itemData is anything
-        else, try to start wielding it as a Wand. If for some reason this doesn't
-        work (perhaps the inventory has changed since the InventoryView launched),
-        then this does nothing."""
         if not self.player.isDead:
             try:
                 self.player.inventory.wieldWand(self._itemOrNone(itemData))
@@ -403,4 +388,18 @@ class LocalInventoryView(InventoryView):
 class RemoteInventoryView(InventoryView):
     """A subclass of InventoryView that is provided with a ClientsideConnection and
     uses that to perform actions like dropping and wielding."""
-    # FIXME: Not implemented yet!
+    def __init__(self, clientsideConnection, inventoryData):
+        super().__init__(inventoryData)
+        self.clientsideConnection = clientsideConnection
+
+    def dropItem(self, itemData):
+        self.clientsideConnection.send(DropItemMessage(itemData.uniqueId))
+
+    def wieldWeapon(self, itemData):
+        itemUniqueId = None if itemData is None else itemData.uniqueId
+        self.clientsideConnection.send(EquipMessage(EquipmentTypeCode.WEAPON, itemUniqueId))
+
+    def wieldWand(self, itemData):
+        itemUniqueId = None if itemData is None else itemData.uniqueId
+        self.clientsideConnection.send(EquipMessage(EquipmentTypeCode.WAND, itemUniqueId))
+

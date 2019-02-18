@@ -204,7 +204,7 @@ class UIState:
             if offsetX > 0:
                 self.offset = x - 1, y
 
-    def takeAction(self, world, person):
+    def takeAction(self):
         """This is called when someone presses the UI action button."""
         if self.inventoryView:
             self.inventoryView.takeAction()
@@ -241,8 +241,8 @@ class UIState:
             # There is no player, so we can't show inventory
             self.inventoryView = None
 
-    def showInventoryRemote(self, inventoryData):
+    def showInventoryRemote(self, clientsideConnection, inventoryData):
         """Begin showing an inventory. This is used by the remote view once
         an inventory becomes available."""
-        self.inventoryView = RemoteInventoryView(inventoryData)
+        self.inventoryView = RemoteInventoryView(clientsideConnection, inventoryData)
 
