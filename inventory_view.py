@@ -6,7 +6,8 @@
 import pygame
 from images import TILE_SIZE
 from clientdata import InventoryData
-from exploranetworking import DropItemMessage, EquipMessage, EquipmentTypeCode
+from exploranetworking import DropItemMessage, EquipMessage
+from mobile import EquipmentTypeCode
 
 
 LIGHT_GREY = (120, 120, 120)
@@ -353,9 +354,10 @@ class InventoryView:
 class LocalInventoryView(InventoryView):
     """A subclass of InventoryView that has direct access to the player object and
     uses that to perform actions like dropping and wielding."""
-    def __init__(self, player):
+    def __init__(self, player, screenChanges):
         super().__init__(InventoryData.fromInventory(player.inventory))
         self.player = player
+        self.screenChanges = screenChanges
 
     def _itemOrNone(self, itemData):
         """If itemData is None, this returns None. If itemData is an ItemData found in the player's
@@ -365,7 +367,7 @@ class LocalInventoryView(InventoryView):
 
     def dropItem(self, itemData):
         if not self.player.isDead:
-            self.player.dropItem(itemData.uniqueId)
+            self.player.dropItem(itemData.uniqueId, self.screenChanges)
 
     def wieldWeapon(self, itemData):
         if not self.player.isDead:
