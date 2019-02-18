@@ -58,7 +58,17 @@ class Trap(Thing):
 
 class Item(Thing):
     """A parent class for any Thing that can be put in an inventory."""
-    pass
+    def uniqueId(self):
+        """All Items have a unique ID used to identify them when managing inventory
+        remotely on the client."""
+        return id(self)
+    def featureCode(self):
+        """For describing items so they can be manipulated on the client, there are
+        a few properties that need to be available clientside. Those are isWeapon (boolean),
+        and isWand (boolean). Currently, no item can be both. This method returns a code
+        string that indicates what features a weapon has. The current codes are: "N"
+        (normal item), "W" (weapon), "S" (wand)."""
+        return "N"
 
 
 class Weapon(Item):
@@ -70,6 +80,8 @@ class Weapon(Item):
         """This returns the ID of the sound effect that should be played
         when this weapon is used to successfully attack someone."""
         return self.hitSoundEffectId
+    def featureCode(self):
+        return "W"
 
 
 class Wand(Item):
@@ -87,6 +99,8 @@ class Wand(Item):
             self.activateSpell(caster, world, screenChanges)
     def activateSpell(self, caster, world, screenChanges):
         raise NotImplementedError # intended to be overridden by subclasses
+    def featureCode(self):
+        return "S"
 
 
 class SelfOnlyWand(Wand):

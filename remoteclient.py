@@ -7,7 +7,7 @@ pygame_init() # Need to run this before some of the code that runs during import
 
 
 import pygame
-from exploranetworking import ClientsideConnection, KeyPressedMessage, WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage, UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage, ClientShouldExitMessage, ClientDisconnectingMessage
+from exploranetworking import ClientsideConnection, KeyPressedMessage, WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage, UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage, InventoryMessage, ClientShouldExitMessage, ClientDisconnectingMessage
 from events import pygameKeyToKeyCode, KeyCode
 import images
 from display import PygameDisplay
@@ -47,7 +47,7 @@ class RemoteClient():
                             elif keyCode == KeyCode.MOVE_UI_RIGHT:
                                 display.uiState.moveUIEast()
                             elif keyCode == KeyCode.TOGGLE_INVENTORY:
-                                display.uiState.toggleInventory()
+                                display.uiState.toggleInventoryRemote(self.clientsideConnection)
                             else:
                                 message = KeyPressedMessage(keyCode)
                                 self.clientsideConnection.send(message)
@@ -77,6 +77,8 @@ class RemoteClient():
                     display.playSounds(message.soundIds, soundLibrary)
                 elif isinstance(message, UpdateVisibleDataMessage):
                     display.setVisibleData(message.visibleData)
+                elif isinstance(message, InventoryMessage):
+                    display.uiState.showInventoryRemote(message.inventoryData)
                 elif isinstance(message, ClientShouldExitMessage):
                     shouldExit = True
                 else:

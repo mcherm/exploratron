@@ -14,7 +14,7 @@ from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayer
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
 from players import Player
-from clientdata import CellData
+from clientdata import CellData, InventoryData
 import rooms
 import time
 import random
@@ -126,7 +126,7 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
             elif event.keyCode == KeyCode.UI_ACTION:
                 uiState.takeAction(world, world.displayedPlayer)
             elif event.keyCode == KeyCode.TOGGLE_INVENTORY:
-                uiState.toggleInventory()
+                uiState.toggleInventoryLocal(world.displayedPlayer)
         else:
             raise Exception(f'Unexpected event: {event}')
     # Action Events
@@ -218,6 +218,10 @@ def processClientMessages(world, clients, eventList):
                 pass
         elif isinstance(message, KeyPressedMessage):
             eventList.addEvent(KeyPressedEvent(clientConnection.playerId, message.keyCode))
+        elif isinstance(message, RequestInventoryMessage):
+            inventory = world.getPlayer(clientConnection.playerId).inventory
+            inventoryData = InventoryData.fromInventory(inventory)
+            clientConnection.send(InventoryMessage(inventoryData))
         elif isinstance(message, ClientDisconnectingMessage):
             player = world.getPlayer(clientConnection.playerId)
             player.removeClient(clientConnection)
@@ -295,7 +299,6 @@ def mainLoop(world):
     clients = ServersideClientConnections()
     world.setDisplayedPlayer(world.players[0].playerId)
     display.setDisplayedPlayerId(world.players[0])
-    display.setDisplayedPlayer(world.players[0]) # FIXME: This one is deprecated - needed only for inventory
 
     while not world.gameOver:
         eventList.clear()

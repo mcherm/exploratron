@@ -50,6 +50,14 @@ class Inventory:
             self._wieldedWand = None
         self.items.remove(item)
 
+    def findItemById(self, uniqueId):
+        """Given the uniqueId of some item, this returns that item if it is in
+        this inventory, or returns None if it is not."""
+        try:
+            return next(x for x in self.items if x.uniqueId() == uniqueId)
+        except StopIteration:
+            return None
+
     def wieldWeapon(self, weapon):
         """If weapon is None, then this stops wielding the currently wielded
         weapon. Otherwise, starts wielding the given weapon if it is a Weapon

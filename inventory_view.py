@@ -5,7 +5,7 @@
 
 import pygame
 from images import TILE_SIZE
-from kindsofthing import Weapon, Wand
+from clientdata import InventoryData
 
 
 LIGHT_GREY = (120, 120, 120)
@@ -60,19 +60,35 @@ class InventoryView:
     """An instance of this class is part of the UI representing an active
     view of the inventory. In the initialization of the class it will read
     the inventory and decide how to lay it out; it will also maintain a
-    crosshair position and draw to the screen as needed."""
+    crosshair position and draw to the screen as needed.
 
-    def __init__(self, player):
-        """Passed a Player whose Inventory we will display, and who will drop any items
-        carried off of the screen."""
-        self.player = player
-        self.itemsInBag = list(player.inventory)
-        self.wieldedWeapon = player.inventory.getWieldedWeapon()
-        self.wieldedWand = player.inventory.getWieldedWand()
-        if self.wieldedWeapon is not None:
-            self.itemsInBag.remove(self.wieldedWeapon) # Do not show wielded weapon in the bag
-        if self.wieldedWand is not None:
-            self.itemsInBag.remove(self.wieldedWand) # Do not show wielded wand in the bag
+    This is abstract because it implements all of the functionality EXCEPT
+    for actually taking the actions like drop and equip. Subclasses add
+    that functionality."""
+
+    def __init__(self, inventoryData):
+        """Passed an InventoryData containing the items we will display."""
+        assert isinstance(inventoryData, InventoryData)
+        self.inventoryData = inventoryData
+        self.itemsInBag = list(inventoryData.items)
+        wieldedWeaponId = inventoryData.wieldedWeaponId
+        if wieldedWeaponId is None:
+            self.wieldedWeapon = None
+        else:
+            try:
+                self.wieldedWeapon = next(x for x in self.itemsInBag if x.uniqueId == wieldedWeaponId)
+                self.itemsInBag.remove(self.wieldedWeapon)  # Do not show wielded weapon in the bag
+            except StopIteration:
+                raise AssertionError("Invalid InventoryData had wielded weapon that was not in inventory.")
+        wieldedWandId = inventoryData.wieldedWandId
+        if wieldedWandId is None:
+            self.wieldedWand = None
+        else:
+            try:
+                self.wieldedWand = next(x for x in self.itemsInBag if x.uniqueId == wieldedWandId)
+                self.itemsInBag.remove(self.wieldedWand) # Do not show wielded wand in the bag
+            except StopIteration:
+                raise AssertionError("Invalid InventoryData had wielded wand that was not in inventory.")
         self.itemsInBag.append(None) # add a blank space in the bag
         self.shouldExit = False
         self.itemBeingMoved = None
@@ -224,7 +240,7 @@ class InventoryView:
                 self.crosshairPositionX += 1
             elif self.crosshairPositionX == 0:
                 if self.crosshairPositionY == len(self.itemPairs):
-                    if self.wieldedWand is None and isinstance(self.itemBeingMoved, Wand):
+                    if self.wieldedWand is None and self.itemBeingMoved.isWand():
                         self.crosshairPositionX += 1
                 else:
                     if self.itemPairs[self.crosshairPositionY][1] is None:
@@ -245,7 +261,7 @@ class InventoryView:
                 self.crosshairPositionX -= 1
             elif self.crosshairPositionX == 0:
                 if self.crosshairPositionY == len(self.itemPairs):
-                    if self.wieldedWeapon is None and isinstance(self.itemBeingMoved, Weapon):
+                    if self.wieldedWeapon is None and self.itemBeingMoved.isWeapon():
                         self.crosshairPositionX -= 1
                 else:
                     if self.itemPairs[self.crosshairPositionY][0] is None:
@@ -279,9 +295,9 @@ class InventoryView:
                 # If on an item, start moving it around
                 pair = self.itemPairs[self.crosshairPositionY]
                 whichItem = 0 if self.crosshairPositionX < 0 else 1
-                item = pair[whichItem]
-                if item is not None:
-                    self.itemBeingMoved = item
+                itemData = pair[whichItem]
+                if itemData is not None:
+                    self.itemBeingMoved = itemData
                     pair[whichItem] = None
                     self.crosshairPositionX = 0 # Pop back to the center
         else:
@@ -289,12 +305,12 @@ class InventoryView:
             if self.crosshairPositionX == 0:
                 pass # Do nothing if in the center
             elif self.crosshairPositionY == len(self.itemPairs):
-                if self.crosshairPositionX == -1 and self.wieldedWeapon is None and isinstance(self.itemBeingMoved, Weapon):
+                if self.crosshairPositionX == -1 and self.wieldedWeapon is None and self.itemBeingMoved.isWeapon():
                     self.wieldedWeapon = self.itemBeingMoved
                     self.itemBeingMoved = None
                     self.wieldWeapon(self.wieldedWeapon)
                     self.crosshairPositionX = 0 # Pop back to the center
-                if self.crosshairPositionX == 1 and self.wieldedWand is None and isinstance(self.itemBeingMoved, Wand):
+                if self.crosshairPositionX == 1 and self.wieldedWand is None and self.itemBeingMoved.isWand():
                     self.wieldedWand = self.itemBeingMoved
                     self.itemBeingMoved = None
                     self.wieldWand(self.wieldedWand)
@@ -313,38 +329,78 @@ class InventoryView:
                     # Already an item in this location. Do nothing
                     pass
 
-    def dropItem(self, item):
+    def dropItem(self, itemData):
+        """Attempt to drop an item currently in the inventory. If the item actually turns
+        out NOT to be in the inventory at this moment, this will do nothing."""
+        raise NotImplementedError
+
+    def wieldWeapon(self, itemData):
+        """If item is None, stops wielding the current weapon. If item is anything
+        else, try to start wielding it as a Weapon. If for some reason this doesn't
+        work (perhaps the inventory has changed since the InventoryView launched),
+        then this does nothing."""
+        raise NotImplementedError
+
+    def wieldWand(self, itemData):
+        """If item is None, stops wielding the current wand. If item is anything
+        else, try to start wielding it as a Wand. If for some reason this doesn't
+        work (perhaps the inventory has changed since the InventoryView launched),
+        then this does nothing."""
+        raise NotImplementedError
+
+
+class LocalInventoryView(InventoryView):
+    """A subclass of InventoryView that has direct access to the player object and
+    uses that to perform actions like dropping and wielding."""
+    def __init__(self, player):
+        self.player = player
+        super().__init__(InventoryData.fromInventory(player.inventory))
+
+    def _itemOrNone(self, itemData):
+        """If itemData is None, this returns None. If itemData is an ItemData found in the player's
+        current inventory, this returns the actual item. If itemData is not found in the
+        current inventory (perhaps it has been destroyed or moved) then this returns None."""
+        return None if itemData is None else self.player.inventory.findItemById(itemData.uniqueId)
+
+    def dropItem(self, itemData):
         """Attempt to drop an item currently in the inventory. If the item actually turns
         out NOT to be in the inventory at this moment, this will do nothing."""
         if not self.player.isDead:
             try:
+                item = self._itemOrNone(itemData)
                 self.player.inventory.removeItem(item)  # take it out the inventory
+                self.player.placeItem(item) # put it on the ground
             except ValueError:
                 # Must no longer be in the inventory. So do nothing
                 return
-            self.player.placeItem(item)
 
-    def wieldWeapon(self, item):
-        """If item is None, stops wielding the current weapon. If item is anything
+    def wieldWeapon(self, itemData):
+        """If itemData is None, stops wielding the current weapon. If itemData is anything
         else, try to start wielding it as a Weapon. If for some reason this doesn't
         work (perhaps the inventory has changed since the InventoryView launched),
         then this does nothing."""
         if not self.player.isDead:
             try:
-                self.player.inventory.wieldWeapon(item)
+                self.player.inventory.wieldWeapon(self._itemOrNone(itemData))
             except ValueError:
                 # Must no longer be wielded. So do nothing
                 return
 
-    def wieldWand(self, item):
-        """If item is None, stops wielding the current wand. If item is anything
+    def wieldWand(self, itemData):
+        """If itemData is None, stops wielding the current wand. If itemData is anything
         else, try to start wielding it as a Wand. If for some reason this doesn't
         work (perhaps the inventory has changed since the InventoryView launched),
         then this does nothing."""
         if not self.player.isDead:
             try:
-                self.player.inventory.wieldWand(item)
+                self.player.inventory.wieldWand(self._itemOrNone(itemData))
             except ValueError:
                 # Must no longer be wielded. So do nothing
                 return
 
+
+
+class RemoteInventoryView(InventoryView):
+    """A subclass of InventoryView that is provided with a ClientsideConnection and
+    uses that to perform actions like dropping and wielding."""
+    # FIXME: Not implemented yet!
