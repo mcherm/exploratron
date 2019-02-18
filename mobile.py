@@ -11,6 +11,11 @@ class Stats:
         self.maxMana = 0
 
 
+class EquipmentTypeCode:
+    WEAPON = "W"
+    WAND = "S"
+
+
 class Inventory:
     """An instance of this class is the stuff that a mobile carries around with
     them.
@@ -266,14 +271,13 @@ class Mobile(Thing):
                 screenChanges.changeCell(self.room, position[0], position[1])
         self.whenItCanAct = currentTime + self.timeToWait()
 
-    def dropItem(self, itemOrItemUniqueId):
+    def dropItem(self, itemOrItemUniqueId, screenChanges):
         """This is passed either an item or a number which is the uniqueId of some item, or None
         (in which case it does nothing at all). For non-None values, the method goes
         through the mobile's inventory and if that item is in the inventory, then it removes it
         from the inventory and adds it to the mobile's current location. If the item is not found
         in the mobile's inventory or is labeled as not droppable, then calling this has no effect.
         The method returns True if the item was dropped and False if it was not."""
-        # FIXME: This method does not insist on receiving a screenChanges and updating it. It ought to.
         # -- convert uniqueId to item --
         item = self.inventory.findItemById(itemOrItemUniqueId) if isinstance(itemOrItemUniqueId, int) else itemOrItemUniqueId
         # -- process item --
@@ -287,6 +291,7 @@ class Mobile(Thing):
             return False
         else:
             self.room.cellAt(self.position[0], self.position[1]).things.append(item)
+            screenChanges.changeCell(self.room, self.position[0], self.position[1])
             return True
 
     def doRegen(self):

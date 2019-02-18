@@ -10,11 +10,12 @@ import objects
 from players import thePlayerCatalog, PlayerCatalogEntry
 from images import Region
 from display import PygameDisplay
-from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent
+from events import EventList, KeyPressedEvent, KeyCode, QuitGameEvent, NewPlayerAddedEvent, ItemDroppedEvent, EquipItemEvent
 from exploranetworking import *
 from screenchanges import ScreenChanges, SetOfEverything
 from players import Player
 from clientdata import CellData, InventoryData
+from mobile import EquipmentTypeCode
 import rooms
 import time
 import random
@@ -126,7 +127,23 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
             elif event.keyCode == KeyCode.UI_ACTION:
                 uiState.takeAction()
             elif event.keyCode == KeyCode.TOGGLE_INVENTORY:
-                uiState.toggleInventoryLocal(world.displayedPlayer)
+                uiState.toggleInventoryLocal(world.displayedPlayer, screenChanges)
+        elif isinstance(event, ItemDroppedEvent):
+            world.getPlayer(event.playerId).dropItem(event.itemUniqueId, screenChanges)
+        elif isinstance(event, EquipItemEvent):
+            player = world.getPlayer(event.playerId)
+            if event.itemUniqueId is None:
+                item = None
+            else:
+                item = player.inventory.findItemById(event.itemUniqueId)
+                # Note: if item they gave wasn't in the inventory we'll still
+                #   unwield any existing wielded item. That is the desired behavior.
+            if event.equipmentTypeCode == EquipmentTypeCode.WEAPON:
+                player.inventory.wieldWeapon(item)
+            elif event.equipmentTypeCode == EquipmentTypeCode.WAND:
+                player.inventory.wieldWand(item)
+            else:
+                raise AssertionError(f"Unknown EquipmentTypeCode: '{event.equipmentTypeCode}'")
         else:
             raise Exception(f'Unexpected event: {event}')
     # Action Events
@@ -164,23 +181,24 @@ def updateWorld(world, region, eventList, screenChanges, uiState):
     regenMobiles(world, currentTime)
     moveMobiles(world, currentTime, screenChanges)
     # Check for Death
-    handleDeath(world)
+    handleDeath(world, screenChanges)
     # Check for GameOver
     handleGameOver(world)
             
 
-def handleDeath(world):
+def handleDeath(world, screenChanges):
     for mobile in itertools.chain(world.mobiles, world.players):
         if mobile.isDead:
             x, y = mobile.position
             cell = mobile.room.cellAt(x, y)
             for item in mobile.inventory:
-                mobile.dropItem(item)
+                mobile.dropItem(item, screenChanges)
             cell.removeThing(mobile)
             if isinstance(mobile, Player):
                 world.removePlayer(mobile)
             else:
                 world.mobiles.remove(mobile)
+            screenChanges.changeCell(mobile.room, x, y)
 
 
 def handleGameOver(world):
@@ -223,23 +241,9 @@ def processClientMessages(world, clients, eventList):
             inventoryData = InventoryData.fromInventory(inventory)
             clientConnection.send(InventoryMessage(inventoryData))
         elif isinstance(message, DropItemMessage):
-            # FIXME: The following should update screenChanges. To do that, this should be an event
-            world.getPlayer(clientConnection.playerId).dropItem(message.itemUniqueId)
+            eventList.addEvent(ItemDroppedEvent(clientConnection.playerId, message.itemUniqueId))
         elif isinstance(message, EquipMessage):
-            # FIXME: This probably should be an event also.
-            player = world.getPlayer(clientConnection.playerId)
-            if message.itemUniqueId is None:
-                item = None
-            else:
-                item = player.inventory.findItemById(message.itemUniqueId)
-                # Note: if item they gave wasn't in the inventory we'll still
-                #   unwield any existing wielded item. That is the desired behavior.
-            if message.equipmentType == EquipmentTypeCode.WEAPON:
-                player.inventory.wieldWeapon(item)
-            elif message.equipmentType == EquipmentTypeCode.WAND:
-                player.inventory.wieldWand(item)
-            else:
-                raise AssertionError(f"Unknown EquipmentTypeCode: '{message.equipmentType}'")
+            eventList.addEvent(EquipItemEvent(clientConnection.playerId, message.equipmentTypeCode, message.itemUniqueId))
         elif isinstance(message, ClientDisconnectingMessage):
             player = world.getPlayer(clientConnection.playerId)
             player.removeClient(clientConnection)

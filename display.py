@@ -213,13 +213,13 @@ class UIState:
         else:
             pass
 
-    def toggleInventoryLocal(self, player):
+    def toggleInventoryLocal(self, player, screenChanges):
         """Toggle whether the inventory is displayed. This version is intended for use
         in a local display where the actual player object is available for performing
         actions like drop and equip."""
         if player:
             if self.inventoryView is None:
-                self.inventoryView = LocalInventoryView(player)
+                self.inventoryView = LocalInventoryView(player, screenChanges)
             else:
                 self.inventoryView = None
         else:

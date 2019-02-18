@@ -79,6 +79,17 @@ class KeyPressedEvent(PlayerEvent):
     def isActionEvent(self):
         return keyCodeToIsAction[self.keyCode]
 
+class ItemDroppedEvent(PlayerEvent):
+    def __init__(self, playerId, itemUniqueId):
+        super().__init__(playerId)
+        self.itemUniqueId = itemUniqueId
+
+class EquipItemEvent(PlayerEvent):
+    def __init__(self, playerId, equipmentTypeCode, itemUniqueId):
+        super().__init__(playerId)
+        self.equipmentTypeCode = equipmentTypeCode
+        self.itemUniqueId = itemUniqueId
+
 class ClientConnectEvent(PlayerEvent):
     """An event where a new client is connecting to a specific player."""
     def __init__(self, playerId):
