@@ -48,7 +48,8 @@ class Sign(Thing):
         super().__init__(region, tileName)
         self.infoText = InfoText(text)
     def doEnter(self, mobile, world, screenChanges):
-        screenChanges.showInfoText(self.infoText)
+        if mobile.isPlayer():
+            screenChanges.showInfoText(mobile, self.infoText)
 
 class Trap(Thing):
     """A thing that makes you take damage"""
