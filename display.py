@@ -1,9 +1,9 @@
 
 import pygame
-from message import MessagePainter
+from infotext import InfoTextPainter
 from images import TILE_SIZE
 from inventory_view import LocalInventoryView, RemoteInventoryView
-from clientdata import GridData, InventoryData
+from clientdata import GridData
 from exploranetworking import RequestInventoryMessage
 
 
@@ -36,7 +36,7 @@ class PygameOverlayDisplay:
 
     def __init__(self, surface):
         self.surface = surface
-        self.messagePainter = MessagePainter()
+        self.infoTextPainter = InfoTextPainter()
 
     def show(self, uiState, imageLibrary):
         # health and mana bars
@@ -70,9 +70,9 @@ class PygameOverlayDisplay:
             self.surface.fill(LIGHT_GREY, maxManaRect)
             self.surface.fill(PURPLE, manaRect)
 
-        # Messages
-        if uiState.message:
-            self.messagePainter.paintMessage(self.surface, uiState.message)
+        # InfoTexts
+        if uiState.infoTexts:
+            self.infoTextPainter.paintInfoText(self.surface, uiState.infoTexts[0])
 
         # inventory
         if uiState.inventoryView:
@@ -136,7 +136,7 @@ class UIState:
         self.offset = 0, 0
         self.visibleData = None
         self.inventoryView = None
-        self.message = None # a single Message object that is shown until the user clears it
+        self.infoTexts = [] # a list of infoTexts to be shown (in order) each until the user clears it.
 
     def setDisplayedPlayerId(self, playerId):
         self.playerId = playerId
@@ -208,8 +208,8 @@ class UIState:
         """This is called when someone presses the UI action button."""
         if self.inventoryView:
             self.inventoryView.takeAction()
-        elif self.message is not None:
-            self.message = None
+        elif self.infoTexts:
+            self.infoTexts.pop(0) # clear the currently-displayed infoText
         else:
             pass
 

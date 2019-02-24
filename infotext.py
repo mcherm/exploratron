@@ -8,17 +8,22 @@ import pygame
 
 
 
-class Message():
-    """An object representing a message."""
+class InfoText():
+    """An object representing an informational text to show to the user."""
     def __init__(self, text):
-        """Create a Message, initializing it with the text to be displayed."""
+        """Create an InfoText, initializing it with the text to be displayed."""
         self.lines = text.splitlines()
 
     def getLines(self):
-        """Returns a list of strings, each containing one line from the message."""
+        """Returns a list of strings, each containing one line from the info text."""
         # FIXME: In the future, we might want to support text wrapping, in which case
         # FIXME:   this will need some information to perform that wrapping.
         return self.lines
+
+    def getText(self):
+        """Returns a single string containing the content, without wrapping.
+        Forced returns will be represented as a "\n" within the string."""
+        return "\n".join(self.lines)
 
 
 MESSAGE_FONT = "arial"
@@ -29,16 +34,16 @@ MESSAGE_BACKGROUND_COLOR = 201, 246, 255
 MESSAGE_TEXT_BORDER = 5
 
 
-class MessagePainter:
+class InfoTextPainter:
     """A singleton helper class that is used to render a message."""
     def __init__(self):
         self.defaultFont = pygame.font.SysFont(MESSAGE_FONT, MESSAGE_FONT_SIZE)
 
-    def paintMessage(self, surface, message):
-        assert isinstance(message, Message)
+    def paintInfoText(self, surface, infoText):
+        assert isinstance(infoText, InfoText)
 
         # -- render each line in the proper font --
-        lines = message.getLines()
+        lines = infoText.getLines()
         renderedLines = [
             self.defaultFont.render(line, MESSAGE_FONT_ANTIALIAS, MESSAGE_TEXT_COLOR, MESSAGE_BACKGROUND_COLOR)
             for line in lines]

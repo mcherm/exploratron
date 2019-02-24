@@ -267,8 +267,7 @@ def renderWorldLocal(world, display, region, screenChanges):
     # --- start any sounds ---
     display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
     # --- possibly a message ---
-    if screenChanges.getNewMessage() is not None:
-        display.uiState.message = screenChanges.getNewMessage()
+    display.uiState.infoTexts.extend(screenChanges.getNewInfoTexts())
     # --- update the visible data ---
     display.setVisibleData(VisibleData.fromEnvironment(world.displayedPlayer))
 
@@ -304,6 +303,13 @@ def renderWorldRemote(world, screenChanges, clients):
             if soundIds:
                 soundMessage = PlaySoundsMessage(soundIds)
                 clients.sendMessageToPlayer(player.playerId, soundMessage)
+
+            # --- Possibly some user messages ---
+            # FIXME: Probably a bug here where every player gets all messages
+            if screenChanges.getNewInfoTexts():
+                for infoText in screenChanges.getNewInfoTexts():
+                    infoTextMessage = InfoTextMessage(infoText.getText())
+                    clients.sendMessageToPlayer(player.playerId, infoTextMessage)
 
             # --- Possibly a message about displayed properties ---
             visibleData = VisibleData.fromEnvironment(player)
