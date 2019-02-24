@@ -194,7 +194,7 @@ def handleDeath(world, screenChanges):
             for item in mobile.inventory:
                 mobile.dropItem(item, screenChanges)
             cell.removeThing(mobile)
-            if isinstance(mobile, Player):
+            if mobile.isPlayer():
                 world.removePlayer(mobile)
             else:
                 world.mobiles.remove(mobile)
@@ -267,7 +267,7 @@ def renderWorldLocal(world, display, region, screenChanges):
     # --- start any sounds ---
     display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
     # --- possibly a message ---
-    display.uiState.infoTexts.extend(screenChanges.getNewInfoTexts())
+    display.uiState.infoTexts.extend(screenChanges.getNewInfoTexts(world.displayedPlayer))
     # --- update the visible data ---
     display.setVisibleData(VisibleData.fromEnvironment(world.displayedPlayer))
 
@@ -305,9 +305,9 @@ def renderWorldRemote(world, screenChanges, clients):
                 clients.sendMessageToPlayer(player.playerId, soundMessage)
 
             # --- Possibly some user messages ---
-            # FIXME: Probably a bug here where every player gets all messages
-            if screenChanges.getNewInfoTexts():
-                for infoText in screenChanges.getNewInfoTexts():
+            newInfoTexts = screenChanges.getNewInfoTexts(player)
+            if newInfoTexts:
+                for infoText in newInfoTexts:
                     infoTextMessage = InfoTextMessage(infoText.getText())
                     clients.sendMessageToPlayer(player.playerId, infoTextMessage)
 

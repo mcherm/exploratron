@@ -5,6 +5,7 @@
 
 from collections import defaultdict
 from infotext import InfoText
+from players import Player
 
 
 class SetOfEverything:
@@ -18,7 +19,7 @@ class ScreenChanges:
         self.changesByRoom = defaultdict(set) # map of room -> set of (x,y) pairs
         self.playerRoomSwitches = {} # map of player -> (oldRoom,newRoom)
         self.soundsToPlayByRoom = defaultdict(list) # map of room -> list of soundIds
-        self.newInfoTexts = []
+        self.newInfoTexts = defaultdict(list) # map of player -> list of InfoTexts
     def clear(self):
         """Calling this clears out the full list of changes."""
         self.changesByRoom.clear()
@@ -58,13 +59,15 @@ class ScreenChanges:
         """Returns a list of new sounds that should begin playing in the given
         room starting with this set of ScreenChanges."""
         return self.soundsToPlayByRoom[room]
-    def showInfoText(self, infoText):
+    def showInfoText(self, player, infoText):
         """Begins displaying the given InfoText in the UI."""
+        assert isinstance(player, Player)
         assert isinstance(infoText, InfoText)
-        self.newInfoTexts.append(infoText)
-    def getNewInfoTexts(self):
-        """Returns a list of new infoTexts to display (in order)."""
-        return self.newInfoTexts
+        self.newInfoTexts[player].append(infoText)
+    def getNewInfoTexts(self, player):
+        """Returns a list of new infoTexts to display (in order) for the given player."""
+        assert isinstance(player, Player)
+        return self.newInfoTexts[player]
     def printThemOut(self):
         """Used only for debugging, this dumps to the screen the whole
         list of changes."""

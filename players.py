@@ -16,6 +16,8 @@ class Player(Mobile):
         self.playerId = playerId
         self.clientConnections = []
         self.displayed = False
+    def isPlayer(self):
+        return True
     def goToLocation(self, location, world, screenChanges):
         oldRoom = self.room
         super().goToLocation(location, world, screenChanges)

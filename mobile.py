@@ -293,6 +293,9 @@ class Mobile(Thing):
             self.room.cellAt(self.position[0], self.position[1]).things.append(item)
             screenChanges.changeCell(self.room, self.position[0], self.position[1])
             return True
+    def isPlayer(self):
+        """Returns True if this is a Player; False for all other Mobiles."""
+        return False
 
     def doRegen(self):
         """This gets called once every 10 seconds. When it is called the
