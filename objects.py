@@ -85,12 +85,12 @@ class ViciousHorns(Weapon):
                          "348112__mattix__crunch")
 
 class Minotar(Mobile):
-    def __init__(self):
+    def __init__(self, extraInventory=[]):
         super().__init__(defaultRegion, "minotaur",
                          maxHealth=12,
                          maxMana=5,
                          brainType=AgressiveBrain,
-                         inventory=[ViciousHorns()])
+                         inventory=[ViciousHorns()] + extraInventory)
         self.stats.speed = 3
 
 class Sting(Weapon):

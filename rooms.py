@@ -28,15 +28,15 @@ room0 = Room(
         [bkw, bkw, dr1, bkw, bkw, bkw, bkw],
         [bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, drt, drt, st1, drt, drt, bkw],
-        [bkw, drt, drt, drt, drt, drt, bkw],
-        [bkw, bkw, bkw, bkw, bkw, d11, bkw],
+        [bkw, drt, drt, drt, drt, drt, d12],
+        [bkw, bkw, bkw, bkw, d11, bkw, bkw],
     ],
     {
         (1,1): Chest(),
         (5,3): Chest(),
         (1,2): BluePotion(),
         (1,2): [Spear(), BluePotion(), Sword(), HealingWand(), Spear()],
-        (5,3): PublicSign("Go South for Minotaur\n\nBeware - the only escape is\nto defeat the beast."),
+        (5,3): PublicSign("Go East for Minotaur\n\nBeware - the only escape is\nto defeat the beast."),
     },
     {
         (5,1): GiantBee(),
@@ -48,7 +48,7 @@ room0 = Room(
 room1 = Room(
     [
         [bkw, bkw, bkw, bkw, bkw],
-        [bkw, drt, drt, drt, d12],
+        [bkw, drt, drt, drt, bkw],
         [bkw, drt, drt, drt, bkw],
         [bkw, bkw, dr2, bkw, bkw],
     ]
@@ -245,7 +245,7 @@ room8 = Room(
         ( 9, 29): Sword(),
     },
     {
-        (20, 1): Minotar()
+        (20, 1): Minotar(extraInventory=[TeleportWand(Location(0, (2,1)))])
     }
 )
 
