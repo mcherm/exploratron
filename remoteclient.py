@@ -7,10 +7,14 @@ pygame_init() # Need to run this before some of the code that runs during import
 
 
 import pygame
-from exploranetworking import ClientsideConnection, KeyPressedMessage, WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage, UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage, InventoryMessage, ClientShouldExitMessage, ClientDisconnectingMessage
+from exploranetworking import (ClientsideConnection, KeyPressedMessage, WelcomeClientMessage, NewRoomMessage,
+                               RefreshRoomMessage, UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage,
+                               InventoryMessage, ClientShouldExitMessage, ClientDisconnectingMessage,
+                               InfoTextMessage)
 from events import pygameKeyToKeyCode, KeyCode
 import images
 from display import PygameDisplay
+from infotext import InfoText
 
 
 
@@ -81,6 +85,9 @@ class RemoteClient():
                     display.setVisibleData(message.visibleData)
                 elif isinstance(message, InventoryMessage):
                     display.uiState.showInventoryRemote(self.clientsideConnection, message.inventoryData)
+                elif isinstance(message, InfoTextMessage):
+                    infoText = InfoText(message.text)
+                    display.uiState.infoTexts.append(infoText)
                 elif isinstance(message, ClientShouldExitMessage):
                     shouldExit = True
                 else:

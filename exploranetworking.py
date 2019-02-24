@@ -144,6 +144,11 @@ class EquipMessage(Message):
         self.equipmentTypeCode = equipmentTypeCode
         self.itemUniqueId = itemUniqueId
 
+class InfoTextMessage(Message):
+    """A message the server sends to the client to queue up a text message to be displayed."""
+    def __init__(self, text):
+        self.text = text
+
 class ClientShouldExitMessage(Message):
     """A message sent when the server is telling the client to quit playing."""
 
@@ -156,7 +161,7 @@ clientToServerMessages = [JoinServerMessage, KeyPressedMessage, RequestInventory
                           EquipMessage, ClientDisconnectingMessage]
 serverToClientMessages = [WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
                           UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage, InventoryMessage,
-                          ClientShouldExitMessage]
+                          InfoTextMessage, ClientShouldExitMessage]
 
 _messageClass = {msg.messageName(): msg for msg in clientToServerMessages + serverToClientMessages}
 

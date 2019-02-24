@@ -1,7 +1,7 @@
 
 from images import Region
 from spells import SingleTargetSpell
-from message import Message
+from infotext import InfoText
 
 
 
@@ -43,12 +43,12 @@ class Door(Thing):
 
 class Sign(Thing):
     """A thing that displays a message when you enter it."""
-    def __init__(self, region, tileName, messageText):
+    def __init__(self, region, tileName, text):
         """Create a new sign with the string messageText."""
         super().__init__(region, tileName)
-        self.message = Message(messageText)
+        self.infoText = InfoText(text)
     def doEnter(self, mobile, world, screenChanges):
-        screenChanges.showMessage(self.message)
+        screenChanges.showInfoText(self.infoText)
 
 class Trap(Thing):
     """A thing that makes you take damage"""
