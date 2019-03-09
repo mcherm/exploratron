@@ -2,13 +2,13 @@ from kindsofthing import Thing, Item, Weapon, Wand
 
 
 class Stats:
-    def __init__(self):
+    def __init__(self, health=0, maxHealth=0, mana=0, maxMana=0, speed=0):
         """Create a new Stats, with all stats set to 0."""
-        self.speed = 0
-        self.maxHealth = 0
         self.health = 0
+        self.maxHealth = 0
         self.mana = 0
         self.maxMana = 0
+        self.speed = 0
 
 
 class EquipmentTypeCode:
@@ -103,12 +103,9 @@ class Mobile(Thing):
         self.whenItCanAct = 0
         self.isDead = False
         self.inventory = Inventory(inventory)
-        self.stats = Stats()
-        self.stats.maxHealth = maxHealth
-        self.stats.health = maxHealth
-        self.stats.maxMana = maxMana
-        self.stats.mana = maxMana
-        self.stats.speed = 5
+        self.stats = Stats(health=maxHealth, maxHealth=maxHealth,
+                           mana=maxMana, maxMana=maxMana,
+                           speed=5)
         self.brain = brainType()
     def canEnter(self, mobile):
         return False
