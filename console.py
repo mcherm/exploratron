@@ -11,7 +11,8 @@ FONT_FILE = "font/Code New Roman.otf"
 FONT_SIZE = 18
 ANTIALIAS = True
 TEXT_COLOR = (250, 250, 250)
-BACKGROUND_COLOR = (10, 10, 10)
+BACKGROUND_COLOR = (20, 20, 20)
+NUMBER_OF_MESSAGES_TO_KEEP = 150
 
 
 _theFont = None
@@ -76,6 +77,8 @@ class Console():
 
     def addMessage(self, message):
         self.messages.append(message)
+        if len(self.messages) > NUMBER_OF_MESSAGES_TO_KEEP * 1.1:
+            del self.messages[:-NUMBER_OF_MESSAGES_TO_KEEP]
         self._invalidate()
 
     def _lineWrap(self):
