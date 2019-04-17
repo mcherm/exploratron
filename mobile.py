@@ -4,11 +4,11 @@ from kindsofthing import Thing, Item, Weapon, Wand
 class Stats:
     def __init__(self, health=0, maxHealth=0, mana=0, maxMana=0, speed=0):
         """Create a new Stats, with all stats set to 0."""
-        self.health = 0
-        self.maxHealth = 0
-        self.mana = 0
-        self.maxMana = 0
-        self.speed = 0
+        self.health = health
+        self.maxHealth = maxHealth
+        self.mana = mana
+        self.maxMana = maxMana
+        self.speed = speed
 
 
 class EquipmentTypeCode:
