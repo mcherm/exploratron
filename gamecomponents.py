@@ -119,4 +119,17 @@ class Room:
         """Returns an exploranetworking.GridData of the information in the
         room."""
         return self.grid.toGridData()
+    def getPlayers(self):
+        """Returns a list of the players in the room. This could be made more
+        efficient if we need to for performance reasons, which is the main
+        reason it gets its own method."""
+        result = []
+        for y in range(self.grid.height):
+            for x in range(self.grid.width):
+                cell = self.grid.cellAt(x, y)
+                for thing in cell.things:
+                    if isinstance(thing, Mobile) and thing.isPlayer():
+                        result.append(thing)
+        return result
+
 
