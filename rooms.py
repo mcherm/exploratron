@@ -6,6 +6,7 @@ from gamecomponents import *
 drt = Dirt()
 bkw = BrickWall()
 idr = InnerDoor()
+grs = Grass()
 st1 = StairsDown(Location(2, (2,3)))
 st2 = StairsDown(Location(0, (3,2)))
 dr1 = WoodenDoor(Location(1, (2,3)))
@@ -20,6 +21,8 @@ dr9 = WoodenDoor(Location(5, (6,6)))
 d10 = WoodenDoor(Location(4, (10,12)))
 d11 = WoodenDoor(Location(7, (6,10)))
 d12 = WoodenDoor(Location(8, (15,19)))
+d14 = WoodenDoor(Location(2, (1,9)))
+d13 = WoodenDoor(Location(9, (1,0)))
 sdr = InnerSecretDoor()
 
 
@@ -66,7 +69,7 @@ room2 = Room(
         [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
         [bkw, drt, drt, drt, drt, bkw, drt, drt, drt, drt, drt, bkw],
-        [bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+        [bkw, d13, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw, bkw],
     ],
     {
         (9,3): Chest(),
@@ -249,5 +252,31 @@ room8 = Room(
     }
 )
 
+room9 = Room(
+    [
+        [bkw, d14, bkw, bkw, bkw, bkw, bkw],
+        [bkw, grs, grs, grs, grs, grs, bkw],
+        [bkw, grs, grs, grs, grs, grs, bkw],
+        [bkw, grs, grs, grs, grs, grs, bkw],
+        [bkw, grs, grs, grs, grs, grs, bkw],
+        [bkw, grs, grs, grs, grs, grs, bkw],
+        [bkw, grs, grs, grs, grs, grs, bkw],
+        [bkw, bkw, bkw, bkw, bkw, bkw, bkw],
+    ],
+    {
+        (4,5): SnakeTrap(),
+        (3, 4): Tree(),
+    },
 
-rooms = [room0, room1, room2, room3, room4, room5, room6, room7, room8]
+{       (5, 6): BlueFuzzball(),
+        (5, 1): BleuFuzzball(),
+        (5, 2): GreenFuzzball(),
+        (5, 3): RedFuzzball(),
+        (5, 4): OrangeFuzzball(),
+
+#if you put them on the same square to start only one, the last one of the list appears, even with random brains.
+    }
+)
+
+
+rooms = [room0, room1, room2, room3, room4, room5, room6, room7, room8, room9]

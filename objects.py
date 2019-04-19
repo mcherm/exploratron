@@ -18,6 +18,10 @@ class Dirt(Thing):
     def __init__(self):
         super().__init__(defaultRegion, 'grey_tile')
 
+class Grass(Thing):
+    def __init__(self):
+        super().__init__(defaultRegion, 'grassBlock')
+
 class StairsDown(Door):
     def __init__(self, destination):
         super().__init__(defaultRegion, 'stairs-down', destination)
@@ -25,6 +29,10 @@ class StairsDown(Door):
 class Chest(Thing):
     def __init__(self):
         super().__init__(defaultRegion, 'chest2')
+
+class Tree(Thing):
+    def __init__(self):
+        super().__init__(defaultRegion, 'Tree')
 
 class WoodenDoor(Door):
     def __init__(self, destination):
@@ -84,6 +92,11 @@ class ViciousHorns(Weapon):
         super().__init__(defaultRegion, "transparent", 1,
                          "348112__mattix__crunch")
 
+class FuzzAttack(Weapon):
+    def __init__(self):
+        super().__init__(defaultRegion, "transparent", .5,
+                         "348112__mattix__crunch")
+
 class Minotar(Mobile):
     def __init__(self, extraInventory=[]):
         super().__init__(defaultRegion, "minotaur",
@@ -91,7 +104,47 @@ class Minotar(Mobile):
                          maxMana=5,
                          brainType=AgressiveBrain,
                          inventory=[ViciousHorns()] + extraInventory)
-        self.stats.speed = 3
+                                    self.stats.speed = 3
+
+class RedFuzzball(Mobile):
+    def __init__(self, extraInventory=[]):
+        super().__init__(defaultRegion, "redFuzzball",
+                         maxHealth=3,
+                         maxMana=5,
+                         brainType=AgressiveBrain,
+                         inventory=[ViciousHorns()])
+
+class OrangeFuzzball(Mobile):
+    def __init__(self, extraInventory=[]):
+        super().__init__(defaultRegion, "orangeFuzzball",
+                            maxHealth=3,
+                            maxMana=5,
+                            brainType=AgressiveBrain,
+                            inventory=[FuzzAttack()])
+
+class GreenFuzzball(Mobile):
+    def __init__(self, extraInventory=[]):
+        super().__init__(defaultRegion, "greenFuzzball",
+                            maxHealth=3,
+                            maxMana=5,
+                            brainType=AgressiveBrain,
+                            inventory=[FuzzAttack()])
+
+class BleuFuzzball(Mobile):
+    def __init__(self, extraInventory=[]):
+        super().__init__(defaultRegion, "bleuFuzzball",
+                            maxHealth=3,
+                            maxMana=5,
+                            brainType=AgressiveBrain,
+                            inventory=[FuzzAttack()])
+
+class BlueFuzzball(Mobile):
+    def __init__(self, extraInventory=[]):
+        super().__init__(defaultRegion, "blueFuzzball",
+                            maxHealth=3,
+                            maxMana=5,
+                            brainType=AgressiveBrain,
+                            inventory=[FuzzAttack()])
 
 class Sting(Weapon):
     def __init__(self):
