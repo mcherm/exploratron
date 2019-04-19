@@ -267,8 +267,8 @@ room9 = Room(
         (4,5): SnakeTrap(),
         (3, 4): Tree(),
     },
-
-{       (5, 6): BlueFuzzball(),
+    {
+        (5, 6): BlueFuzzball(),
         (5, 1): BleuFuzzball(),
         (5, 2): GreenFuzzball(),
         (5, 3): RedFuzzball(),
