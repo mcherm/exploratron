@@ -20,12 +20,16 @@ class ScreenChanges:
         self.playerRoomSwitches = {} # map of player -> (oldRoom,newRoom)
         self.soundsToPlayByRoom = defaultdict(list) # map of room -> list of soundIds
         self.newInfoTexts = defaultdict(list) # map of player -> list of InfoTexts
+        self.consoleTextsForAll = list()  # list of messages for any player not a key in playerConsoleTexts
+        self.playerConsoleTexts = defaultdict(self.consoleTextsForAll.copy) # map of player -> list of strings
     def clear(self):
         """Calling this clears out the full list of changes."""
         self.changesByRoom.clear()
         self.playerRoomSwitches.clear()
         self.soundsToPlayByRoom.clear()
         self.newInfoTexts.clear()
+        self.consoleTextsForAll.clear()
+        self.playerConsoleTexts.clear()
     def changeCell(self, room, x, y):
         """Calling this adds a change to one cell of one room."""
         self.changesByRoom[room].add((x,y))
@@ -68,6 +72,22 @@ class ScreenChanges:
         """Returns a list of new infoTexts to display (in order) for the given player."""
         assert isinstance(player, Player)
         return self.newInfoTexts[player]
+    def addConsoleTextForPlayer(self, player, text):
+        """Adds a new message to the console of the given player."""
+        assert isinstance(player, Player)
+        self.playerConsoleTexts[player].append(text)
+    def addConsoleTextForRoom(self, room, text):
+        """Adds a new message to the console of all players in a room."""
+        for player in room.getPlayers():
+            self.playerConsoleTexts[player].append(text)
+    def addConsoleTextForAll(self, text):
+        """Adds a new message to the console of all players."""
+        for player in self.playerConsoleTexts:
+            self.playerConsoleTexts[player].append(text)
+        self.consoleTextsForAll.append(text)
+    def getConsoleTextsForPlayer(self, player):
+        """Returns a list of new console text strings (in order) for the given player."""
+        return self.playerConsoleTexts[player]
     def printThemOut(self):
         """Used only for debugging, this dumps to the screen the whole
         list of changes."""
