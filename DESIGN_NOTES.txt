@@ -31,3 +31,16 @@ UI_ACTION           Either
 
 
 =========================
+
+Messages:
+
+There are two kinds. An InfoText is a message that gets delivered to a specific
+player and is displayed until they dismiss it. We show these floating over the
+UI. A ConsoleText is a message to be shown in the console. The console texts
+can be delivered to a specific player or to "everyone in a room" or to
+"everyone in a region".
+
+For console texts:
+ * should track order
+ * I should probably base it on the location at the time the message is sent
+   * That means I need to find all players in a room. Should I make that efficient?

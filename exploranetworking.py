@@ -149,6 +149,11 @@ class InfoTextMessage(Message):
     def __init__(self, text):
         self.text = text
 
+class ConsoleTextMessage(Message):
+    """A message the server sends to the client to append a new text message onto the console."""
+    def __init__(self, text):
+        self.text = text
+
 class ClientShouldExitMessage(Message):
     """A message sent when the server is telling the client to quit playing."""
 
@@ -161,7 +166,7 @@ clientToServerMessages = [JoinServerMessage, KeyPressedMessage, RequestInventory
                           EquipMessage, ClientDisconnectingMessage]
 serverToClientMessages = [WelcomeClientMessage, NewRoomMessage, RefreshRoomMessage,
                           UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage, InventoryMessage,
-                          InfoTextMessage, ClientShouldExitMessage]
+                          InfoTextMessage, ConsoleTextMessage, ClientShouldExitMessage]
 
 _messageClass = {msg.messageName(): msg for msg in clientToServerMessages + serverToClientMessages}
 
