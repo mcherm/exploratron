@@ -104,7 +104,7 @@ class Minotar(Mobile):
                          maxMana=5,
                          brainType=AgressiveBrain,
                          inventory=[ViciousHorns()] + extraInventory)
-                                    self.stats.speed = 3
+        self.stats.speed = 3
 
 class RedFuzzball(Mobile):
     def __init__(self, extraInventory=[]):
@@ -112,7 +112,8 @@ class RedFuzzball(Mobile):
                          maxHealth=3,
                          maxMana=5,
                          brainType=AgressiveBrain,
-                         inventory=[ViciousHorns()])
+                         inventory=[ViciousHorns()] )
+        self.stats.speed = 1
 
 class OrangeFuzzball(Mobile):
     def __init__(self, extraInventory=[]):
@@ -121,6 +122,8 @@ class OrangeFuzzball(Mobile):
                             maxMana=5,
                             brainType=AgressiveBrain,
                             inventory=[FuzzAttack()])
+        self.stats.speed = 1
+
 
 class GreenFuzzball(Mobile):
     def __init__(self, extraInventory=[]):
@@ -129,6 +132,7 @@ class GreenFuzzball(Mobile):
                             maxMana=5,
                             brainType=AgressiveBrain,
                             inventory=[FuzzAttack()])
+        self.stats.speed = 1
 
 class BleuFuzzball(Mobile):
     def __init__(self, extraInventory=[]):
@@ -137,6 +141,7 @@ class BleuFuzzball(Mobile):
                             maxMana=5,
                             brainType=AgressiveBrain,
                             inventory=[FuzzAttack()])
+        self.stats.speed = 1
 
 class BlueFuzzball(Mobile):
     def __init__(self, extraInventory=[]):
@@ -145,6 +150,7 @@ class BlueFuzzball(Mobile):
                             maxMana=5,
                             brainType=AgressiveBrain,
                             inventory=[FuzzAttack()])
+        self.stats.speed = 1
 
 class Sting(Weapon):
     def __init__(self):
