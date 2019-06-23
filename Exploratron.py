@@ -268,6 +268,10 @@ def renderWorldLocal(world, display, region, screenChanges):
     display.playSounds(screenChanges.getRoomSounds(displayedRoom), region.soundLibrary)
     # --- possibly a message ---
     display.uiState.infoTexts.extend(screenChanges.getNewInfoTexts(world.displayedPlayer))
+    # --- Add any new console messages ---
+    newConsoleTexts  = screenChanges.getConsoleTextsForPlayer(world.displayedPlayer)
+    for newConsoleText in newConsoleTexts:
+        display.console.addMessage(newConsoleText)
     # --- update the visible data ---
     display.setVisibleData(VisibleData.fromEnvironment(world.displayedPlayer))
 

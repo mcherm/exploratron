@@ -110,10 +110,6 @@ class PygameDisplay:
     def show(self, gridData, imageLibrary):
         self.gridDisplay.show(self.screen, self.gridPosition, gridData, self.uiState, imageLibrary)
         self.overlayDisplay.show(self.uiState, imageLibrary)
-        # FIXME: Begin of generating random text just to test ---------------------------------
-        import datetime
-        self.console.addMessage( f"{(datetime.datetime.now())} - {len(self.console.messages)} messages" )
-        # FIXME: End of generating random text just to test -----------------------------------
         self.console.show(self.screen, self.consolePosition)
         pygame.display.flip()
 

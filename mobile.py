@@ -266,6 +266,8 @@ class Mobile(Thing):
             if iGotIt:
                 cell.removeThing(topItem)
                 screenChanges.changeCell(self.room, position[0], position[1])
+                if self.isPlayer():
+                    screenChanges.addConsoleTextForPlayer(self, "You picked up an item")
         self.whenItCanAct = currentTime + self.timeToWait()
 
     def dropItem(self, itemOrItemUniqueId, screenChanges):
