@@ -11,7 +11,7 @@ from brain import PlayerBrain
 
 class Player(Mobile):
     def __init__(self, region, tileName, health, maxMana, playerId):
-        super().__init__(region, tileName, health, maxMana, brainType=PlayerBrain)
+        super().__init__(region, tileName,"person", health, maxMana, brainType=PlayerBrain)
         self.queuedEvent = None
         self.playerId = playerId
         self.clientConnections = []

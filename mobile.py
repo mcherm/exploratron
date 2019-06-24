@@ -98,8 +98,8 @@ class Inventory:
 
 
 class Mobile(Thing):
-    def __init__(self, region, tileName, maxHealth, maxMana, brainType, inventory=()):
-        super().__init__(region, tileName)
+    def __init__(self, region, tileName, displayName, maxHealth, maxMana, brainType, inventory=()):
+        super().__init__(region, tileName, displayName)
         self.whenItCanAct = 0
         self.isDead = False
         self.inventory = Inventory(inventory)
@@ -267,7 +267,7 @@ class Mobile(Thing):
                 cell.removeThing(topItem)
                 screenChanges.changeCell(self.room, position[0], position[1])
                 if self.isPlayer():
-                    screenChanges.addConsoleTextForPlayer(self, "You picked up an item")
+                    screenChanges.addConsoleTextForPlayer(self, "You picked up a " + topItem.displayName + ".")
         self.whenItCanAct = currentTime + self.timeToWait()
 
     def dropItem(self, itemOrItemUniqueId, screenChanges):
