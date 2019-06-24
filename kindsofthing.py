@@ -7,10 +7,11 @@ from infotext import InfoText
 
 class Thing:
     """Represents any kind of thing in the world."""
-    def __init__(self, region, tileName):
+    def __init__(self, region, tileName, displayName):
         assert isinstance(region, Region)
         assert isinstance(tileName, str)
         self.tileId = region.imageLibrary.idByName(tileName)
+        self.displayName = displayName
     def canEnter(self, mobile):
         """Tests whether the mobile can enter a space containing
         this thing. Returns True if it can and False if not."""
@@ -32,8 +33,8 @@ class Wall(Thing):
 
 class Door(Thing):
     """A thing that teleports you to a new location when you enter."""
-    def __init__(self, region, tileName, destination, soundEffectName=None):
-        super().__init__(region, tileName)
+    def __init__(self, region, tileName, displayName, destination, soundEffectName=None):
+        super().__init__(region, tileName, displayName)
         self.destination = destination
         self.soundEffectId = None if soundEffectName is None else region.soundLibrary.idByName(soundEffectName)
     def doEnter(self, mobile, world, screenChanges):
@@ -43,9 +44,9 @@ class Door(Thing):
 
 class Sign(Thing):
     """A thing that displays a message when you enter it."""
-    def __init__(self, region, tileName, text):
+    def __init__(self, region, tileName, displayName, text):
         """Create a new sign with the string messageText."""
-        super().__init__(region, tileName)
+        super().__init__(region, tileName, displayName)
         self.infoText = InfoText(text)
     def doEnter(self, mobile, world, screenChanges):
         if mobile.isPlayer():
@@ -73,8 +74,8 @@ class Item(Thing):
 
 
 class Weapon(Item):
-    def __init__(self, region, tileName, damage, hitSoundEffectName):
-        super().__init__(region, tileName)
+    def __init__(self, region, tileName, displayName, damage, hitSoundEffectName):
+        super().__init__(region, tileName, displayName)
         self.damage = damage
         self.hitSoundEffectId = region.soundLibrary.idByName(hitSoundEffectName)
     def getHitSoundEffectId(self):
@@ -86,8 +87,8 @@ class Weapon(Item):
 
 
 class Wand(Item):
-    def __init__(self, region, manaCost, spell, tileName="wand"):
-        super().__init__(region, tileName)
+    def __init__(self, region, displayName, manaCost, spell, tileName="wand"):
+        super().__init__(region, tileName, displayName)
         self.manaCost = manaCost
         self.spell = spell
     def cast(self, caster, world, screenChanges):
@@ -106,9 +107,9 @@ class Wand(Item):
 
 class SelfOnlyWand(Wand):
     """A wand with a spell that affects the caster. No aiming needed."""
-    def __init__(self, region, manaCost, spell, tileName="wand"):
+    def __init__(self, region, displayName, manaCost, spell, tileName="wand"):
         assert isinstance(spell, SingleTargetSpell)
-        super().__init__(region, manaCost, spell, tileName)
+        super().__init__(region, displayName, manaCost, spell, tileName)
 
     def activateSpell(self, caster, world, screenChanges):
         """This is how you activate a SingleTarget spell that affects the caster."""
