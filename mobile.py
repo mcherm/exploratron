@@ -117,6 +117,9 @@ class Mobile(Thing):
         else:
             screenChanges.roomPlaySound(self.room, wieldedWeapon.getHitSoundEffectId())
             self.takeDamage(wieldedWeapon.damage)
+            if self.isPlayer():
+                screenChanges.addConsoleTextForPlayer(self, "You were hit by the " + mobile.displayName + ".")
+
     def timeToWait(self):
         timeToWait = (500 - (self.stats.speed) * 20)
         return timeToWait
