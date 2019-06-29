@@ -55,7 +55,7 @@ class Sign(Thing):
 class Trap(Thing):
     """A thing that makes you take damage"""
     def doEnter(self, mobile, world, screenChanges):
-        mobile.takeDamage(1)
+        mobile.takeDamage(1, screenChanges)
         
 
 class Item(Thing):
