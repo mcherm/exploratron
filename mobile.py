@@ -109,6 +109,7 @@ class Mobile(Thing):
         self.brain = brainType()
     def canEnter(self, mobile):
         return False
+
     def doBump(self, mobile, world, screenChanges):
         """This gets called when a mobile bumps the cell with this thing."""
         wieldedWeapon = mobile.getWieldedWeapon()
@@ -116,9 +117,11 @@ class Mobile(Thing):
             pass
         else:
             screenChanges.roomPlaySound(self.room, wieldedWeapon.getHitSoundEffectId())
-            self.takeDamage(wieldedWeapon.damage)
             if self.isPlayer():
-                screenChanges.addConsoleTextForPlayer(self, "You were hit by the " + mobile.displayName + ".")
+                screenChanges.addConsoleTextForPlayer(self, f"You were hit by the {mobile.displayName}.")
+            if mobile.isPlayer():
+                screenChanges.addConsoleTextForPlayer(mobile, f"You hit the {self.displayName}.")
+            self.takeDamage(wieldedWeapon.damage, screenChanges)
 
     def timeToWait(self):
         timeToWait = (500 - (self.stats.speed) * 20)
@@ -239,10 +242,12 @@ class Mobile(Thing):
         """This is called when the mobile should have the opportunity to carry out
         an action."""
         self.brain.takeOneAction(self, currentTime, world, screenChanges)
-    def takeDamage(self, amount):
+    def takeDamage(self, amount, screenChanges):
         self.stats.health = self.stats.health-amount
         if self.stats.health < 1:
             self.isDead = True
+            screenChanges.addConsoleTextForRoom( self.room, f"{self.displayName} was killed.")
+
     def receiveItem(self, item):
         """This is called to potentially give an item to a mobile.
         If the item is successfully put in the mobile's inventory
