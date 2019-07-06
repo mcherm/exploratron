@@ -1,5 +1,6 @@
 import pygame
-from console import *
+from console import FONT_FILE, FONT_SIZE, ANTIALIAS, TEXT_COLOR, BACKGROUND_COLOR, getFont, charWidthInPixels, \
+        charHeightInPixels, Console
 
 
 def test_canLoadFont():
