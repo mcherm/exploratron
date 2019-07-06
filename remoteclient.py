@@ -10,7 +10,7 @@ import pygame
 from exploranetworking import (ClientsideConnection, KeyPressedMessage, WelcomeClientMessage, NewRoomMessage,
                                RefreshRoomMessage, UpdateRoomMessage, PlaySoundsMessage, UpdateVisibleDataMessage,
                                InventoryMessage, ClientShouldExitMessage, ClientDisconnectingMessage,
-                               InfoTextMessage)
+                               InfoTextMessage, ConsoleTextMessage)
 from events import pygameKeyToKeyCode, KeyCode
 import images
 from display import PygameDisplay
@@ -88,6 +88,8 @@ class RemoteClient():
                 elif isinstance(message, InfoTextMessage):
                     infoText = InfoText(message.text)
                     display.uiState.infoTexts.append(infoText)
+                elif isinstance(message, ConsoleTextMessage):
+                    display.console.addMessage(message.text)
                 elif isinstance(message, ClientShouldExitMessage):
                     shouldExit = True
                 else:

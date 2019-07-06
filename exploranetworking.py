@@ -149,6 +149,7 @@ class InfoTextMessage(Message):
     def __init__(self, text):
         self.text = text
 
+# FIXME: Wouldn't it be a better design if this contained a LIST of text messages?
 class ConsoleTextMessage(Message):
     """A message the server sends to the client to append a new text message onto the console."""
     def __init__(self, text):
