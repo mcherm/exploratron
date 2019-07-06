@@ -3,7 +3,7 @@ pygame.init()
 from screenchanges import *
 from players import thePlayerCatalog
 from objects import defaultRegion, Dirt
-from gamecomponents import Room, Location
+from gamecomponents import Room
 
 
 def makePlayer(id="0"):

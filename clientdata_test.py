@@ -3,7 +3,6 @@
 #
 
 from clientdata import *
-from kindsofthing import Item
 
 
 def test_CellData_Singleton():
