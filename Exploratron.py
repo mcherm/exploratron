@@ -315,6 +315,13 @@ def renderWorldRemote(world, screenChanges, clients):
                     infoTextMessage = InfoTextMessage(infoText.getText())
                     clients.sendMessageToPlayer(player.playerId, infoTextMessage)
 
+            # --- Possibly some console messages ---
+            newConsoleTexts = screenChanges.getConsoleTextsForPlayer(player)
+            if newConsoleTexts:
+                for consoleText in newConsoleTexts:
+                    consoleTextMessage = ConsoleTextMessage(consoleText)
+                    clients.sendMessageToPlayer(player.playerId, consoleTextMessage)
+
             # --- Possibly a message about displayed properties ---
             visibleData = VisibleData.fromEnvironment(player)
             for serversideClientConnection in clients.connectionsByPlayer.get(player.playerId):
